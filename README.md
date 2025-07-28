@@ -6,16 +6,12 @@ Lawn Care Assistant – Requirements Document
 
 The Lawn Care Assistant is a mobile application with supporting backend services designed to help homeowners maintain a healthy lawn by providing personalized care recommendations based on real-time and historical weather data, lawn type, and optional soil information. The system will send proactive reminders and advice for mowing, watering, fertilization, and seasonal lawn care tasks.
 
-⸻
-
 2. Goals
 	•	Provide personalized reminders and recommendations for lawn care tasks.
 	•	Use weather data to guide decisions about mowing, watering, and overseeding.
 	•	Help users understand and apply the correct mowing heights and fertilizers.
 	•	Provide enhanced insights for users with soil sample data.
 	•	Allow content uploads such as videos, guides, and expert tips.
-
-⸻
 
 3. Key Features
 
@@ -47,8 +43,6 @@ The Lawn Care Assistant is a mobile application with supporting backend services
 	•	🧠 Expert tips and FAQs available in-app.
 	•	👥 Optional community forums or Q&A sections.
 
-⸻
-
 4. Technical Requirements
 
 4.1 Mobile App
@@ -74,15 +68,11 @@ The Lawn Care Assistant is a mobile application with supporting backend services
 	•	Soil Sample Data
 	•	Media Content (videos, guides)
 
-⸻
-
 5. Non-Functional Requirements
 	•	Secure handling of user data (OAuth2, GDPR-compliant).
 	•	Fast API response times (<300ms target).
 	•	Scalable backend (cloud-native architecture preferred).
 	•	Offline caching of essential data (e.g., upcoming tasks).
-
-⸻
 
 6. Future Enhancements
 	•	Smart device integration (sprinkler systems, soil sensors).
