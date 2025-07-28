@@ -79,3 +79,6 @@ The Lawn Care Assistant is a mobile application with supporting backend services
     * AI assistant to answer user questions.
     * Localized lawn care recommendations (zoning maps, frost dates).
     * Subscription-based premium features.
+
+# UI Mock ups
+<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/6e9b2235-7a74-44f5-bad1-35e01998f78e" />
