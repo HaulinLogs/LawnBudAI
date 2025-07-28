@@ -1,4 +1,4 @@
-# LawnBudAI]
+# LawnBudAI
 
 Lawn Care Assistant – Requirements Document
 
