@@ -1,12 +1,12 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-type Props = { weather: string | null };
+type Props = { weather: string | null, title: string | null };
 
-export function LawnStatusCard({ weather }: Props) {
+export function LawnStatusCard({ weather, title }: Props) {
   return (
     <View style={styles.card}>
-      <Text style={styles.title}>Today&apos;s Weather</Text>
+      <Text style={styles.title}>{title}</Text>
       <Text>{weather ?? 'Loading...'}</Text>
       <Text style={styles.tip}>
         {weather?.includes('Rain') ? 'No need to water today!' : 'Consider watering the lawn.'}
