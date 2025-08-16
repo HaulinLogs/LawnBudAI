@@ -1,9 +1,32 @@
+import { router, Stack } from 'expo-router';
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import Icon from '@expo/vector-icons/Ionicons';
 
 export default function FertilizerScreen() {
   return (
     <View style={styles.card}>
+        <Stack.Screen
+        options={{
+          headerShown: true,
+          headerStyle: {
+            backgroundColor: '#064e3b',
+          },
+          headerTitleStyle: {
+            color: '#fff',
+            fontSize: 24,
+          },
+          headerTitle: 'Fertilizer',
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => {
+               router.back();
+            }}>
+              <Icon name="arrow-back" size={24} color="white" />
+            </TouchableOpacity>
+          ),
+        }}
+      />
+      
       <Text style={styles.title}>Fertilizer</Text>
       <Text>{'Fertilize the lawn'}</Text>
       <Text style={styles.tip}>

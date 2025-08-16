@@ -1,11 +1,11 @@
 import { View, Text, ActivityIndicator, ScrollView } from 'react-native';
 import { Stack } from 'expo-router';
 import ParallaxScrollView  from '@/components/ParallaxScrollView';
-import { useWeather } from '../hooks/useWeather';
+import { useWeather } from '@/hooks/useWeather';
 import { styles } from './HomeScreen.styles';
 import { TodoStatusCard } from '@/components/TodoStatusCard';
 import { useTodo } from '@/hooks/useTodo';
-import { WeatherResponse } from '@/models/weather';
+import { getRainForecast, WeatherResponse } from '@/models/weather';
 
 export default function HomeScreen() {
   const { weather, loading, error } = useWeather('Madison');
@@ -37,7 +37,7 @@ export default function HomeScreen() {
             ) : weather ? (
               <Text style={styles.weatherText}>
                 {weather?.current_condition[0]?.weatherDesc[0]?.value} · {weather?.current_condition[0].temp_F}°F ·{' '}
-                {shouldRain(weather) ? 'Chance of rain' : 'No rain expected'}
+                {getRainForecast(weather?.weather)}
               </Text>
             ) : (
               <Text style={styles.errorText}>Weather unavailable</Text>

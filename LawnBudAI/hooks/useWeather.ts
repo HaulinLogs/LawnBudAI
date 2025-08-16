@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { fetchWeather } from '@/services/weather';
 import { WeatherResponse } from '@/models/weather';
 
@@ -8,11 +8,20 @@ export function useWeather(city: string) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setLoading(true);
-    fetchWeather(city)
-      .then(setWeather)
-      .catch(err => setError(err.message))
-      .finally(() => setLoading(false));
+    const loadWeather = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await fetchWeather(city);
+        setWeather(data);
+      } catch (e: any) {
+        setError(e.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadWeather();
   }, [city]);
 
   return { weather, loading, error };
