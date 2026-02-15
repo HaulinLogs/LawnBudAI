@@ -2,18 +2,58 @@ import { View, Text, ActivityIndicator, ScrollView, Image } from 'react-native';
 import { Stack } from 'expo-router';
 import ParallaxScrollView  from '@/components/ParallaxScrollView';
 import { useWeather } from '@/hooks/useWeather';
+import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { styles } from './HomeScreen.styles';
 import { TodoStatusCard } from '@/components/TodoStatusCard';
 import { useTodo } from '@/hooks/useTodo';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { WeatherCard } from '@/components/WeatherCard';
+import { IconSymbol } from '@/components/ui/IconSymbol';
 
 export default function HomeScreen() {
-  const { weather, loading, error } = useWeather('Madison');
+  const { prefs, loading: prefsLoading } = useUserPreferences();
+  const { weather, loading, error } = useWeather(prefs.city);
   const { mowingTodo, fertilizerTodo, wateringTodo } = useTodo('mowing');
 
-  if (loading) return <ActivityIndicator />;
-  if (error) return <Text>Error: {error}</Text>;
+  // Log errors for owner notification (send to error tracking service)
+  useEffect(() => {
+    if (error) {
+      console.error('[HOMESCREEN_ERROR]', {
+        timestamp: new Date().toISOString(),
+        error,
+        city: prefs.city,
+        url: 'app-homescreen',
+      });
+      // TODO: In production, send to error tracking service like Sentry, LogRocket, or custom webhook
+      // Example: sendToErrorTracker({ error, context: 'homescreen', city: prefs.city });
+    }
+  }, [error, prefs.city]);
+
+  if (loading || prefsLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#ecfdf5' }}>
+        <ActivityIndicator size="large" color="#22c55e" />
+      </View>
+    );
+  }
+  if (error) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#ecfdf5', paddingHorizontal: 20 }}>
+        <View style={{ backgroundColor: '#fee2e2', borderRadius: 12, padding: 24, borderLeftWidth: 4, borderLeftColor: '#dc2626', alignItems: 'center' }}>
+          <IconSymbol name="exclamationtriangle" size={48} color="#dc2626" />
+          <Text style={{ color: '#7f1d1d', fontSize: 18, fontWeight: 'bold', marginBottom: 8, marginTop: 16 }}>
+            Weather Unavailable
+          </Text>
+          <Text style={{ color: '#991b1b', fontSize: 14, lineHeight: 20, textAlign: 'center' }}>
+            {error}
+          </Text>
+          <Text style={{ color: '#9a3412', fontSize: 12, marginTop: 12, textAlign: 'center' }}>
+            Please try again shortly or check your internet connection.
+          </Text>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <>

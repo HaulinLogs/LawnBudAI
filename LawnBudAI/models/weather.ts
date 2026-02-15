@@ -111,7 +111,6 @@ function isRainCode(weatherCode: string): boolean {
   let icon = getWeatherIcon(weatherCode);
   switch (icon) {
     case "rainy":
-    case "rainy":
     case "snow":
     case "thunderstorm-outline":
       return true;

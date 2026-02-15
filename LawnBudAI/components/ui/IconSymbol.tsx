@@ -21,6 +21,8 @@ const MAPPING = {
   'leaf': 'yard',
   'cloud.rain': 'water',
   'ladybug': 'bug-report',
+  'gear': 'settings',
+  'exclamationtriangle': 'warning',
 } as IconMapping;
 
 /**
