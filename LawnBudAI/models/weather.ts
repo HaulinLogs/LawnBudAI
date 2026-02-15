@@ -1,3 +1,4 @@
+import Icon from '@expo/vector-icons/Ionicons';
 export interface ValueWrapper {
   value: string;
 }
@@ -16,6 +17,7 @@ export interface CurrentCondition {
 export interface HourlyForecast {
   time: string;
   tempC: string;
+  tempF: string;
   FeelsLikeC: string;
   weatherCode: string;
   weatherDesc: ValueWrapper[];
@@ -41,8 +43,12 @@ export interface WeatherResponse {
   nearest_area: NearestArea[];
 }
 
+export function getCurrentWeatherIcon(weather: WeatherResponse) {
+  return getWeatherIcon(weather.current_condition[0].weatherCode);
+}
+
 // Return Ionicon icon codes
-export function getWeatherIcon(weatherCode: string): string {
+export function getWeatherIcon(weatherCode: string): React.ComponentProps<typeof Icon>['name'] {
   switch (weatherCode) {
         // rainy-outline
         // thunderstorm-outline
@@ -53,60 +59,60 @@ export function getWeatherIcon(weatherCode: string): string {
     case "116": return "partly-sunny-outline";
     case "119": return "cloudy-outline";
     case "122": return "cloudy-outline";
-    case "143": return "weather-fog";
-    case "176": return "cloud-drizzle";
-    case "179": return "cloud-drizzle";
-    case "182": return "cloud-drizzle";
-    case "185": return "cloud-drizzle";
+    case "143": return "partly-sunny";
+    case "176": return "rainy";
+    case "179": return "rainy";
+    case "182": return "rainy";
+    case "185": return "rainy";
     case "200": return "thunderstorm-outline";
-    case "227": return "snowflake";
-    case "230": return "snowflake-alert";
-    case "248": return "weather-fog";
-    case "260": return "weather-fog";
-    case "263": return "cloud-drizzle";
-    case "266": return "cloud-drizzle";
-    case "283": return "cloud-drizzle";
-    case "286": return "cloud-drizzle";
-    case "293": return "cloud-drizzle";
-    case "296": return "cloud-drizzle";
-    case "299": return "cloud-rain";
-    case "302": return "cloud-rain";
-    case "305": return "cloud-rain";
-    case "308": return "cloud-rain";
-    case "311": return "cloud-drizzle";
-    case "314": return "cloud-drizzle";
-    case "317": return "cloud-drizzle";
-    case "320": return "cloud-snow";
-    case "323": return "cloud-snow";
-    case "326": return "cloud-snow";
-    case "329": return "snowflake-alert";
-    case "332": return "snowflake-alert";
-    case "335": return "snowflake-alert";
-    case "338": return "snowflake-alert";
-    case "350": return "cloud-drizzle";
-    case "353": return "cloud-drizzle";
-    case "356": return "cloud-rain";
-    case "359": return "snowflake-alert";
-    case "362": return "cloud-drizzle";
-    case "365": return "cloud-drizzle";
-    case "368": return "cloud-snow";
-    case "371": return "snowflake-alert";
-    case "374": return "cloud-drizzle";
-    case "377": return "cloud-drizzle";
+    case "227": return "snow";
+    case "230": return "snow";
+    case "248": return "partly-sunny";
+    case "260": return "partly-sunny";
+    case "263": return "rainy";
+    case "266": return "rainy";
+    case "283": return "rainy";
+    case "286": return "rainy";
+    case "293": return "rainy";
+    case "296": return "rainy";
+    case "299": return "rainy";
+    case "302": return "rainy";
+    case "305": return "rainy";
+    case "308": return "rainy";
+    case "311": return "rainy";
+    case "314": return "rainy";
+    case "317": return "rainy";
+    case "320": return "snow";
+    case "323": return "snow";
+    case "326": return "snow";
+    case "329": return "snow";
+    case "332": return "snow";
+    case "335": return "snow";
+    case "338": return "snow";
+    case "350": return "rainy";
+    case "353": return "rainy";
+    case "356": return "rainy";
+    case "359": return "snow";
+    case "362": return "rainy";
+    case "365": return "rainy";
+    case "368": return "snow";
+    case "371": return "snow";
+    case "374": return "rainy";
+    case "377": return "rainy";
     case "386": return "thunderstorm-outline";
     case "389": return "thunderstorm-outline";
     case "392": return "thunderstorm-outline";
-    case "395": return "snowflake-alert";
-    case "398": return "snowflake-alert";
+    case "395": return "snow";
+    case "398": return "snow";
   }
   return "sunny-outline";
 }
 function isRainCode(weatherCode: string): boolean {
   let icon = getWeatherIcon(weatherCode);
   switch (icon) {
-    case "cloud-drizzle":
-    case "cloud-rain":
-    case "cloud-snow":
+    case "rainy":
+    case "rainy":
+    case "snow":
     case "thunderstorm-outline":
       return true;
     default:

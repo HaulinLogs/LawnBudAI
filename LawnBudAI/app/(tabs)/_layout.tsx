@@ -37,7 +37,7 @@ export default function TabLayout() {
         name="mowing"
         options={{
           title: 'Mowing',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="leaf" color={color} />,
         }}
       />
 
@@ -45,7 +45,7 @@ export default function TabLayout() {
         name="watering"
         options={{
           title: 'Watering',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="cloud.rain" color={color} />,
         }}
       />
 
@@ -53,7 +53,7 @@ export default function TabLayout() {
         name="fertilizer"
         options={{
           title: 'Fertilizer',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="ladybug" color={color} />,
         }}
       />
     </Tabs>

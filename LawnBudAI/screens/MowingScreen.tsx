@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, Text, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import Icon from '@expo/vector-icons/Ionicons';
-import { getWeatherIcon } from '@/models/weather';
+import { getCurrentWeatherIcon, getWeatherIcon } from '@/models/weather';
 import { useWeather } from '@/hooks/useWeather';
+import { styles } from './Screen.styles';
+
 export default function MowingScreen() { // Export the function
   const { weather, loading, error } = useWeather('Madison');
-  const [weatherIcon, setWeatherIcon] = useState('');
+  const [weatherIcon, setWeatherIcon] = useState<React.ComponentProps<typeof Icon>['name']>('sunny-outline');
 
   useEffect(() => {
     if (weather) {
-      const weatherCode = weather.current_condition[0].weatherCode;
-      setWeatherIcon(getWeatherIcon(weatherCode));
+      setWeatherIcon(getCurrentWeatherIcon(weather));
     }
   }, [weather]);
 
@@ -69,20 +70,3 @@ export default function MowingScreen() { // Export the function
     </View>
   );
 }
-
-
-const styles = StyleSheet.create({
-  card: { flex: 1, padding: 16, backgroundColor: '#fff' },
-  title: { fontSize: 20, fontWeight: 'bold' },
-  tip: { marginTop: 8, fontStyle: 'italic' },
-  weatherContainer: {
-    marginTop: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  weatherText: { fontSize: 16 },
-  temperature: { fontSize: 14, color: 'gray' },
-  sectionTitle: { fontSize: 18, fontWeight: 'bold', marginTop: 10 },
-  nextMowing: { fontSize: 16, marginTop: 10 },
-  error: { color: 'red' },
-});

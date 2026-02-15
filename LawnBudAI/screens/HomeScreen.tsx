@@ -1,11 +1,12 @@
-import { View, Text, ActivityIndicator, ScrollView } from 'react-native';
+import { View, Text, ActivityIndicator, ScrollView, Image } from 'react-native';
 import { Stack } from 'expo-router';
 import ParallaxScrollView  from '@/components/ParallaxScrollView';
 import { useWeather } from '@/hooks/useWeather';
 import { styles } from './HomeScreen.styles';
 import { TodoStatusCard } from '@/components/TodoStatusCard';
 import { useTodo } from '@/hooks/useTodo';
-import { getRainForecast, WeatherResponse } from '@/models/weather';
+import React from 'react';
+import { WeatherCard } from '@/components/WeatherCard';
 
 export default function HomeScreen() {
   const { weather, loading, error } = useWeather('Madison');
@@ -14,36 +15,23 @@ export default function HomeScreen() {
   if (loading) return <ActivityIndicator />;
   if (error) return <Text>Error: {error}</Text>;
 
-    function shouldRain(weather: WeatherResponse) {
-        let shouldRain = false;
-        weather.weather[0].hourly.forEach(hour => {
-            
-            });
-        return shouldRain;
-    }
-
   return (
     <>
       <Stack.Screen options={{ title: 'LawnBud AI' }} />
       <ParallaxScrollView
         headerBackgroundColor={{ light: '#ecfdf5', dark: '#064e3b' }}
-        headerImage={<></>}
+        headerImage={<Image source={require('@/assets/images/icon.png')} style={{ width: 100, height: 100 }} 
+        height={100}
+      />}
       >
         <ScrollView contentContainerStyle={styles.container}>
           <View style={styles.card}>
-            <Text style={styles.sectionTitle}>Today’s Weather</Text>
             {loading ? (
-              <ActivityIndicator color="#22c55e" style={styles.loadingIndicator} />
-            ) : weather ? (
-              <Text style={styles.weatherText}>
-                {weather?.current_condition[0]?.weatherDesc[0]?.value} · {weather?.current_condition[0].temp_F}°F ·{' '}
-                {getRainForecast(weather?.weather)}
-              </Text>
-            ) : (
-              <Text style={styles.errorText}>Weather unavailable</Text>
-            )}
+                <ActivityIndicator color="#22c55e" style={styles.loadingIndicator} />
+              ) : (
+                weather ? (<WeatherCard weather={weather} />) : (<Text>Weather not available...</Text>)
+              )}
           </View>
-
           <View style={styles.section}>
             <TodoStatusCard
               title="Mowing"
