@@ -7,9 +7,11 @@ import { IconSymbol } from '@/components/ui/IconSymbol';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { useRole } from '@/hooks/useRole';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const { isAdmin } = useRole();
 
   return (
     <Tabs
@@ -64,6 +66,16 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="gear" color={color} />,
         }}
       />
+
+      {isAdmin && (
+        <Tabs.Screen
+          name="admin"
+          options={{
+            title: 'Admin',
+            tabBarIcon: ({ color }) => <IconSymbol size={28} name="shield" color={color} />,
+          }}
+        />
+      )}
     </Tabs>
   );
 }

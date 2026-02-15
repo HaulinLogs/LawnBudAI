@@ -197,12 +197,109 @@ USING (auth.uid() = user_id);
 
 ## Development Phases
 
-### Phase 1: Foundation (Weeks 1-2, ~30 hours)
+### Phase 1: Foundation ✅ COMPLETE (Weeks 1-2, ~30 hours)
 
 **Goal**: Working authentication + synced database
 
+**Status**: ✅ Complete
+
+**Deliverables:**
+- Users can sign up, log in, and persist sessions
+- Settings are saved and synced across devices
+- Home dashboard shows real todos from database
+- Security monitoring and telemetry integrated
+- Comprehensive operational documentation
+
+---
+
+### Phase 2: RBAC + Rate Limiting Foundation (Weeks 3-4, ~14 hours)
+
+**Goal**: User roles, rate limiting, and premium feature gates in place
+
 #### Tasks
-1. **Supabase Setup** (3 hours)
+1. **Database Schema** (2 hours)
+   - Create `user_roles` table (user, premium, admin)
+   - Create `rate_limit_counters` table
+   - Implement atomic RPC function for rate limiting
+   - Auto-assign default 'user' role on sign-up via trigger
+   - Update RLS policies for admin-only features
+
+2. **Role Management Hook** (2 hours)
+   - `hooks/useRole.ts` — fetch and cache user role
+   - Expose `isAdmin` and `isPremium` convenience flags
+   - Handle auth state changes
+
+3. **Rate Limiting** (3 hours)
+   - `lib/rateLimiter.ts` — client-side API with RPC backend
+   - Define limits: 100/hour (user), 1000/hour (premium), unlimited (admin)
+   - Implement `checkRateLimit()`, `enforceRateLimit()`, `getRateLimitInfo()`
+   - Fail-open error handling (don't block on errors)
+
+4. **Permission Utilities** (1 hour)
+   - `lib/roleGuard.ts` — `hasPermission()`, `isAdminUser()`, `isPremiumUser()`
+   - Role hierarchy checking
+
+5. **UI Components** (3 hours)
+   - `components/PremiumGate.tsx` — paywall for premium features
+   - Admin tab (conditional) in `app/(tabs)/_layout.tsx`
+   - Plan tier display in `app/(tabs)/settings.tsx`
+   - Admin dashboard placeholder `app/(tabs)/admin.tsx`
+   - Upgrade screen placeholder `app/(tabs)/upgrade.tsx`
+
+6. **Operational Runbook** (2 hours)
+   - `database/rbac-runbook.md` — manual SQL commands for role management
+   - Promote/demote users, view roles, reset rate limits
+
+7. **Documentation** (1 hour)
+   - Update implementation plan to insert Phase 2
+   - Document icon additions (shield, crown)
+
+#### Deliverables
+- User roles work; free/premium/admin users are properly gated
+- Rate limits enforced server-side (cannot be bypassed)
+- Premium features show paywall when accessed by free users
+- Admin users see admin tab and can manage users via SQL
+- Runbook documented for beta testers and admin promotions
+
+---
+
+### Phase 2.5: Admin Panel + RevenueCat (Deferred, ~20 hours)
+
+**Status**: ⏸️ Planned for after Phase 3
+
+**Note**: This phase is deferred after Phase 2 foundation is proven. It will add the in-app admin UI and payment processing.
+
+#### Planned Tasks
+1. **Admin Panel Route Group** (`app/(admin)/`)
+   - `_layout.tsx` — role guard redirects non-admins to tabs
+   - `users.tsx` — search by email, view role, promote/demote/reset buttons
+   - `dashboard.tsx` — telemetry tables, security event logs, rate limit monitoring
+
+2. **RevenueCat Integration**
+   - Install `react-native-purchases`
+   - `hooks/useSubscription.ts` — wrap RevenueCat SDK
+   - Premium paywall in `app/(tabs)/upgrade.tsx` (currently placeholder)
+   - Webhook: Subscription confirmed → Supabase Edge Function sets role to 'premium'
+   - Webhook: Subscription expired → Supabase Edge Function sets role back to 'user'
+
+3. **Payment UI**
+   - Update upgrade screen with real pricing, purchase button, restore purchases
+   - Receipt validation and error handling
+
+#### Deliverables
+- In-app admin UI for role management
+- In-app premium purchases (iOS App Store + Android Play Store)
+- Revenue tracking and webhook integration
+- Subscription state synced with database roles
+
+---
+
+### Phase 3: Core Screens (Weeks 5-7, ~50 hours)
+
+**Goal**: All 3 care screens functional with data entry and history
+
+#### Tasks
+1. **Mowing Screen Completion** (15 hours)
    - Create Supabase project (free)
    - Migrate schema from SQLite → Postgres
    - Enable RLS policies
@@ -288,7 +385,7 @@ USING (auth.uid() = user_id);
 
 ---
 
-### Phase 3: Intelligence & Notifications (Weeks 6-7, ~30 hours)
+### Phase 4: Intelligence & Notifications (Weeks 8-9, ~30 hours)
 
 **Goal**: Smart recommendations + push notifications
 
@@ -331,7 +428,7 @@ USING (auth.uid() = user_id);
 
 ---
 
-### Phase 4: Polish & App Store (Weeks 8-10, ~30 hours)
+### Phase 5: Polish & App Store (Weeks 10-12, ~30 hours)
 
 **Goal**: Beta-ready, submitted to App Stores
 
@@ -375,34 +472,44 @@ USING (auth.uid() = user_id);
 
 ---
 
-## Immediate Next Steps (This Week)
+## Immediate Next Steps (Phase 2)
 
-### Day 1-2: Supabase Setup
+### Phase 2 Setup (~14 hours)
+
+**Day 1: Database Schema**
 ```bash
-# 1. Visit https://supabase.com and create free project
-# 2. Note: Project URL and Key (anon public key)
-# 3. Create the schema above in Supabase SQL editor
-# 4. Enable RLS on all tables
+# 1. In Supabase SQL Editor, run database/rbac-schema.sql
+# 2. Verify tables created: user_roles, rate_limit_counters
+# 3. Test trigger: Sign up a new user, check user_roles table has 'user' role
 ```
 
-### Day 2-3: Install Supabase Client
+**Day 2: Testing Role Assignment**
 ```bash
-cd /Users/kevin/Documents/LawnBudAI/LawnBudAI
-npm install @supabase/supabase-js @react-native-async-storage/async-storage
+# 1. Promote yourself to admin in Supabase SQL Editor:
+#    UPDATE user_roles SET role = 'admin' WHERE user_id = '<your-uuid>';
+# 2. Reload app
+# 3. Verify admin tab appears in tab navigation
+# 4. Promote a free user to premium and reload to verify rate limit increase
 ```
 
-### Day 3-5: Create Auth Infrastructure
-1. Create `lib/supabase.ts` — Supabase client initialization
-2. Create `hooks/useAuth.ts` — Auth hook (sign up, login, logout)
-3. Create auth screens (sign-up, sign-in)
-4. Update `app/_layout.tsx` to redirect to auth if not logged in
+**Day 3: Rate Limit Verification**
+```bash
+# 1. In app, trigger 101 requests on 'free' role
+# 2. Verify 101st request returns allowed=false
+# 3. Promote to premium (1000 limit), verify requests allowed
+# 4. Check rate_limit_counters table in Supabase
+```
 
-### Day 5-7: Test End-to-End
-- Sign up with test email
-- Create user settings
-- Verify data appears in Supabase dashboard
-- Log out and log back in
-- Verify data persists
+**Day 4-5: PremiumGate + Settings UI**
+- Free user tries to access premium feature → PremiumGate shown
+- Settings screen shows Plan tier (Free/Premium/Admin)
+- Upgrade button visible for free users
+- All role state properly synced
+
+**Day 6-7: Documentation + Handoff**
+- Review RBAC runbook
+- Document how to promote beta testers to premium
+- Create admin user(s) for Phase 3 testing
 
 ---
 
@@ -451,10 +558,12 @@ eas submit --platform android
 | Phase | Activity | Hours |
 |-------|----------|-------|
 | 1 | Supabase + Auth + Settings | 30 |
-| 2 | 3 Core Screens + Forms + History | 50 |
-| 3 | Recommendations + Notifications | 30 |
-| 4 | Polish + Onboarding + App Store | 30 |
-| **Total** | | **140** |
+| 2 | RBAC + Rate Limiting | 14 |
+| 2.5 | Admin Panel + RevenueCat (Deferred) | 20 |
+| 3 | 3 Core Screens + Forms + History | 50 |
+| 4 | Recommendations + Notifications | 30 |
+| 5 | Polish + Onboarding + App Store | 30 |
+| **Total** | | **174** |
 
 **Buffer**: 60 hours for unexpected issues, debugging, design adjustments
 **Grand Total**: ~200 hours (matches your 10 weeks × 20 hrs/week)

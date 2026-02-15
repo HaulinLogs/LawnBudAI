@@ -3,10 +3,12 @@ import { Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { recordSuccessfulLogin, recordFailedLogin } from '@/lib/securityMonitoring';
 import { trackAuthEvent } from '@/lib/telemetry';
+import { useRole, type UserRole } from '@/hooks/useRole';
 
 export function useAuth() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const { role, isAdmin, isPremium } = useRole();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -51,5 +53,15 @@ export function useAuth() {
     return supabase.auth.signOut();
   };
 
-  return { session, loading, signIn, signUp, signOut };
+  return {
+    session,
+    loading,
+    signIn,
+    signUp,
+    signOut,
+    // Role convenience methods
+    role,
+    isAdmin,
+    isPremium,
+  };
 }

@@ -23,6 +23,8 @@ const MAPPING = {
   'ladybug': 'bug-report',
   'gear': 'settings',
   'exclamationtriangle': 'warning',
+  'shield': 'admin-panel-settings',
+  'crown': 'workspace-premium',
 } as IconMapping;
 
 /**
