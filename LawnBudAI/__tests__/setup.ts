@@ -3,6 +3,20 @@
  * Runs before all tests to configure the test environment
  */
 
+// Import jest-native matchers for React Native components
+import '@testing-library/jest-native/extend-expect';
+
+// Mock @react-native-async-storage/async-storage
+jest.mock('@react-native-async-storage/async-storage', () => ({
+  setItem: jest.fn(() => Promise.resolve()),
+  getItem: jest.fn(() => Promise.resolve(null)),
+  removeItem: jest.fn(() => Promise.resolve()),
+  multiSet: jest.fn(() => Promise.resolve()),
+  multiGet: jest.fn(() => Promise.resolve([])),
+  getAllKeys: jest.fn(() => Promise.resolve([])),
+  clear: jest.fn(() => Promise.resolve()),
+}));
+
 // Mock fetch for tests that use it
 global.fetch = jest.fn();
 
