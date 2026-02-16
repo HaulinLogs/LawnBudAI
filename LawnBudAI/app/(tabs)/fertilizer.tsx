@@ -1,3 +1,3 @@
-import FertilzerScreen from '@/screens/FertlizerScreen';
+import FertilizerScreen from '@/screens/FertilizerScreen';
 
-export default FertilzerScreen;
+export default FertilizerScreen;
