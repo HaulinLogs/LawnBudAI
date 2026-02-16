@@ -11,14 +11,20 @@ vars = { ENVIRONMENT = "production" }
 [env.production]
 name = "lawnbudai-prod"
 vars = { ENVIRONMENT = "production" }
+[env.production.site]
+bucket = "dist"
 
 [env.staging]
 name = "lawnbudai-staging"
 vars = { ENVIRONMENT = "staging" }
+[env.staging.site]
+bucket = "dist"
 
 [env.development]
 name = "lawnbudai-dev"
 vars = { ENVIRONMENT = "development" }
+[env.development.site]
+bucket = "dist"
 
 # Build configuration
 [build]
