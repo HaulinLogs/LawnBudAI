@@ -241,6 +241,34 @@ See `TDD.md` for complete TDD guidelines and testing best practices.
 
 **Schedule Status:** 9.5x ahead of plan (53 hours completed vs 199 hour estimate)
 
+## Context7 MCP - Documentation Lookup
+
+This project includes Context7 MCP server for AI-assisted documentation queries.
+
+**Usage in Claude Code:**
+```
+Query library documentation without context switching:
+- /mcp context7 query-docs --library "/supabase/docs" --query "Row Level Security"
+- /mcp context7 query-docs --library "/vercel/next.js" --query "authentication patterns"
+- /mcp context7 query-docs --library "/mongodb/docs" --query "database indexing"
+```
+
+**Common Queries During Development:**
+- "How do I set up Supabase RLS policies?"
+- "React useEffect cleanup patterns"
+- "Jest mocking Supabase client"
+- "Playwright E2E test assertions"
+- "TypeScript type guards"
+
+**Supported Libraries:**
+- Supabase (PostgreSQL, Auth, RLS)
+- React & React Native
+- Expo & Expo Router
+- Jest & Testing Library
+- Playwright
+- TypeScript
+- And many more...
+
 ## Important Notes
 
 - App fetches weather for hardcoded city ("Madison"); can be made configurable
@@ -248,3 +276,4 @@ See `TDD.md` for complete TDD guidelines and testing best practices.
 - All user events automatically filtered by authenticated user ID via Supabase RLS
 - App includes accessibility features via haptic feedback (HapticTab)
 - Web platform support included via Expo Web + Playwright E2E testing
+- Multiple AI coding assistants supported: Claude Code, Cursor, Gemini, OpenCode (see HOW_TO_CONTRIBUTE.md)
