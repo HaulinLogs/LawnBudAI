@@ -1,6 +1,6 @@
-name = "lawnbudai"
+name = "lawnbud-ai"
 pages_build_output_dir = "dist"
 compatibility_date = "2024-01-01"
 
 [env.production]
-name = "lawnbudai-prod"
+name = "lawnbud-ai-prod"

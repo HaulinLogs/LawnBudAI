@@ -1,9 +1,9 @@
-name = "lawnbudai"
+name = "lawnbud-ai"
 pages_build_output_dir = "dist"
 compatibility_date = "2024-01-01"
 
 [env.production]
-name = "lawnbudai-prod"
+name = "lawnbud-ai-prod"
 routes = [
-  { pattern = "lawnbudai.pages.dev/*", zone_name = "pages.dev" }
+  { pattern = "lawnbud-ai.pages.dev/*", zone_name = "pages.dev" }
 ]
