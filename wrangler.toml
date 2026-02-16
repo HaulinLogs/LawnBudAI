@@ -1,0 +1,33 @@
+name = "lawnbudai"
+type = "javascript"
+account_id = ""
+workers_dev = true
+main = "dist/index.js"
+site = { bucket = "dist" }
+build = { command = "npm run build" }
+compatibility_date = "2024-01-01"
+
+# Environment variables
+vars = { ENVIRONMENT = "production" }
+
+[env.production]
+name = "lawnbudai-prod"
+vars = { ENVIRONMENT = "production" }
+
+[env.staging]
+name = "lawnbudai-staging"
+vars = { ENVIRONMENT = "staging" }
+
+[env.development]
+name = "lawnbudai-dev"
+vars = { ENVIRONMENT = "development" }
+
+# Build configuration
+[build]
+command = "npm run build"
+cwd = "./LawnBudAI"
+watch_paths = ["LawnBudAI/**/*.ts", "LawnBudAI/**/*.tsx"]
+
+# Static site routing
+[triggers]
+crons = []
