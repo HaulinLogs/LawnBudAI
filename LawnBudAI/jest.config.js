@@ -6,7 +6,7 @@ module.exports = {
   },
   testMatch: ['**/__tests__/**/*.test.ts?(x)'],
   transformIgnorePatterns: [
-    'node_modules/(?!(expo|expo-router|expo-sqlite|expo-blur|expo-constants|expo-font|expo-haptics|expo-image|expo-linking|expo-splash-screen|expo-status-bar|expo-symbols|expo-system-ui|expo-web-browser|expo-modules-core|expo-asset|react-native|react-native-gesture-handler|react-native-reanimated|react-native-safe-area-context|react-native-screens|react-native-web|@react-native|@react-navigation|@expo)/)',
+    'node_modules/(?!(expo|expo-router|expo-blur|expo-constants|expo-font|expo-haptics|expo-image|expo-linking|expo-splash-screen|expo-status-bar|expo-symbols|expo-system-ui|expo-web-browser|expo-modules-core|expo-asset|react-native|react-native-gesture-handler|react-native-reanimated|react-native-safe-area-context|react-native-screens|react-native-web|@react-native|@react-navigation|@expo)/)',
   ],
   collectCoverageFrom: [
     'lib/**/*.{ts,tsx}',

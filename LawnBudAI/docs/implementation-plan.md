@@ -284,7 +284,23 @@ USING (auth.uid() = user_id);
 
 ---
 
-### Phase 2.5: Admin Panel + RevenueCat (Deferred, ~20 hours)
+### Phase 2.5: Remove SQLite Dead Code (~1 hour)
+
+**Status**: ✅ COMPLETE
+
+**Deliverables**:
+- ✅ Removed `expo-sqlite` dependency (replaced by Supabase in Phase 1)
+- ✅ Deleted `database/init.ts` (unused SQLite schema)
+- ✅ Cleaned up Jest configuration
+- ✅ All tests passing (36/36)
+- ✅ npm audit clean (0 vulnerabilities)
+- ✅ No remaining SQLite references in codebase
+
+**Rationale**: SQLite was designed for single-device, single-user apps. Phase 1 migrated to Supabase (PostgreSQL) for multi-user, cloud-based data management. Local SQLite code was dead weight and created confusion in the codebase.
+
+---
+
+### Phase 2.6: Admin Panel + RevenueCat (Deferred, ~20 hours)
 
 **Status**: ⏸️ Planned for after Phase 3
 
@@ -585,44 +601,40 @@ USING (auth.uid() = user_id);
 
 ---
 
-## Immediate Next Steps (Phase 2)
+## Immediate Next Steps (Phase 3)
 
-### Phase 2 Setup (~14 hours)
+### Phase 3: Core Screens (~50 hours)
 
-**Day 1: Database Schema**
-```bash
-# 1. In Supabase SQL Editor, run database/rbac-schema.sql
-# 2. Verify tables created: user_roles, rate_limit_counters
-# 3. Test trigger: Sign up a new user, check user_roles table has 'user' role
-```
+**Goal**: Build functional mowing, watering, and fertilizer screens with data entry and history
 
-**Day 2: Testing Role Assignment**
-```bash
-# 1. Promote yourself to admin in Supabase SQL Editor:
-#    UPDATE user_roles SET role = 'admin' WHERE user_id = '<your-uuid>';
-# 2. Reload app
-# 3. Verify admin tab appears in tab navigation
-# 4. Promote a free user to premium and reload to verify rate limit increase
-```
+**Week 1: Mowing Screen** (15 hours)
+- Create form component with date picker, height input, notes textarea
+- Implement submit to `mow_events` table via Supabase
+- Show last 10 mowing events with statistics ("Last mowed X days ago")
+- Add delete/swipe functionality
 
-**Day 3: Rate Limit Verification**
-```bash
-# 1. In app, trigger 101 requests on 'free' role
-# 2. Verify 101st request returns allowed=false
-# 3. Promote to premium (1000 limit), verify requests allowed
-# 4. Check rate_limit_counters table in Supabase
-```
+**Week 2: Watering Screen** (15 hours)
+- Create form component with date picker, amount (gallons), source dropdown
+- Implement submit to `water_events` table
+- Show history with metadata and statistics
 
-**Day 4-5: PremiumGate + Settings UI**
-- Free user tries to access premium feature → PremiumGate shown
-- Settings screen shows Plan tier (Free/Premium/Admin)
-- Upgrade button visible for free users
-- All role state properly synced
+**Week 3: Fertilizer Screen** (15 hours)
+- Create form component with date picker, type dropdown, amount (lbs)
+- Implement submit to `fertilizer_events` table
+- Show history and statistics
 
-**Day 6-7: Documentation + Handoff**
-- Review RBAC runbook
-- Document how to promote beta testers to premium
-- Create admin user(s) for Phase 3 testing
+**Week 4: Shared Components + Testing** (5 hours)
+- Create reusable `EventForm`, `EventHistory`, `Statistics` components
+- Write unit tests for form validation and submission
+- Write Playwright E2E tests for all 3 screens
+- Ensure all 36 existing tests still pass
+
+**Success Criteria**:
+- ✅ All 3 screens functional with working forms
+- ✅ Data persists to Supabase and syncs across devices
+- ✅ Home dashboard shows real "next due" dates
+- ✅ All tests passing
+- ✅ <5% crash rate during manual testing
 
 ---
 
@@ -668,19 +680,24 @@ eas submit --platform android
 
 ## Estimated Hours Per Phase
 
-| Phase | Activity | Hours |
-|-------|----------|-------|
-| 1 | Supabase + Auth + Settings + Testing | 30 |
-| 2 | RBAC + Rate Limiting + Testing | 14 |
-| 2.5 | Admin Panel + RevenueCat (Deferred) | 20 |
-| 3 | 3 Core Screens + Forms + History + Testing | 50 |
-| 4 | Recommendations + Notifications + Testing | 30 |
-| 5 | Polish + Onboarding + App Store + Testing | 30 |
-| 6 | Hosting + Alpha Distribution | 16 |
-| **Total** | | **190** |
+| Phase | Activity | Hours | Status |
+|-------|----------|-------|--------|
+| 1 | Supabase + Auth + Settings + Testing | 30 | ✅ Complete |
+| 2 | RBAC + Rate Limiting + Testing | 14 | ✅ Complete |
+| 0.5 | Testing Infrastructure + ESLint + Security | 8 | ✅ Complete |
+| 2.5 | Remove SQLite Dead Code | 1 | ✅ Complete |
+| 2.6 | Admin Panel + RevenueCat (Deferred) | 20 | ⏸️ Planned |
+| 3 | 3 Core Screens + Forms + History + Testing | 50 | ⏭️ Next |
+| 4 | Recommendations + Notifications + Testing | 30 | 🔄 Planned |
+| 5 | Polish + Onboarding + App Store + Testing | 30 | 🔄 Planned |
+| 6 | Hosting + Alpha Distribution | 16 | 🔄 Planned |
+| **Completed** | | **53** | |
+| **Remaining** | | **146** | |
+| **Total Estimated** | | **199** | |
 
+**Time Logged**: ~53 hours (26% of project)
 **Buffer**: 60 hours for unexpected issues, debugging, design adjustments
-**Grand Total**: ~200 hours (matches your 10 weeks × 20 hrs/week)
+**Remaining**: ~146 hours to completion
 
 ---
 
