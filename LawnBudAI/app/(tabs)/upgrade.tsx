@@ -91,7 +91,7 @@ export default function UpgradeScreen() {
         {/* Bottom Text */}
         <View style={styles.footerContainer}>
           <Text style={styles.footerText}>
-            In Phase 2.5, we'll integrate RevenueCat for secure in-app purchases on iOS and Android.
+            In Phase 2.5, we&apos;ll integrate RevenueCat for secure in-app purchases on iOS and Android.
           </Text>
           <Text style={styles.footerTextSmall}>
             Cancel your subscription anytime from App Store/Play Store settings

@@ -7,6 +7,7 @@
 
 import { renderHook, waitFor } from '@testing-library/react-native';
 import { useRole } from '@/hooks/useRole';
+import { supabase } from '@/lib/supabase';
 
 // Mock Supabase
 jest.mock('@/lib/supabase', () => ({
@@ -18,8 +19,6 @@ jest.mock('@/lib/supabase', () => ({
     from: jest.fn(),
   },
 }));
-
-import { supabase } from '@/lib/supabase';
 
 const mockSupabase = supabase as jest.Mocked<typeof supabase>;
 

@@ -1,7 +1,7 @@
 import { getCurrentWeatherIcon, getWeatherIcon, getRainForecast, WeatherDay, WeatherResponse } from '@/models/weather';
 import { styles } from '@/styles/app.styles';
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text } from 'react-native';
 import Icon from '@expo/vector-icons/Ionicons';
 
 type Props = {weather: WeatherResponse }
@@ -46,7 +46,7 @@ export function WeatherCard({weather}: Props) {
         </View>
       </View>
        {weather.weather.map(w => (
-            <Text>
+            <Text key={w.date}>
               <b>{w.date}</b>{" "}
               {getHourlyText(w)}
             </Text>))}

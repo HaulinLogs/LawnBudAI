@@ -10,6 +10,7 @@ import {
   enforceRateLimit,
   getRateLimitInfo,
 } from '@/lib/rateLimiter';
+import { supabase } from '@/lib/supabase';
 
 // Mock Supabase
 jest.mock('@/lib/supabase', () => ({
@@ -20,8 +21,6 @@ jest.mock('@/lib/supabase', () => ({
     rpc: jest.fn(),
   },
 }));
-
-import { supabase } from '@/lib/supabase';
 
 const mockSupabase = supabase as jest.Mocked<typeof supabase>;
 

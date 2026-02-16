@@ -73,7 +73,7 @@ export async function getRateLimitInfo(
   endpoint: string,
   role: UserRole = 'user'
 ): Promise<{ current: number; limit: number; remaining: number }> {
-  const { allowed, remaining } = await checkRateLimit(endpoint, role);
+  const { remaining } = await checkRateLimit(endpoint, role);
   const limit = LIMITS[role];
   return {
     current: limit - remaining,

@@ -1,5 +1,5 @@
-import * as SQLite from 'expo-sqlite';
-const db = SQLite.openDatabase('lawncare.db');
+import { openDatabase } from 'expo-sqlite';
+const db = openDatabase('lawncare.db');
 
 export const initializeDatabase = () => {
   db.transaction(tx => {

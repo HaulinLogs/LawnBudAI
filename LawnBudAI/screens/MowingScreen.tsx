@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import Icon from '@expo/vector-icons/Ionicons';
-import { getCurrentWeatherIcon, getWeatherIcon } from '@/models/weather';
+import { getCurrentWeatherIcon } from '@/models/weather';
 import { useWeather } from '@/hooks/useWeather';
 import { styles } from './Screen.styles';
 

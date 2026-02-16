@@ -43,7 +43,7 @@ export default function SettingsScreen() {
         lawn_size_sqft: lawnSize ? parseInt(lawnSize) : null,
       });
       Alert.alert('Success', 'Preferences saved');
-    } catch (error) {
+    } catch {
       Alert.alert('Error', 'Failed to save preferences');
     } finally {
       setSaving(false);
@@ -75,13 +75,12 @@ export default function SettingsScreen() {
   // Plan section styles
   const planStyles = StyleSheet.create({
     planCard: {
-      backgroundColor: '#fff',
+      backgroundColor: isPremium ? '#f0fdf4' : '#fff',
       borderRadius: 12,
       padding: 16,
       marginBottom: 24,
       borderWidth: 1,
       borderColor: isPremium ? '#10b981' : '#e5e7eb',
-      backgroundColor: isPremium ? '#f0fdf4' : '#fff',
     },
     planHeader: {
       flexDirection: 'row',

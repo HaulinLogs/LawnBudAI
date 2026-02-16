@@ -20,7 +20,7 @@ export default function AdminScreen() {
           </View>
 
           <View style={styles.infoCard}>
-            <Text style={styles.infoTitle}>What's Next</Text>
+            <Text style={styles.infoTitle}>What&apos;s Next</Text>
             <Text style={styles.infoText}>
               In Phase 2.5, this dashboard will include:
             </Text>

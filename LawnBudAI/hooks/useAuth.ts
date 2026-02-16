@@ -3,7 +3,7 @@ import { Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { recordSuccessfulLogin, recordFailedLogin } from '@/lib/securityMonitoring';
 import { trackAuthEvent } from '@/lib/telemetry';
-import { useRole, type UserRole } from '@/hooks/useRole';
+import { useRole } from '@/hooks/useRole';
 
 export function useAuth() {
   const [session, setSession] = useState<Session | null>(null);

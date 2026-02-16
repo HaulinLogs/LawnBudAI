@@ -18,17 +18,12 @@ test.describe('Authentication Flow', () => {
   test('should display sign in/sign up options when not authenticated', async ({ page }) => {
     // Check for auth-related UI elements
     // Note: Adjust selectors based on your actual app navigation
-    const authLink = page.locator('button, a').filter({ hasText: /sign in|login|auth/i }).first();
-
     // If user is already signed in, this test would skip
     // For now, we just verify the page loads
     expect(page.url()).toContain('/');
   });
 
   test('should handle sign in flow', async ({ page }) => {
-    // Look for sign in button or link
-    const signInButton = page.locator('text=/sign in|login/i').first();
-
     // This is a placeholder test - actual implementation depends on:
     // 1. Whether auth UI is shown on home screen or separate route
     // 2. How sign in form is structured

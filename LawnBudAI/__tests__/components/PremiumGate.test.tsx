@@ -7,13 +7,12 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react-native';
 import { PremiumGate } from '@/components/PremiumGate';
+import { useRouter } from 'expo-router';
 
 // Mock expo-router
 jest.mock('expo-router', () => ({
   useRouter: jest.fn(),
 }));
-
-import { useRouter } from 'expo-router';
 
 const mockRouter = useRouter as jest.MockedFunction<typeof useRouter>;
 

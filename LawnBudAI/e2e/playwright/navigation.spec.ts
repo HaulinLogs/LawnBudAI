@@ -44,9 +44,6 @@ test.describe('Tab Navigation', () => {
   test('should handle rapid navigation without crashing', async ({ page }) => {
     await page.goto('/');
 
-    // Try to find navigation buttons and click them
-    const buttons = page.locator('button').all();
-
     // Should not crash during navigation
     await expect(page).not.toHaveTitle(/error|exception/i);
   });
