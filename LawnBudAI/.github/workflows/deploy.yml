@@ -22,11 +22,11 @@ jobs:
           node-version: 18.x
 
       - name: Install dependencies
-        run: npm install --legacy-peer-deps
+        run: yarn install
         working-directory: ./LawnBudAI
 
       - name: Build Expo web export
-        run: npx expo export -p web
+        run: yarn expo export -p web
         working-directory: ./LawnBudAI
         env:
           EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.EXPO_PUBLIC_SUPABASE_URL }}
