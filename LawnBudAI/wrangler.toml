@@ -1,13 +1,6 @@
 name = "lawnbudai"
-main = "dist/index.js"
+pages_build_output_dir = "dist"
 compatibility_date = "2024-01-01"
 
 [env.production]
 name = "lawnbudai-prod"
-
-[env.staging]
-name = "lawnbudai-staging"
-
-[[migrations]]
-tag = "v1"
-new_classes = []
