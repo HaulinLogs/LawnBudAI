@@ -30,10 +30,10 @@ Live at: lawnbudai-staging.pages.dev (or custom domain)
 2. Click **Create a project** → **Connect to Git**
 3. Authorize GitHub and select `LawnBudAI` repository
 4. Configure build settings:
-   - **Framework preset**: Expo (or None for custom)
-   - **Build command**: `npx expo export -p web`
-   - **Build output directory**: `dist`
-   - **Root directory** (if nested): `LawnBudAI/`
+   - **Framework preset**: None (custom)
+   - **Build command**: `yarn install && yarn expo export -p web`
+   - **Build output directory**: `LawnBudAI/dist`
+   - **Root directory**: `./`
 5. Click **Save and deploy**
 
 ### Option B: Manual Setup (CI/CD Deployment)
@@ -105,10 +105,11 @@ jobs:
           node-version: 18.x
 
       - name: Install dependencies
-        run: npm ci --legacy-peer-deps
+        run: yarn install
+        working-directory: ./LawnBudAI
 
       - name: Build Expo web export
-        run: npx expo export -p web
+        run: yarn expo export -p web
         working-directory: ./LawnBudAI
 
       - name: Deploy to Cloudflare Pages

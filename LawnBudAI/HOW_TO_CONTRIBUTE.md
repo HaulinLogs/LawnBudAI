@@ -33,8 +33,8 @@ cd LawnBudAI
 npm install --legacy-peer-deps
 
 # 3. Verify setup
-npm run lint:ci          # Should show 0 errors, 0 warnings
-npm run testFinal        # Should show 36/36 tests passing
+yarn lint:ci          # Should show 0 errors, 0 warnings
+yarn testFinal        # Should show 36/36 tests passing
 
 # 4. Start development
 npm start
@@ -49,10 +49,10 @@ npm start
 # Go to claude.ai/code and upload the repository
 
 # 2. Key commands available:
-npm run test             # Run tests in watch mode
-npm run lint:fix         # Auto-fix linting issues
-npm run testDebug        # Debug failing tests
-npm run quality-gates    # Run all checks
+yarn test             # Run tests in watch mode
+yarn lint:fix         # Auto-fix linting issues
+yarn testDebug        # Debug failing tests
+yarn quality-gates    # Run all checks
 
 # 3. Read project files for context:
 # - ARCHITECTURE.md (system design)
@@ -161,13 +161,13 @@ git checkout -b feature/3.3/fertilizer-screen
 # See TDD.md for detailed process
 
 # 3. Run tests in watch mode
-npm run test
+yarn test
 
 # 4. Implement feature
 # Follow existing patterns in codebase
 
 # 5. Run linting
-npm run lint:fix
+yarn lint:fix
 
 # 6. Commit changes (pre-commit hook auto-formats)
 git add .
@@ -177,9 +177,9 @@ git commit -m "Feature: Add fertilizer screen"
 git push origin feature/3.3/fertilizer-screen
 
 # If pre-push hook fails:
-npm run quality-gates   # Identify issues
-npm run lint:fix        # Fix linting
-npm run testFinal       # Verify tests
+yarn quality-gates   # Identify issues
+yarn lint:fix        # Fix linting
+yarn testFinal       # Verify tests
 git push                # Try again
 ```
 
@@ -271,7 +271,7 @@ describe('useFertilizerEvents', () => {
 ### Step 3: Run Tests (They Fail)
 
 ```bash
-npm run test
+yarn test
 # Tests will fail - this is expected!
 # Error: useFertilizerEvents is not implemented
 ```
@@ -320,7 +320,7 @@ export function useFertilizerEvents() {
 ### Step 5: Run Tests (They Pass)
 
 ```bash
-npm run testFinal
+yarn testFinal
 # ✓ All tests passing!
 ```
 
@@ -358,13 +358,13 @@ describe('FertilizerScreen', () => {
 
 ```bash
 # Auto-fix linting
-npm run lint:fix
+yarn lint:fix
 
 # Verify all tests pass
-npm run testFinal
+yarn testFinal
 
 # Check coverage
-npm run test:coverage
+yarn test:coverage
 # Target: 70% minimum
 
 # Verify no vulnerabilities
@@ -435,7 +435,7 @@ Reviewers check:
 ```bash
 # If reviewer requests changes:
 1. Make changes locally
-2. Run tests: npm run testFinal
+2. Run tests: yarn testFinal
 3. Commit: git commit -m "address: feedback from review"
 4. Push: git push
 
@@ -720,23 +720,23 @@ export default function Component({ title }: Props) {
 
 ```bash
 # View detailed error
-npm run testDebug -- <test-file>
+yarn testDebug -- <test-file>
 
 # Update snapshots (if intentional)
-npm run updateSnapshots
+yarn updateSnapshots
 
 # Run specific test
-npm run testDebug -- -t "should add event"
+yarn testDebug -- -t "should add event"
 ```
 
 ### Linting Errors
 
 ```bash
 # View all issues
-npm run lint:ci
+yarn lint:ci
 
 # Auto-fix most issues
-npm run lint:fix
+yarn lint:fix
 
 # For remaining issues, edit manually
 ```
@@ -794,11 +794,11 @@ npx tsc --noEmit
 
 ## Summary
 
-1. **Setup**: Clone → npm install → npm run test
+1. **Setup**: Clone → npm install → yarn test
 2. **Branch**: Create feature branch with descriptive name
 3. **TDD**: Write tests first, implement second
 4. **Code**: Follow existing patterns
-5. **Quality**: Run npm run quality-gates
+5. **Quality**: Run yarn quality-gates
 6. **Review**: Create PR and get team review
 7. **Merge**: Squash merge to main
 

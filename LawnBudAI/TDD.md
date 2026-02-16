@@ -15,7 +15,7 @@ LawnBudAI enforces Test-Driven Development practices to ensure code quality, mai
 ### 2. Test Coverage Thresholds
 - **Minimum Coverage**: 70% for all metrics (lines, functions, branches, statements)
 - **Target Coverage**: 80%+ for new code in Phase 3+
-- **Measurement**: Run `npm run test:coverage` before committing
+- **Measurement**: Run `yarn test:coverage` before committing
 - **Enforcement**: Pre-push hook verifies coverage thresholds
 
 ### 3. Test Categories
@@ -37,7 +37,7 @@ LawnBudAI enforces Test-Driven Development practices to ensure code quality, mai
 - Test real Supabase integration (or test database)
 - Verify UI, navigation, and data persistence
 - Slower execution but highest confidence
-- Run before merging to main: `npm run test:playwright`
+- Run before merging to main: `yarn test:playwright`
 
 #### Integration Tests
 - Test multiple components/hooks working together
@@ -50,13 +50,13 @@ LawnBudAI enforces Test-Driven Development practices to ensure code quality, mai
 All of the following must pass before pushing code:
 
 ```bash
-npm run quality-gates
+yarn quality-gates
 ```
 
 This runs:
-1. **Linting Check**: `npm run lint:ci` (0 errors, 0 warnings)
-2. **Unit Tests**: `npm run testFinal` (all tests passing)
-3. **Coverage Report**: `npm run test:coverage` (70% minimum)
+1. **Linting Check**: `yarn lint:ci` (0 errors, 0 warnings)
+2. **Unit Tests**: `yarn testFinal` (all tests passing)
+3. **Coverage Report**: `yarn test:coverage` (70% minimum)
 4. **Security Audit**: `npm audit` (no high/critical vulnerabilities)
 
 ### 5. Pre-Commit Hooks
@@ -103,18 +103,18 @@ export function useWaterEvents() {
 ### Step 3: Run Tests Locally
 ```bash
 # Watch mode for development
-npm run test
+yarn test
 
 # Debug mode if tests fail
-npm run testDebug
+yarn testDebug
 
 # Final check before commit
-npm run testFinal
+yarn testFinal
 ```
 
 ### Step 4: Check Coverage
 ```bash
-npm run test:coverage
+yarn test:coverage
 ```
 
 Ensure coverage meets thresholds. If too low:
@@ -125,10 +125,10 @@ Ensure coverage meets thresholds. If too low:
 ### Step 5: Lint and Format
 ```bash
 # Auto-fix linting issues
-npm run lint:fix
+yarn lint:fix
 
 # Run final linting check
-npm run lint:ci
+yarn lint:ci
 ```
 
 ### Step 6: Commit Code
@@ -254,30 +254,30 @@ PRs cannot be merged until all CI checks pass.
 ### Tests Failing
 ```bash
 # Run in debug mode
-npm run testDebug
+yarn testDebug
 
 # Update snapshots if needed
-npm run updateSnapshots
+yarn updateSnapshots
 
 # Check test logs for mocking issues
-npm run test -- --verbose
+yarn test -- --verbose
 ```
 
 ### Coverage Too Low
 - Add test cases for uncovered branches
-- Check `npm run test:coverage` report for gaps
+- Check `yarn test:coverage` report for gaps
 - Refactor complex code to improve testability
 
 ### Pre-Push Hook Failing
 ```bash
 # Fix linting issues
-npm run lint:fix
+yarn lint:fix
 
 # Run tests to verify
-npm run testFinal
+yarn testFinal
 
 # Check coverage
-npm run test:coverage
+yarn test:coverage
 ```
 
 ## Resources

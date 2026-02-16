@@ -11,61 +11,61 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Running the App
 ```bash
 # Install dependencies
-npm install --legacy-peer-deps
+yarn install
 
 # Start the Expo development server
-npm start
+yarn start
 
 # Run on iOS simulator
-npm run ios
+yarn ios
 
 # Run on Android emulator
-npm run android
+yarn android
 
 # Run on web browser
-npm run web
+yarn web
 
 # Reset project to fresh state (moves current app to app-example)
-npm run reset-project
+yarn reset-project
 ```
 
 ### Testing & Quality (TDD Enforcement)
 ```bash
 # Run tests in watch mode (only changed files)
-npm run test
+yarn test
 
 # Run tests in debug mode with verbose output
-npm run testDebug
+yarn testDebug
 
 # Run all tests once (use before committing)
-npm run testFinal
+yarn testFinal
 
 # Generate coverage report
-npm run test:coverage
+yarn test:coverage
 
 # Update test snapshots
-npm run updateSnapshots
+yarn updateSnapshots
 
 # Run E2E tests with Playwright
-npm run test:playwright
+yarn test:playwright
 
 # Run E2E tests in interactive UI mode
-npm run test:playwright:ui
+yarn test:playwright:ui
 
 # Run all quality gates (linting, tests, coverage, security)
-npm run quality-gates
+yarn quality-gates
 ```
 
 ### Linting & Code Quality
 ```bash
 # Check code for linting issues
-npm run lint
+yarn lint
 
 # Auto-fix linting issues
-npm run lint:fix
+yarn lint:fix
 
 # Strict linting (used in CI/CD)
-npm run lint:ci
+yarn lint:ci
 ```
 
 ## TDD Development Workflow

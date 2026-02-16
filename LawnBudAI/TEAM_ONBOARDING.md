@@ -12,7 +12,7 @@ git clone https://github.com/HaulinLogs/lawnbudai.git
 cd LawnBudAI
 
 # Install dependencies
-npm install --legacy-peer-deps
+yarn install
 
 # Start development server
 npm start
@@ -94,9 +94,9 @@ Each phase has specific deliverables:
    └─ Follow existing patterns
 
 3. Verify Quality
-   ├─ npm run lint:fix  (auto-fix linting)
-   ├─ npm run testFinal (verify all tests)
-   ├─ npm run test:coverage (70% minimum)
+   ├─ yarn lint:fix  (auto-fix linting)
+   ├─ yarn testFinal (verify all tests)
+   ├─ yarn test:coverage (70% minimum)
    └─ git push (pre-push hook verifies all)
 ```
 
@@ -104,22 +104,22 @@ Each phase has specific deliverables:
 
 ```bash
 # Watch mode - only changed tests
-npm run test
+yarn test
 
 # Debug mode - verbose output
-npm run testDebug
+yarn testDebug
 
 # All tests once (before commit)
-npm run testFinal
+yarn testFinal
 
 # Coverage report
-npm run test:coverage
+yarn test:coverage
 
 # E2E tests
-npm run test:playwright
+yarn test:playwright
 
 # All quality checks
-npm run quality-gates
+yarn quality-gates
 ```
 
 ### Git Hooks (Automatic)
@@ -151,7 +151,7 @@ Track all work in GitHub Projects:
 
 1. **Morning**: Check project for assigned items
 2. **Work**: Create PR linked to GitHub issue
-3. **Before push**: Run `npm run quality-gates`
+3. **Before push**: Run `yarn quality-gates`
 4. **Push**: Triggers GitHub Actions + Cloudflare deploy
 5. **Evening**: Code review team PRs
 
@@ -309,7 +309,7 @@ describe('useMowEvents', () => {
 1. Create branch: `git checkout -b fix/<feature-name>`
 2. Write failing test first
 3. Fix code to make test pass
-4. Run quality gates: `npm run quality-gates`
+4. Run quality gates: `yarn quality-gates`
 5. Push and create PR
 6. Get review and merge
 
@@ -317,13 +317,13 @@ describe('useMowEvents', () => {
 
 ```bash
 # Run specific test file
-npm run testDebug -- <path-to-file>.test.ts
+yarn testDebug -- <path-to-file>.test.ts
 
 # Run with verbose output
-npm run testDebug -- --verbose
+yarn testDebug -- --verbose
 
 # Update snapshots (if test changed intentionally)
-npm run updateSnapshots
+yarn updateSnapshots
 ```
 
 ## Team Communication
@@ -364,13 +364,13 @@ Use GitHub Discussions for:
 
 ```bash
 # Check what's failing
-npm run quality-gates
+yarn quality-gates
 
 # Fix linting
-npm run lint:fix
+yarn lint:fix
 
 # Fix tests
-npm run testDebug
+yarn testDebug
 
 # Try pushing again
 git push

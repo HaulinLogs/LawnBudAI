@@ -34,11 +34,11 @@ The project is organized into the following directories:
 The following scripts are available in the `package.json` file:
 
 *   `npm start`: Starts the Expo development server.
-*   `npm run android`: Starts the app on an Android emulator or device.
-*   `npm run ios`: Starts the app on an iOS simulator or device.
-*   `npm run web`: Starts the app in a web browser.
-*   `npm run lint`: Lints the project files using ESLint.
-*   `npm run reset-project`: Resets the project to a fresh state.
+*   `yarn android`: Starts the app on an Android emulator or device.
+*   `yarn ios`: Starts the app on an iOS simulator or device.
+*   `yarn web`: Starts the app in a web browser.
+*   `yarn lint`: Lints the project files using ESLint.
+*   `yarn reset-project`: Resets the project to a fresh state.
 
 ## Getting Started
 
