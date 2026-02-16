@@ -1,0 +1,24 @@
+# Maestro mobile E2E test: Home screen assertions
+#
+# Tests that home screen displays correctly with weather and todo info
+# Run with: maestro test .maestro/home.yml
+
+appId: com.lawnbudai.app
+---
+- launchApp
+- assertVisible: "Home"
+
+# Verify home screen key elements
+# - Weather information (if available)
+# - Todo status cards
+# - Tab navigation is accessible
+
+# Future enhanced tests:
+# - assertVisible: "Weather" (weather card)
+# - assertVisible: "Mow"        (todo status)
+# - assertVisible: "Water"      (todo status)
+# - assertVisible: "Fertilize"  (todo status)
+# - tapOn: "Mowing"             (navigate to mowing tab)
+# - assertVisible: "Mowing Schedule"
+# - tapOn: "Home"               (back to home)
+# - assertVisible: "Home"

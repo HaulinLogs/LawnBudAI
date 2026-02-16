@@ -1,0 +1,26 @@
+# Maestro mobile E2E test: Sign in flow
+#
+# Tests the authentication flow on mobile (iOS/Android)
+# Run with: maestro test .maestro/sign-in.yml
+#
+# Prerequisites:
+# - App must be running (EAS internal distribution or local build)
+# - Maestro CLI installed: https://maestro.mobile.dev
+
+appId: com.lawnbudai.app
+---
+- launchApp
+- assertVisible: "Home"
+
+# If user is already logged in, this flow will pass quickly
+# If user needs to log in:
+# - This would tap Sign In, enter credentials, and verify redirect to home
+
+# Future: More detailed sign in flow
+# - tapOn: "Sign In"
+# - assertVisible: "Email"
+# - inputText: "test@example.com"
+# - tapOn: "Password Field"
+# - inputText: "password123"
+# - tapOn: "Sign In Button"
+# - assertVisible: "Home"

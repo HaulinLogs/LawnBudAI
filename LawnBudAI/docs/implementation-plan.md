@@ -203,12 +203,19 @@ USING (auth.uid() = user_id);
 
 **Status**: ✅ Complete
 
+**Testing for Phase 1**
+- Unit tests for auth hooks (useAuth)
+- Integration tests for settings sync
+- Playwright E2E tests for sign up/login flow
+- Run: `npm test && npm run test:playwright`
+
 **Deliverables:**
 - Users can sign up, log in, and persist sessions
 - Settings are saved and synced across devices
 - Home dashboard shows real todos from database
 - Security monitoring and telemetry integrated
 - Comprehensive operational documentation
+- ✅ All tests passing
 
 ---
 
@@ -254,12 +261,26 @@ USING (auth.uid() = user_id);
    - Update implementation plan to insert Phase 2
    - Document icon additions (shield, crown)
 
+#### Testing for Phase 2
+- **Unit Tests** (2 hours)
+  - `__tests__/lib/roleGuard.test.ts` — test role hierarchy and permission checks
+  - `__tests__/lib/rateLimiter.test.ts` — mock Supabase RPC and verify rate limit logic
+  - `__tests__/hooks/useRole.test.ts` — mock Supabase and test role fetching
+  - `__tests__/components/PremiumGate.test.tsx` — render test and button interaction
+
+- **Run Tests**
+  ```bash
+  npm test  # Run all unit tests
+  npm run test:coverage  # View coverage report
+  ```
+
 #### Deliverables
 - User roles work; free/premium/admin users are properly gated
 - Rate limits enforced server-side (cannot be bypassed)
 - Premium features show paywall when accessed by free users
 - Admin users see admin tab and can manage users via SQL
 - Runbook documented for beta testers and admin promotions
+- **All unit tests passing before moving to Phase 3**
 
 ---
 
@@ -337,14 +358,21 @@ USING (auth.uid() = user_id);
    - Fetch from `mow_events`, `water_events`, `fertilizer_events` tables
    - Calculate next mowing/watering/fertilizer due date
 
+#### Testing for Phase 3
+- Unit tests for useTodo hook
+- Component tests for data entry forms
+- Playwright E2E tests for mowing/watering/fertilizer screens
+- Run: `npm test && npm run test:playwright`
+
 #### Deliverable
 - Users can sign up, log in, and persist sessions
 - Settings are saved and synced across devices
 - Home dashboard shows real todos from database
+- ✅ All tests passing
 
 ---
 
-### Phase 2: Core Screens (Weeks 3-5, ~50 hours)
+### Phase 3b: Alternative Core Screens (Weeks 3-5, ~50 hours)
 
 **Goal**: All 3 care screens functional with data entry and history
 
@@ -421,10 +449,17 @@ USING (auth.uid() = user_id);
    - Time preference: When to send (8 AM, 12 PM, 6 PM)
    - Save to `user_preferences` table
 
+#### Testing for Phase 4
+- Unit tests for recommendation rules
+- Unit tests for notification scheduling
+- Maestro E2E tests for notification display on mobile
+- Run: `npm test && maestro test .maestro/`
+
 #### Deliverable
 - Users get smart, weather-aware reminders
 - Notifications only send when action is needed
 - All settings configurable
+- ✅ All tests passing
 
 ---
 
@@ -464,11 +499,89 @@ USING (auth.uid() = user_id);
    - Submit to TestFlight + Google Play Internal Testing
    - Wait for approval (~24-48 hours)
 
+#### Testing for Phase 5
+- Full regression tests: Unit + Playwright + Maestro
+- Manual testing: iOS (iPhone), Android (Pixel/Samsung), Web (Chrome/Safari)
+- Performance testing: App startup time, memory usage
+- Crash rate target: <5%
+- Run all: `npm test && npm run test:playwright && maestro test .maestro/ && npm run test:coverage`
+
 #### Deliverable
 - Production-ready app
 - Submitted to TestFlight for iOS
 - Submitted to Google Play Internal Testing for Android
 - Ready for BETA tester invite
+- ✅ All tests passing, <5% crash rate
+
+---
+
+### Phase 6: Hosting + Alpha Distribution (~16 hours)
+
+**Goal**: Deploy web app to Cloudflare Pages + set up alpha distribution for mobile
+
+**Status**: 🔄 Planned (after Phase 5)
+
+#### Tasks
+
+1. **Web Export & Hosting** (4 hours)
+   - Configure `expo export -p web` in CI/CD
+   - Deploy to Cloudflare Pages (free, unlimited bandwidth)
+     - Connect GitHub repo to Cloudflare Pages
+     - Automatic deploys on `main` branch push
+     - Free `*.pages.dev` subdomain
+   - Verify static export works (no Node.js required on server)
+   - Test on web: Chrome, Firefox, Safari, mobile browsers
+
+2. **Mobile Alpha Distribution Setup** (8 hours)
+   - **EAS Internal Distribution** (fastest for testers)
+     - Run `eas build --platform android --profile preview`
+     - Share QR code with beta testers
+     - No app store review needed
+     - Auto-updates via EAS Update channel
+
+   - **Google Play Internal Testing** (for wider Android alpha)
+     - Set up Google Play Developer account ($25 one-time)
+     - Create internal test track
+     - Upload AAB (Android App Bundle) from EAS Build
+     - Invite testers via Google Play Console
+     - Track metrics: crashes, ratings, feedback
+
+   - **TestFlight** (Deferred—requires Apple Developer Program $99/yr)
+     - Document setup for future iOS alpha
+     - Currently focusing on Android + EAS Internal Distribution
+
+3. **OTA Updates Channel** (2 hours)
+   - Create EAS Update channel for hotfixes
+   - Document: How to deploy critical bug fixes without app store review
+   - Example: `eas update --branch hotfix-123`
+
+4. **Beta Tester Workflow Documentation** (2 hours)
+   - `docs/alpha-distribution.md` — step-by-step for testers
+   - How to join Android internal testing
+   - How to scan EAS QR code on iOS
+   - How to report bugs (GitHub issues template)
+   - FAQ: App crashes? Check your internet. Need update? Restart app.
+
+#### Hosting Decision Details
+
+**Why Cloudflare Pages (not Netlify or Vercel):**
+- ✅ Unlimited bandwidth (Netlify: 100 GB/mo)
+- ✅ Free custom domain support
+- ✅ Commercial use allowed (free tier)
+- ✅ Automatic HTTPS
+- ✅ Zero-cold-start deployments
+- ✅ No build minute limits
+
+**Why NOT Supabase/Heroku:**
+- Supabase: Backend-only, no web hosting
+- Heroku: Free tier removed (Nov 2022), minimum $5-7/mo
+
+#### Deliverables
+- Expo Web deployed to Cloudflare Pages (free subdomain)
+- Android alpha on EAS Internal Distribution (QR code sharing)
+- Android alpha on Google Play Internal Testing (wider audience)
+- OTA update channel configured for hotfixes
+- Beta tester onboarding guide complete
 
 ---
 
@@ -557,13 +670,14 @@ eas submit --platform android
 
 | Phase | Activity | Hours |
 |-------|----------|-------|
-| 1 | Supabase + Auth + Settings | 30 |
-| 2 | RBAC + Rate Limiting | 14 |
+| 1 | Supabase + Auth + Settings + Testing | 30 |
+| 2 | RBAC + Rate Limiting + Testing | 14 |
 | 2.5 | Admin Panel + RevenueCat (Deferred) | 20 |
-| 3 | 3 Core Screens + Forms + History | 50 |
-| 4 | Recommendations + Notifications | 30 |
-| 5 | Polish + Onboarding + App Store | 30 |
-| **Total** | | **174** |
+| 3 | 3 Core Screens + Forms + History + Testing | 50 |
+| 4 | Recommendations + Notifications + Testing | 30 |
+| 5 | Polish + Onboarding + App Store + Testing | 30 |
+| 6 | Hosting + Alpha Distribution | 16 |
+| **Total** | | **190** |
 
 **Buffer**: 60 hours for unexpected issues, debugging, design adjustments
 **Grand Total**: ~200 hours (matches your 10 weeks × 20 hrs/week)

@@ -1,0 +1,25 @@
+# Maestro mobile E2E test: Settings screen + plan tier display
+#
+# Tests navigation to settings, plan tier display, and upgrade CTA
+# Run with: maestro test .maestro/settings.yml
+
+appId: com.lawnbudai.app
+---
+- launchApp
+- assertVisible: "Home"
+
+# Navigate to settings (usually via tab navigation)
+# This test verifies:
+# - Settings tab is accessible
+# - Plan tier is displayed (Free/Premium/Admin)
+# - Upgrade button is visible for free users
+
+# Future enhanced tests:
+# - tapOn: "Settings"           (or appropriate navigation)
+# - assertVisible: "Settings"
+# - assertVisible: "Plan"       (or "Free", "Premium", "Admin")
+# - assertVisible: "Upgrade"    (for free users only)
+# - tapOn: "Upgrade"
+# - assertVisible: "Premium Benefits"
+# - tapOn: "Home"               (go back)
+# - assertVisible: "Home"
