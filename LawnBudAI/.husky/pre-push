@@ -1,0 +1,43 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+echo "🔍 Running quality gates before push..."
+echo ""
+
+# Run linting
+echo "📋 Checking linting..."
+npm run lint:ci
+if [ $? -ne 0 ]; then
+  echo "❌ Linting failed. Run 'npm run lint:fix' to fix issues."
+  exit 1
+fi
+
+# Run all tests
+echo ""
+echo "🧪 Running all tests..."
+npm run testFinal
+if [ $? -ne 0 ]; then
+  echo "❌ Tests failed. Fix failing tests before pushing."
+  exit 1
+fi
+
+# Check coverage
+echo ""
+echo "📊 Checking test coverage..."
+npm run test:coverage -- --passWithNoTests
+if [ $? -ne 0 ]; then
+  echo "❌ Coverage check failed. Ensure adequate test coverage."
+  exit 1
+fi
+
+# Check npm audit
+echo ""
+echo "🔐 Checking security vulnerabilities..."
+npm audit --audit-level=moderate
+if [ $? -ne 0 ]; then
+  echo "⚠️  Security vulnerabilities found. Run 'npm audit fix' if possible."
+  exit 1
+fi
+
+echo ""
+echo "✅ All quality gates passed! Ready to push."

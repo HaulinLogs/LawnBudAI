@@ -4,13 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**LawnBudAI** is a React Native mobile application built with Expo that helps users manage lawn care activities. The app provides tools for tracking mowing, watering, and fertilizing schedules, integrates real-time weather data, and stores historical lawn care events in a local SQLite database.
+**LawnBudAI** is a React Native mobile application built with Expo that helps users manage lawn care activities. The app provides tools for tracking mowing, watering, and fertilizing schedules, integrates real-time weather data, and stores historical lawn care events in Supabase PostgreSQL with Row Level Security (RLS) for multi-user data isolation.
 
 ## Development Commands
 
+### Running the App
 ```bash
 # Install dependencies
-npm install
+npm install --legacy-peer-deps
 
 # Start the Expo development server
 npm start
@@ -24,12 +25,65 @@ npm run android
 # Run on web browser
 npm run web
 
-# Lint code with ESLint
-npm run lint
-
 # Reset project to fresh state (moves current app to app-example)
 npm run reset-project
 ```
+
+### Testing & Quality (TDD Enforcement)
+```bash
+# Run tests in watch mode (only changed files)
+npm run test
+
+# Run tests in debug mode with verbose output
+npm run testDebug
+
+# Run all tests once (use before committing)
+npm run testFinal
+
+# Generate coverage report
+npm run test:coverage
+
+# Update test snapshots
+npm run updateSnapshots
+
+# Run E2E tests with Playwright
+npm run test:playwright
+
+# Run E2E tests in interactive UI mode
+npm run test:playwright:ui
+
+# Run all quality gates (linting, tests, coverage, security)
+npm run quality-gates
+```
+
+### Linting & Code Quality
+```bash
+# Check code for linting issues
+npm run lint
+
+# Auto-fix linting issues
+npm run lint:fix
+
+# Strict linting (used in CI/CD)
+npm run lint:ci
+```
+
+## TDD Development Workflow
+
+This project enforces Test-Driven Development (TDD). See `TDD.md` for complete guidelines.
+
+**Quick Summary:**
+1. Write tests first (before implementing feature)
+2. Implement feature to pass tests
+3. Pre-commit hook runs ESLint auto-fix and Prettier formatting
+4. Pre-push hook enforces quality gates (linting, tests, coverage, security audit)
+5. GitHub Actions runs quality gates on every PR
+
+**Quality Gate Requirements:**
+- ESLint: 0 errors, 0 warnings
+- Tests: All passing (36+ existing tests)
+- Coverage: 70% minimum (lines, functions, branches, statements)
+- Security: No critical vulnerabilities (npm audit)
 
 ## Project Architecture
 
@@ -39,9 +93,9 @@ The app follows Expo Router's file-based routing with the following architectura
 
 - **Routing**: File-based routing via Expo Router in the `app/` directory
 - **UI Components**: Reusable components in `components/`
-- **Data Fetching**: Custom React hooks (`useWeather`, `useTodo`) for data management
+- **Data Fetching**: Custom React hooks (`useWeather`, `useMowEvents`, `useWaterEvents`) for data management
 - **External Data**: Weather API integration via `services/weather.ts`
-- **Local Storage**: SQLite database for lawn care event history via `database/init.ts`
+- **Backend**: Supabase PostgreSQL database with Row Level Security (RLS) for multi-user data isolation
 - **Type Safety**: TypeScript interfaces in `models/`
 
 ### Directory Structure
@@ -68,10 +122,12 @@ The app follows Expo Router's file-based routing with the following architectura
    - Currently mock data; designed for future database integration
    - Displayed via `TodoStatusCard` components
 
-3. **Database**:
-   - SQLite database initialized via `database/init.ts`
-   - Tables: `mow_events`, `water_events`, `weather_history`, `fertilizer_events`, `soil_samples`
-   - Uses expo-sqlite for data persistence
+3. **Supabase Backend**:
+   - PostgreSQL database with Row Level Security (RLS) policies
+   - Tables: `mow_events`, `water_events`, `fertilizer_events`, `users` (with auth integration)
+   - All events are user-specific via `user_id` foreign key and RLS policies
+   - Authentication via Supabase Auth with email/password
+   - Real-time subscriptions available via Supabase realtime API
 
 ### Navigation Structure
 
@@ -89,18 +145,33 @@ The app follows Expo Router's file-based routing with the following architectura
 - **React**: UI library (19.0.0)
 - **Expo Router**: File-based routing (5.1.4)
 - **TypeScript**: Type-safe development (5.8.3)
-- **expo-sqlite**: Local database (15.2.14)
+- **Supabase**: PostgreSQL database + Auth + Realtime (v2.95.3)
 - **Axios**: HTTP client (1.11.0)
 - **@react-navigation**: Navigation system with native and bottom tabs
 - **@expo/vector-icons**: Icon system with Ionicons
-- **ESLint**: Code linting via expo config
+- **Jest**: Unit testing framework (v29.7.0)
+- **Playwright**: E2E testing framework (@playwright/test v1.48.0)
+- **ESLint**: Code linting via flat config (v9.25.0)
+- **Prettier**: Code formatting (v3.3.3)
+- **Husky**: Git hooks for TDD enforcement (v9.1.7)
+- **Lint-staged**: Run linters on staged files (v15.2.10)
 
 ## Important Architectural Patterns
 
 ### Custom Hooks
 The app uses custom React hooks for data management:
-- `useWeather(city)`: Fetches weather data with loading/error states
-- `useTodo(name)`: Manages lawn care task data
+- `useWeather(city)`: Fetches weather data from wttr.in API with loading/error states
+- `useMowEvents()`: CRUD operations for mowing events (Supabase backend)
+  - `fetchEvents()`: Fetch user's mowing events ordered by date
+  - `addEvent(input)`: Record new mowing event
+  - `deleteEvent(eventId)`: Remove mowing event
+  - `getStats()`: Calculate days since mow and average height
+- `useWaterEvents()`: CRUD operations for watering events (Supabase backend)
+  - `fetchEvents()`: Fetch user's watering events ordered by date
+  - `addEvent(input)`: Record new watering event with source (sprinkler/manual/rain)
+  - `deleteEvent(eventId)`: Remove watering event
+  - `getStats()`: Calculate days since watering, monthly totals, averages
+  - `getSourceBreakdown()`: Count events by source type
 - `useColorScheme()`: Detects and provides dark/light mode support
 - `useThemeColor()`: Returns color values based on theme
 
@@ -110,10 +181,13 @@ The app uses custom React hooks for data management:
 - Reusable UI components accept props for configuration
 - Separate `.styles.ts` files for component-specific styling
 
-### Database Integration
-- SQL initialization only; actual data operations not yet fully implemented
-- Tables designed for lawn care event tracking and history
-- Future work: Connect hooks to database operations
+### Supabase Backend Integration
+- PostgreSQL database with Row Level Security (RLS) policies enforce user data isolation
+- CRUD operations via Supabase JavaScript client (`@supabase/supabase-js`)
+- Event tables: `mow_events`, `water_events`, `fertilizer_events`
+- All tables have `user_id` foreign key and RLS policies to restrict access to event owner
+- Authentication via Supabase Auth - integrated with event user_id for data isolation
+- Hooks handle Supabase client initialization and error handling
 
 ### Error Handling
 - Weather hook catches API errors and provides error state
@@ -144,9 +218,33 @@ The app uses custom React hooks for data management:
 - Implement actual CRUD operations in hooks once database integration is active
 - Use `expo-sqlite` API via transaction-based execution
 
-## Notes
+## TDD & Quality Gates (Phase 3.0+)
 
-- App currently uses hardcoded city ("Madison") for weather; can be made configurable
-- Todo data is mocked in `useTodo` hook; connect to database or API
+**Critical:** All new code must include tests before implementation. Pre-commit and pre-push hooks enforce code quality:
+- **Pre-commit**: Auto-fixes ESLint issues and runs Prettier
+- **Pre-push**: Runs full quality gates (linting, tests, coverage, security audit)
+- **CI/CD**: GitHub Actions validates all PRs
+
+See `TDD.md` for complete TDD guidelines and testing best practices.
+
+## Project Status
+
+**Phase 3.0 Progress:**
+- ✅ Phase 0.5: Testing Infrastructure (Jest + Playwright configured, 36 tests passing)
+- ✅ Phase 1: Authentication + Telemetry (Supabase Auth integrated, RLS policies active)
+- ✅ Phase 2.0: RBAC + Rate Limiting (Role-based access control foundation, rate limiting hooks)
+- ✅ Phase 2.5: SQLite Removal (Supabase-only architecture, dead code cleaned)
+- ✅ Phase 3.1: Mowing Screen (CRUD operations, statistics, form validation)
+- ✅ Phase 3.2: Watering Screen (Source dropdown, monthly breakdown, statistics)
+- ⏳ Phase 3.3: Fertilizer Screen (In progress)
+- ⏳ Phase 3.4: Shared Components & E2E Testing (Planned)
+
+**Schedule Status:** 9.5x ahead of plan (53 hours completed vs 199 hour estimate)
+
+## Important Notes
+
+- App fetches weather for hardcoded city ("Madison"); can be made configurable
+- Supabase credentials in `lib/supabase.ts` - use environment variables in production
+- All user events automatically filtered by authenticated user ID via Supabase RLS
 - App includes accessibility features via haptic feedback (HapticTab)
-- Support for web platform included (expo web)
+- Web platform support included via Expo Web + Playwright E2E testing
