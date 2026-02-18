@@ -64,4 +64,12 @@ lawnbudai.zip
 coverage/
 .DS_Store
 
+# Environment variables - NEVER commit these
+.env
+.env.local
+.env.*.local
+
+# Test artifacts and reports
+LawnBudAI/test-results/
+LawnBudAI/playwright-report/
 
