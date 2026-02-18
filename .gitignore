@@ -73,3 +73,7 @@ coverage/
 LawnBudAI/test-results/
 LawnBudAI/playwright-report/
 
+# Yarn and build artifacts
+.yarn/install-state.gz
+node_modules/.yarn-state.yml
+
