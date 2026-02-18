@@ -5,7 +5,6 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   StyleSheet,
-  ScrollView,
 } from 'react-native';
 import Icon from '@expo/vector-icons/Ionicons';
 
