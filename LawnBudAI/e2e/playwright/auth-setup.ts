@@ -55,9 +55,19 @@ export async function signUpTestUser(page: Page) {
 
 /**
  * Sign in with test user credentials
+ *
+ * Before running E2E tests, you must:
+ * 1. Create a test user in your Supabase project
+ * 2. Set TEST_USER_EMAIL and TEST_USER_PASSWORD environment variables
+ *
+ * Example setup:
+ * - Go to your Supabase project > Authentication > Users
+ * - Create a new user with test credentials
+ * - Add TEST_USER_EMAIL and TEST_USER_PASSWORD to .env.local
  */
 export async function signInTestUser(page: Page) {
   validateTestCredentials();
+
   // Navigate to sign-in page
   const url = page.url();
   if (!url.includes('sign-in')) {
@@ -67,44 +77,58 @@ export async function signInTestUser(page: Page) {
   // Wait for form to load
   await page.waitForLoadState('networkidle');
 
-  // Try to find email/password inputs
-  const emailInput = page.locator('input[type="email"], input[placeholder*="email" i]').first();
-  if (await emailInput.count() > 0) {
-    await emailInput.fill(TEST_EMAIL);
+  // Try to find email input (may have different selectors in React Native Web)
+  const emailInputs = await page.locator('input[type="email"]').all();
+  if (emailInputs.length > 0) {
+    await emailInputs[0].fill(TEST_EMAIL);
+  } else {
+    console.warn('Could not find email input on sign-in page');
   }
 
-  const passwordInput = page.locator('input[type="password"]').first();
-  if (await passwordInput.count() > 0) {
-    await passwordInput.fill(TEST_PASSWORD);
+  // Try to find password input
+  const passwordInputs = await page.locator('input[type="password"]').all();
+  if (passwordInputs.length > 0) {
+    await passwordInputs[0].fill(TEST_PASSWORD);
+  } else {
+    console.warn('Could not find password input on sign-in page');
   }
 
-  // Click sign in button
-  const signInButton = page.locator('button').filter({ hasText: /sign in|login/i }).first();
-  if (await signInButton.count() > 0) {
-    await signInButton.click();
+  // Look for sign in button (may be TouchableOpacity rendered as div[role="button"])
+  const signInButtons = await page.locator('button, [role="button"]').filter({ hasText: /sign in|login|sign-in/i }).all();
 
-    // Wait for auth to complete and app to load
-    try {
-      await page.waitForLoadState('networkidle');
+  if (signInButtons.length > 0) {
+    await signInButtons[0].click();
 
-      // Give Supabase a moment to process auth
-      await page.waitForTimeout(2000);
+    // Wait for auth to complete
+    await page.waitForTimeout(3000);
 
-      // Check if we're authenticated by looking for tabs/authenticated content
-      const content = await page.content();
-      const isAuthenticated = content.includes('mow') ||
-                             content.includes('water') ||
-                             content.includes('Mow') ||
-                             content.includes('Water');
+    // Check if we're authenticated by checking URL or content
+    const currentUrl = page.url();
+    const content = await page.content();
 
-      return isAuthenticated;
-    } catch (e) {
-      // Timeout is fine, continue
-      return false;
+    // If redirected away from sign-in page, auth likely succeeded
+    if (!currentUrl.includes('sign-in')) {
+      return true;
     }
-  }
 
-  return false;
+    // If still on sign-in page, check for error messages
+    if (content.includes('Error') || content.includes('invalid') || content.includes('failed')) {
+      console.warn(
+        `Authentication failed. Please verify test credentials are configured:\n` +
+        `TEST_USER_EMAIL: ${TEST_EMAIL || '(not set)'}\n` +
+        `TEST_USER_PASSWORD: ${TEST_PASSWORD ? '(set)' : '(not set)'}\n\n` +
+        `To create a test user:\n` +
+        `1. Go to Supabase project > Authentication > Users\n` +
+        `2. Create new user with the same email and password\n` +
+        `3. Ensure email is confirmed in Supabase`
+      );
+    }
+
+    return false;
+  } else {
+    console.warn('Could not find sign-in button');
+    return false;
+  }
 }
 
 /**
