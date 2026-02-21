@@ -36,7 +36,7 @@ jobs:
         run: cd LawnBudAI && yarn install --frozen-lockfile
 
       - name: Build Expo web export
-        run: cd LawnBudAI && yarn expo export -p web
+        run: cd LawnBudAI && yarn expo export -p web --clear
         env:
           EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
