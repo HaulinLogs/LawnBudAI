@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -21,8 +21,26 @@ export default function SignUpScreen() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const [retryMinutes, setRetryMinutes] = useState(0);
   const router = useRouter();
   const { signUp } = useAuth();
+
+  // Countdown timer for rate limit
+  useEffect(() => {
+    if (retryMinutes <= 0) return;
+
+    const interval = setInterval(() => {
+      setRetryMinutes((prev) => {
+        if (prev <= 1) {
+          setError('');
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 60000); // Update every minute
+
+    return () => clearInterval(interval);
+  }, [retryMinutes]);
 
   const handleSignUp = async () => {
     if (!email || !password || !confirmPassword) {
@@ -47,7 +65,14 @@ export default function SignUpScreen() {
     const { data, error: signUpError } = await signUp(email, password);
 
     if (signUpError) {
-      setError(signUpError.message);
+      // Handle rate limit error (429)
+      if (signUpError.message?.includes('429') || signUpError.message?.includes('rate limit')) {
+        const minutes = 60; // Default to 60 minutes if not specified
+        setRetryMinutes(minutes);
+        setError(`Thanks for trying us out! We're currently working on our infrastructure. Please try again in ${minutes} minutes.`);
+      } else {
+        setError(signUpError.message);
+      }
       setLoading(false);
     } else {
       // Create default user preferences
@@ -115,12 +140,14 @@ export default function SignUpScreen() {
           {success ? <Text style={styles.success}>{success}</Text> : null}
 
           <TouchableOpacity
-            style={[styles.button, loading && styles.buttonDisabled]}
+            style={[styles.button, (loading || retryMinutes > 0) && styles.buttonDisabled]}
             onPress={handleSignUp}
-            disabled={loading}
+            disabled={loading || retryMinutes > 0}
           >
             {loading ? (
               <ActivityIndicator color="#fff" />
+            ) : retryMinutes > 0 ? (
+              <Text style={styles.buttonText}>Try again in {retryMinutes}m</Text>
             ) : (
               <Text style={styles.buttonText}>Create Account</Text>
             )}
