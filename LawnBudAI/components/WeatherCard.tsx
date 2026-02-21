@@ -1,10 +1,16 @@
-import { getCurrentWeatherIcon, getWeatherIcon, getRainForecast, WeatherDay, WeatherResponse } from ‘@/models/weather’;
-import { styles } from ‘@/styles/app.styles’;
-import React from ‘react’;
-import { View, Text, ScrollView, StyleSheet } from ‘react-native’;
-import Icon from ‘@expo/vector-icons/Ionicons’;
+import {
+  getCurrentWeatherIcon,
+  getWeatherIcon,
+  getRainForecast,
+  WeatherDay,
+  WeatherResponse,
+} from '@/models/weather';
+import { styles } from '@/styles/app.styles';
+import React from 'react';
+import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import Icon from '@expo/vector-icons/Ionicons';
 
-type Props = {weather: WeatherResponse }
+type Props = { weather: WeatherResponse };
 
 const forecastStyles = StyleSheet.create({
   forecastContainer: {
@@ -14,54 +20,52 @@ const forecastStyles = StyleSheet.create({
     gap: 8,
   },
   forecastCard: {
-    backgroundColor: ‘#fff’,
+    backgroundColor: '#fff',
     borderRadius: 8,
     padding: 12,
     minWidth: 100,
-    alignItems: ‘center’,
-    justifyContent: ‘center’,
+    alignItems: 'center',
+    justifyContent: 'center',
     gap: 8,
-    shadowColor: ‘#000’,
+    shadowColor: '#000',
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
   forecastDate: {
     fontSize: 12,
-    fontWeight: ‘600’,
-    color: ‘#065f46’,
+    fontWeight: '600',
+    color: '#065f46',
   },
   forecastTemp: {
     fontSize: 14,
-    fontWeight: ‘500’,
-    color: ‘#333’,
+    fontWeight: '500',
+    color: '#333',
   },
   forecastTempSmall: {
     fontSize: 12,
-    color: ‘#666’,
+    color: '#666',
   },
   forecastIcon: {
-    color: ‘#22c55e’,
+    color: '#22c55e',
   },
 });
 
 function celsiusToFahrenheit(celsius: string): number {
-  return Math.round((parseFloat(celsius) * 9/5) + 32);
+  return Math.round((parseFloat(celsius) * 9 / 5) + 32);
 }
 
 function formatDate(dateString: string): string {
   const date = new Date(dateString);
-  return date.toLocaleDateString(‘en-US’, { month: ‘short’, day: ‘numeric’ });
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
-export function WeatherCard({weather}: Props) {
+export function WeatherCard({ weather }: Props) {
   return (
     <>
-      <Text style={styles.sectionTitle}>Today’s Weather</Text>
+      <Text style={styles.sectionTitle}>Today's Weather</Text>
       <View style={styles.weatherRow}>
         <Text style={styles.weatherText}>
-          {weather?.current_condition[0]?.weatherDesc[0]?.value} ·{" "}
-          {weather?.current_condition[0].temp_F}°F ·{" "}
-          {getRainForecast(weather?.weather)}
+          {weather?.current_condition[0]?.weatherDesc[0]?.value} · {weather?.current_condition[0].temp_F}°F · {getRainForecast(weather?.weather)}
         </Text>
         <View style={styles.iconContainer}>
           <Icon
@@ -81,7 +85,7 @@ export function WeatherCard({weather}: Props) {
           {weather.weather.map((day: WeatherDay) => {
             const maxTempF = celsiusToFahrenheit(day.maxtempC);
             const minTempF = celsiusToFahrenheit(day.mintempC);
-            const weatherIcon = day.hourly[0]?.weatherCode || ‘113’;
+            const weatherIcon = day.hourly[0]?.weatherCode || '113';
 
             return (
               <View key={day.date} style={forecastStyles.forecastCard}>
@@ -107,5 +111,5 @@ export function WeatherCard({weather}: Props) {
         </ScrollView>
       </View>
     </>
-  )
+  );
 }
