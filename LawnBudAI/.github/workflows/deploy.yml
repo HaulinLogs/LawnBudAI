@@ -30,12 +30,21 @@ jobs:
         env:
           npm_config_loglevel: error
 
-      - name: Apply database migrations
-        run: supabase db push
-        working-directory: ./LawnBudAI
+      - name: Link Supabase project
+        run: |
+          cd LawnBudAI
+          echo "Linking Supabase project..."
+          supabase link --project-ref kzycwqjcqcmenlwswhnf
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+
+      - name: Apply database migrations
+        run: |
+          cd LawnBudAI
+          echo "Applying database migrations..."
+          supabase db push --dry-run=false
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
 
       - name: Build Expo web export
         run: yarn expo export -p web
