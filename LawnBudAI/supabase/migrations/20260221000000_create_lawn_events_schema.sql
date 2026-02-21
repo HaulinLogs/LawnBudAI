@@ -242,11 +242,11 @@ returns table (
 ) language sql stable security definer as $$
   select
     source,
-    round(sum(amount_inches)::numeric, 2),
+    round(sum(amount_inches)::numeric, 2) as total_amount,
     count(*)::integer
   from public.water_events
   where user_id = p_user_id
   and date >= date_trunc('month', current_date)::date
   group by source
-  order by amount_inches desc;
+  order by total_amount desc;
 $$;
