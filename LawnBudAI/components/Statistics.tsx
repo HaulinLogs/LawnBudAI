@@ -4,6 +4,7 @@ import {
   Text,
   StyleSheet,
 } from 'react-native';
+import { colors, spacing, borderRadius, typography } from '@/styles/theme';
 
 interface StatBox {
   value: string | number;
@@ -19,13 +20,13 @@ interface StatisticsProps {
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 12,
+    marginBottom: spacing.md,
   },
   title: {
     fontSize: 18,
-    fontWeight: '700',
-    color: '#1f2937',
-    marginBottom: 12,
+    fontWeight: '700' as const,
+    color: colors.textPrimary,
+    marginBottom: spacing.md,
   },
   statsContainer: {
     flexDirection: 'row',
@@ -34,24 +35,24 @@ const styles = StyleSheet.create({
   statBox: {
     flex: 1,
     backgroundColor: '#f3f4f6',
-    borderRadius: 8,
-    padding: 12,
+    borderRadius: borderRadius.sm,
+    padding: spacing.md,
     marginHorizontal: 6,
-    alignItems: 'center',
+    alignItems: 'center' as const,
   },
   statValue: {
     fontSize: 20,
-    fontWeight: '700',
-    color: '#22c55e',
-    marginBottom: 4,
+    fontWeight: '700' as const,
+    color: colors.primary,
+    marginBottom: spacing.sm,
   },
   statLabel: {
     fontSize: 12,
-    color: '#6b7280',
-    textAlign: 'center',
+    color: colors.textTertiary,
+    textAlign: 'center' as const,
   },
   breakdown: {
-    marginTop: 16,
+    marginTop: spacing.lg,
   },
 });
 

@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
-  TouchableOpacity,
   ScrollView,
   Alert,
   StyleSheet,
@@ -14,6 +13,8 @@ import { WaterEventInput } from '@/models/events';
 import EventForm from '@/components/EventForm';
 import EventHistory from '@/components/EventHistory';
 import Statistics from '@/components/Statistics';
+import GenericPicker from '@/components/ui/GenericPicker';
+import { validateRequiredField, validatePositiveNumber, validateForm } from '@/lib/validation';
 
 const localStyles = StyleSheet.create({
   container: {
@@ -31,41 +32,6 @@ const localStyles = StyleSheet.create({
     fontWeight: '700',
     color: '#1f2937',
     marginBottom: 12,
-  },
-  pickerContainer: {
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 8,
-    marginBottom: 12,
-    backgroundColor: '#fff',
-  },
-  sourceButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  sourceButtonText: {
-    fontSize: 16,
-    color: '#1f2937',
-  },
-  sourceOption: {
-    paddingVertical: 12,
-    paddingHorizontal: 12,
-    borderTopWidth: 1,
-    borderTopColor: '#e5e7eb',
-  },
-  sourceOptionText: {
-    fontSize: 16,
-    color: '#1f2937',
-  },
-  sourceOptionSelected: {
-    backgroundColor: '#f0fdf4',
-  },
-  sourceOptionSelectedText: {
-    color: '#22c55e',
-    fontWeight: '600',
   },
   sourceBreakdown: {
     flexDirection: 'row',
@@ -88,20 +54,25 @@ export default function WateringScreen() {
   const [source, setSource] = useState<'sprinkler' | 'manual' | 'rain'>('manual');
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [showSourcePicker, setShowSourcePicker] = useState(false);
+
+  const sourceOptions = [
+    { label: 'Sprinkler', value: 'sprinkler' as const, icon: 'water' },
+    { label: 'Manual', value: 'manual' as const, icon: 'hand-right' },
+    { label: 'Rain', value: 'rain' as const, icon: 'rainy' },
+  ];
 
   const stats = getStats();
   const breakdown = getSourceBreakdown();
 
   const handleSubmit = async () => {
-    if (!date || !amount) {
-      Alert.alert('Error', 'Please fill in date and amount');
-      return;
-    }
+    // Validate form using centralized validation utilities
+    const validation = validateForm([
+      () => validateRequiredField(date, 'Date'),
+      () => validatePositiveNumber(amount, 'Amount'),
+    ]);
 
-    const amountNum = parseFloat(amount);
-    if (isNaN(amountNum) || amountNum <= 0) {
-      Alert.alert('Error', 'Amount must be a valid positive number');
+    if (!validation.valid) {
+      Alert.alert('Error', validation.error || 'Please fill in all required fields');
       return;
     }
 
@@ -109,7 +80,7 @@ export default function WateringScreen() {
     try {
       const input: WaterEventInput = {
         date,
-        amount_gallons: amountNum,
+        amount_gallons: parseFloat(amount),
         source,
         notes: notes.trim() || undefined,
       };
@@ -144,49 +115,12 @@ export default function WateringScreen() {
   };
 
   const sourcePicker = (
-    <View>
-      <Text style={{ fontSize: 14, fontWeight: '600', color: '#374151', marginBottom: 6 }}>
-        Source
-      </Text>
-      <View style={localStyles.pickerContainer}>
-        <TouchableOpacity
-          style={localStyles.sourceButton}
-          onPress={() => setShowSourcePicker(!showSourcePicker)}
-        >
-          <Text style={localStyles.sourceButtonText}>
-            {source.charAt(0).toUpperCase() + source.slice(1)}
-          </Text>
-          <Icon name={showSourcePicker ? 'chevron-up' : 'chevron-down'} size={20} color="#6b7280" />
-        </TouchableOpacity>
-
-        {showSourcePicker && (
-          <>
-            {(['sprinkler', 'manual', 'rain'] as const).map(opt => (
-              <TouchableOpacity
-                key={opt}
-                style={[
-                  localStyles.sourceOption,
-                  source === opt && localStyles.sourceOptionSelected,
-                ]}
-                onPress={() => {
-                  setSource(opt);
-                  setShowSourcePicker(false);
-                }}
-              >
-                <Text
-                  style={[
-                    localStyles.sourceOptionText,
-                    source === opt && localStyles.sourceOptionSelectedText,
-                  ]}
-                >
-                  {opt.charAt(0).toUpperCase() + opt.slice(1)}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </>
-        )}
-      </View>
-    </View>
+    <GenericPicker
+      label="Source"
+      options={sourceOptions}
+      value={source}
+      onChange={setSource}
+    />
   );
 
   return (

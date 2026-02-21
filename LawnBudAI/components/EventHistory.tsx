@@ -7,6 +7,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import Icon from '@expo/vector-icons/Ionicons';
+import { colors, spacing, borderRadius } from '@/styles/theme';
 
 interface Event {
   id: string;
@@ -27,13 +28,13 @@ interface EventHistoryProps {
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 12,
+    marginBottom: spacing.md,
   },
   eventItem: {
     backgroundColor: '#f3f4f6',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 8,
+    borderRadius: borderRadius.sm,
+    padding: spacing.md,
+    marginBottom: spacing.sm,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -43,28 +44,28 @@ const styles = StyleSheet.create({
   },
   eventDate: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#1f2937',
+    fontWeight: '600' as const,
+    color: colors.textPrimary,
   },
   eventDetail: {
     fontSize: 12,
-    color: '#6b7280',
-    marginTop: 4,
+    color: colors.textTertiary,
+    marginTop: spacing.sm,
   },
   deleteButton: {
-    padding: 8,
+    padding: spacing.sm,
   },
   emptyState: {
-    alignItems: 'center',
-    paddingVertical: 24,
+    alignItems: 'center' as const,
+    paddingVertical: spacing.xl,
   },
   emptyStateText: {
     fontSize: 16,
     color: '#9ca3af',
-    marginTop: 8,
+    marginTop: spacing.md,
   },
   errorText: {
-    color: '#ef4444',
+    color: colors.error,
     fontSize: 14,
   },
 });
@@ -82,7 +83,7 @@ export default function EventHistory({
   if (loading) {
     return (
       <View style={styles.container}>
-        <ActivityIndicator size="large" color="#22c55e" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -99,7 +100,7 @@ export default function EventHistory({
     return (
       <View style={styles.container}>
         <View style={styles.emptyState}>
-          <Icon name={emptyStateIcon} size={48} color="#d1d5db" />
+          <Icon name={emptyStateIcon} size={48} color={colors.border} />
           <Text style={styles.emptyStateText}>{emptyStateText}</Text>
         </View>
       </View>
@@ -124,7 +125,7 @@ export default function EventHistory({
             style={styles.deleteButton}
             onPress={() => onDelete(event.id)}
           >
-            <Icon name="trash" size={20} color="#ef4444" />
+            <Icon name="trash" size={20} color={colors.error} />
           </TouchableOpacity>
         </View>
       ))}

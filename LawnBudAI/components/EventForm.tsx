@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   StyleSheet,
 } from 'react-native';
+import { colors, spacing, borderRadius, typography } from '@/styles/theme';
 
 interface EventFormProps {
   date: string;
@@ -27,42 +28,42 @@ interface EventFormProps {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
+    backgroundColor: colors.white,
+    borderRadius: borderRadius.md,
+    padding: spacing.lg,
+    marginBottom: spacing.md,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderColor: colors.borderLight,
   },
   label: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#374151',
-    marginBottom: 6,
+    fontWeight: '600' as const,
+    color: colors.textSecondary,
+    marginBottom: spacing.sm,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 8,
+    borderColor: colors.border,
+    borderRadius: borderRadius.sm,
     padding: 10,
     fontSize: 16,
-    marginBottom: 12,
-    color: '#1f2937',
+    marginBottom: spacing.md,
+    color: colors.textPrimary,
   },
   button: {
-    backgroundColor: '#22c55e',
+    backgroundColor: colors.primary,
     paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    alignItems: 'center',
+    paddingHorizontal: spacing.lg,
+    borderRadius: borderRadius.sm,
+    alignItems: 'center' as const,
   },
   buttonDisabled: {
-    backgroundColor: '#d1d5db',
+    backgroundColor: colors.disabled,
   },
   buttonText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '600' as const,
   },
 });
 

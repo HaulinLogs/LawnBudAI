@@ -12,6 +12,7 @@ import { MowEventInput } from '@/models/events';
 import EventForm from '@/components/EventForm';
 import EventHistory from '@/components/EventHistory';
 import Statistics from '@/components/Statistics';
+import { validateRequiredField, validatePositiveNumber, validateForm } from '@/lib/validation';
 
 const localStyles = StyleSheet.create({
   container: {
@@ -42,14 +43,14 @@ export default function MowingScreen() {
   const stats = getStats();
 
   const handleSubmit = async () => {
-    if (!date || !height) {
-      Alert.alert('Error', 'Please fill in date and height');
-      return;
-    }
+    // Validate form using centralized validation utilities
+    const validation = validateForm([
+      () => validateRequiredField(date, 'Date'),
+      () => validatePositiveNumber(height, 'Height'),
+    ]);
 
-    const heightNum = parseFloat(height);
-    if (isNaN(heightNum) || heightNum <= 0) {
-      Alert.alert('Error', 'Height must be a valid positive number');
+    if (!validation.valid) {
+      Alert.alert('Error', validation.error || 'Please fill in all required fields');
       return;
     }
 
@@ -57,7 +58,7 @@ export default function MowingScreen() {
     try {
       const input: MowEventInput = {
         date,
-        height_inches: heightNum,
+        height_inches: parseFloat(height),
         notes: notes.trim() || undefined,
       };
       await addEvent(input);

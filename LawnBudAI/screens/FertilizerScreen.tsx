@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
-  TouchableOpacity,
   ScrollView,
   Alert,
   StyleSheet,
@@ -15,6 +14,8 @@ import { FertilizerEventInput, ApplicationForm, ApplicationMethod } from '@/mode
 import EventForm from '@/components/EventForm';
 import EventHistory from '@/components/EventHistory';
 import Statistics from '@/components/Statistics';
+import GenericPicker from '@/components/ui/GenericPicker';
+import { validateRequiredField, validatePositiveNumber, validateNumberInRange, validateForm } from '@/lib/validation';
 
 const localStyles = StyleSheet.create({
   container: {
@@ -32,41 +33,6 @@ const localStyles = StyleSheet.create({
     fontWeight: '700',
     color: '#1f2937',
     marginBottom: 12,
-  },
-  pickerContainer: {
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 8,
-    marginBottom: 12,
-    backgroundColor: '#fff',
-  },
-  pickerButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  pickerButtonText: {
-    fontSize: 16,
-    color: '#1f2937',
-  },
-  pickerOption: {
-    paddingVertical: 12,
-    paddingHorizontal: 12,
-    borderTopWidth: 1,
-    borderTopColor: '#e5e7eb',
-  },
-  pickerOptionText: {
-    fontSize: 16,
-    color: '#1f2937',
-  },
-  pickerOptionSelected: {
-    backgroundColor: '#f0fdf4',
-  },
-  pickerOptionSelectedText: {
-    color: '#22c55e',
-    fontWeight: '600',
   },
   npkInputContainer: {
     flexDirection: 'row',
@@ -145,8 +111,6 @@ export default function FertilizerScreen() {
   const [applicationMethod, setApplicationMethod] = useState<ApplicationMethod>('broadcast');
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [showFormPicker, setShowFormPicker] = useState(false);
-  const [showMethodPicker, setShowMethodPicker] = useState(false);
 
   const stats = getStats();
   const formBreakdown = getFormBreakdown();
@@ -157,33 +121,17 @@ export default function FertilizerScreen() {
   const npkWarning = npkTotal > 100 ? 'N-P-K total exceeds 100%' : null;
 
   const handleSubmit = async () => {
-    if (!date || !amount || !nitrogen || !phosphorus || !potassium) {
-      Alert.alert('Error', 'Please fill in all required fields');
-      return;
-    }
+    // Validate form using centralized validation utilities
+    const validation = validateForm([
+      () => validateRequiredField(date, 'Date'),
+      () => validatePositiveNumber(amount, 'Amount'),
+      () => validateNumberInRange(nitrogen, 'Nitrogen', 0, 100),
+      () => validateNumberInRange(phosphorus, 'Phosphorus', 0, 100),
+      () => validateNumberInRange(potassium, 'Potassium', 0, 100),
+    ]);
 
-    const amountNum = parseFloat(amount);
-    const nitrogenNum = parseFloat(nitrogen);
-    const phosphorusNum = parseFloat(phosphorus);
-    const potassiumNum = parseFloat(potassium);
-
-    if (isNaN(amountNum) || amountNum <= 0) {
-      Alert.alert('Error', 'Amount must be a valid positive number');
-      return;
-    }
-
-    if (isNaN(nitrogenNum) || nitrogenNum < 0 || nitrogenNum > 100) {
-      Alert.alert('Error', 'Nitrogen must be between 0 and 100');
-      return;
-    }
-
-    if (isNaN(phosphorusNum) || phosphorusNum < 0 || phosphorusNum > 100) {
-      Alert.alert('Error', 'Phosphorus must be between 0 and 100');
-      return;
-    }
-
-    if (isNaN(potassiumNum) || potassiumNum < 0 || potassiumNum > 100) {
-      Alert.alert('Error', 'Potassium must be between 0 and 100');
+    if (!validation.valid) {
+      Alert.alert('Error', validation.error || 'Please fill in all required fields');
       return;
     }
 
@@ -191,10 +139,10 @@ export default function FertilizerScreen() {
     try {
       const input: FertilizerEventInput = {
         date,
-        amount_lbs_per_1000sqft: amountNum,
-        nitrogen_pct: nitrogenNum,
-        phosphorus_pct: phosphorusNum,
-        potassium_pct: potassiumNum,
+        amount_lbs_per_1000sqft: parseFloat(amount),
+        nitrogen_pct: parseFloat(nitrogen),
+        phosphorus_pct: parseFloat(phosphorus),
+        potassium_pct: parseFloat(potassium),
         application_form: applicationForm,
         application_method: applicationMethod,
         notes: notes.trim() || undefined,
@@ -235,109 +183,21 @@ export default function FertilizerScreen() {
   };
 
   const formPicker = (
-    <View>
-      <Text style={{ fontSize: 14, fontWeight: '600', color: '#374151', marginBottom: 6 }}>
-        Application Form
-      </Text>
-      <View style={localStyles.pickerContainer}>
-        <TouchableOpacity
-          style={localStyles.pickerButton}
-          onPress={() => setShowFormPicker(!showFormPicker)}
-        >
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Icon name={APPLICATION_FORMS.find(f => f.value === applicationForm)?.icon || 'water'} size={16} color="#22c55e" />
-            <Text style={[localStyles.pickerButtonText, { marginLeft: 8 }]}>
-              {APPLICATION_FORMS.find(f => f.value === applicationForm)?.label}
-            </Text>
-          </View>
-          <Icon name={showFormPicker ? 'chevron-up' : 'chevron-down'} size={20} color="#6b7280" />
-        </TouchableOpacity>
-
-        {showFormPicker && (
-          <>
-            {APPLICATION_FORMS.map(opt => (
-              <TouchableOpacity
-                key={opt.value}
-                style={[
-                  localStyles.pickerOption,
-                  applicationForm === opt.value && localStyles.pickerOptionSelected,
-                ]}
-                onPress={() => {
-                  setApplicationForm(opt.value);
-                  setShowFormPicker(false);
-                }}
-              >
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Icon name={opt.icon} size={16} color={applicationForm === opt.value ? '#22c55e' : '#6b7280'} />
-                  <Text
-                    style={[
-                      localStyles.pickerOptionText,
-                      { marginLeft: 8 },
-                      applicationForm === opt.value && localStyles.pickerOptionSelectedText,
-                    ]}
-                  >
-                    {opt.label}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </>
-        )}
-      </View>
-    </View>
+    <GenericPicker
+      label="Application Form"
+      options={APPLICATION_FORMS}
+      value={applicationForm}
+      onChange={setApplicationForm}
+    />
   );
 
   const methodPicker = (
-    <View>
-      <Text style={{ fontSize: 14, fontWeight: '600', color: '#374151', marginBottom: 6 }}>
-        Application Method
-      </Text>
-      <View style={localStyles.pickerContainer}>
-        <TouchableOpacity
-          style={localStyles.pickerButton}
-          onPress={() => setShowMethodPicker(!showMethodPicker)}
-        >
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Icon name={APPLICATION_METHODS.find(m => m.value === applicationMethod)?.icon || 'radio-button-on'} size={16} color="#22c55e" />
-            <Text style={[localStyles.pickerButtonText, { marginLeft: 8 }]}>
-              {APPLICATION_METHODS.find(m => m.value === applicationMethod)?.label}
-            </Text>
-          </View>
-          <Icon name={showMethodPicker ? 'chevron-up' : 'chevron-down'} size={20} color="#6b7280" />
-        </TouchableOpacity>
-
-        {showMethodPicker && (
-          <>
-            {APPLICATION_METHODS.map(opt => (
-              <TouchableOpacity
-                key={opt.value}
-                style={[
-                  localStyles.pickerOption,
-                  applicationMethod === opt.value && localStyles.pickerOptionSelected,
-                ]}
-                onPress={() => {
-                  setApplicationMethod(opt.value);
-                  setShowMethodPicker(false);
-                }}
-              >
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Icon name={opt.icon} size={16} color={applicationMethod === opt.value ? '#22c55e' : '#6b7280'} />
-                  <Text
-                    style={[
-                      localStyles.pickerOptionText,
-                      { marginLeft: 8 },
-                      applicationMethod === opt.value && localStyles.pickerOptionSelectedText,
-                    ]}
-                  >
-                    {opt.label}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </>
-        )}
-      </View>
-    </View>
+    <GenericPicker
+      label="Application Method"
+      options={APPLICATION_METHODS}
+      value={applicationMethod}
+      onChange={setApplicationMethod}
+    />
   );
 
   return (
