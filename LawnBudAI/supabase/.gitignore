@@ -1,0 +1,16 @@
+# Local Supabase environment files
+.branches/
+.temp/
+.id
+docker-compose.yml
+seed.sql
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

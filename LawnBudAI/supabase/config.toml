@@ -1,0 +1,45 @@
+# Supabase Local Development Configuration
+# https://supabase.com/docs/guides/local-development
+
+[project]
+# Project ID from your Supabase dashboard
+project_id = "kzycwqjcqcmenlwswhnf"
+
+# Database configuration
+[db]
+# Port for local PostgreSQL (when using supabase start)
+port = 54322
+# Database password (for local development only)
+shadow_db_uri = ""
+
+[api]
+# Port for local REST API
+port = 54321
+# Schemas to expose via the API
+schemas = ["public", "storage", "graphql_public"]
+# JWT secret (must match SUPABASE_JWT_SECRET)
+jwt_secret = "super-secret-jwt-token-with-at-least-32-characters-long"
+# Default role for unauthenticated requests
+default_role = "anon"
+
+[auth]
+# Site URL for auth redirects (local development)
+site_url = "http://localhost:3000"
+# Additional redirect URLs for auth callbacks
+additional_redirect_urls = [
+  "http://localhost:3000/auth/callback",
+  "http://localhost:3000/LawnBudAI/auth/callback"
+]
+# JWT expiration (in seconds)
+jwt_expiry = 3600
+# Enable email confirmations
+enable_signup = true
+# Email provider for local testing (can use "test" for development)
+smtp_provider = "twilio_sendgrid"
+
+[auth.email]
+# Use "test" provider for local testing
+enable_confirmations = false
+
+[analytics]
+enabled = true
