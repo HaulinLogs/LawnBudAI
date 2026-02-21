@@ -12,7 +12,7 @@ import { IconSymbol } from '@/components/ui/IconSymbol';
 
 export default function HomeScreen() {
   const { prefs, loading: prefsLoading } = useUserPreferences();
-  const { weather, loading, error } = useWeather(prefs.city);
+  const { weather, loading, error } = useWeather(prefs.city, prefs.state);
   const { mowingTodo, fertilizerTodo, wateringTodo } = useTodo('mowing');
 
   // Log errors for owner notification (send to error tracking service)
@@ -22,12 +22,13 @@ export default function HomeScreen() {
         timestamp: new Date().toISOString(),
         error,
         city: prefs.city,
+        state: prefs.state,
         url: 'app-homescreen',
       });
       // TODO: In production, send to error tracking service like Sentry, LogRocket, or custom webhook
-      // Example: sendToErrorTracker({ error, context: 'homescreen', city: prefs.city });
+      // Example: sendToErrorTracker({ error, context: 'homescreen', city: prefs.city, state: prefs.state });
     }
-  }, [error, prefs.city]);
+  }, [error, prefs.city, prefs.state]);
 
   if (loading || prefsLoading) {
     return (

@@ -21,6 +21,7 @@ export default function SettingsScreen() {
   const { prefs, loading, save } = useUserPreferences();
   const { role, isPremium } = useRole();
   const [city, setCity] = useState('');
+  const [state, setState] = useState('');
   const [lawnSize, setLawnSize] = useState('');
   const [grassType, setGrassType] = useState('cool_season');
   const [saving, setSaving] = useState(false);
@@ -29,6 +30,7 @@ export default function SettingsScreen() {
   useEffect(() => {
     if (!loading && prefs) {
       setCity(prefs.city);
+      setState(prefs.state || 'WI');
       setGrassType(prefs.grass_type);
       setLawnSize(prefs.lawn_size_sqft ? String(prefs.lawn_size_sqft) : '');
     }
@@ -39,6 +41,7 @@ export default function SettingsScreen() {
     try {
       await save({
         city: city || 'Madison',
+        state: state || 'WI',
         grass_type: grassType,
         lawn_size_sqft: lawnSize ? parseInt(lawnSize) : null,
       });
@@ -127,10 +130,22 @@ export default function SettingsScreen() {
           <Text style={styles.label}>City</Text>
           <TextInput
             style={styles.input}
-            placeholder="Enter city name"
+            placeholder="Enter city name (e.g., Madison)"
             value={city}
             onChangeText={setCity}
             editable={!saving}
+          />
+        </View>
+
+        <View style={styles.card}>
+          <Text style={styles.label}>State (US) / Region</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter state code (e.g., WI, CA)"
+            value={state}
+            onChangeText={(text) => setState(text.toUpperCase())}
+            editable={!saving}
+            maxLength={2}
           />
         </View>
 

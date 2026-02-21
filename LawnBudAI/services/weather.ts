@@ -1,9 +1,18 @@
 import { WeatherResponse } from '@/models/weather';
 import { trackWeatherError } from '@/lib/errorTracking';
 
-export async function fetchWeather(city: string): Promise<WeatherResponse> {
+/**
+ * Fetch weather data from wttr.in API
+ * @param city - City name (e.g., "Madison")
+ * @param state - State code for US locations (e.g., "WI", "CA")
+ *               Helps disambiguate cities with same names (Madison, WI vs Madison, AL)
+ */
+export async function fetchWeather(city: string, state?: string): Promise<WeatherResponse> {
+  // Build location string: "city,state" for US, or just "city" for other countries
+  const location = state ? `${city},${state}` : city;
+
   // Try direct API first
-  const directUrl = `https://wttr.in/${city}?format=j1`;
+  const directUrl = `https://wttr.in/${encodeURIComponent(location)}?format=j1`;
 
   try {
     console.log(`Fetching weather for ${city} from: ${directUrl}`);
@@ -27,10 +36,11 @@ export async function fetchWeather(city: string): Promise<WeatherResponse> {
     console.warn('Direct weather fetch failed, trying CORS proxy...', {
       message: errorMessage,
       isCORSError,
+      location,
     });
 
     // Track the error for monitoring
-    trackWeatherError(errorMessage, city);
+    trackWeatherError(errorMessage, location);
 
     // Fallback: Use CORS proxy
     if (isCORSError) {
@@ -50,7 +60,7 @@ export async function fetchWeather(city: string): Promise<WeatherResponse> {
         return data;
       } catch (proxyError: any) {
         console.error('CORS proxy also failed:', proxyError);
-        trackWeatherError(`Fallback CORS proxy failed: ${proxyError.message}`, city);
+        trackWeatherError(`Fallback CORS proxy failed: ${proxyError.message}`, location);
         throw new Error('Unable to reach weather service. Please check your internet connection.');
       }
     }

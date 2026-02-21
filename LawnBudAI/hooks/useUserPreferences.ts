@@ -3,6 +3,8 @@ import { supabase } from '@/lib/supabase';
 
 interface UserPreferences {
   city: string;
+  state: string;
+  timezone?: string;
   grass_type: string;
   lawn_size_sqft: number | null;
 }
@@ -10,6 +12,8 @@ interface UserPreferences {
 export function useUserPreferences() {
   const [prefs, setPrefs] = useState<UserPreferences>({
     city: 'Madison',
+    state: 'WI',
+    timezone: 'America/Chicago',
     grass_type: 'cool_season',
     lawn_size_sqft: null
   });
@@ -40,15 +44,19 @@ export function useUserPreferences() {
           console.log('User preferences found:', data);
           setPrefs({
             city: data.city || 'Madison',
+            state: data.state || 'WI',
+            timezone: data.timezone || 'America/Chicago',
             grass_type: data.grass_type || 'cool_season',
             lawn_size_sqft: data.lawn_size_sqft || null,
           });
         } else {
           console.log('No preferences found, using defaults');
-          // Auto-create default preferences for this user
+          // Auto-create default preferences for this user (database trigger will also handle this)
           const { error: insertError } = await supabase.from('user_preferences').insert({
             user_id: user.id,
             city: 'Madison',
+            state: 'WI',
+            timezone: 'America/Chicago',
             grass_type: 'cool_season',
           });
           if (insertError) {
@@ -70,13 +78,22 @@ export function useUserPreferences() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      await supabase.from('user_preferences').upsert({
+      const { error } = await supabase.from('user_preferences').upsert({
         user_id: user.id,
         ...updates,
+        updated_at: new Date().toISOString(),
       });
+
+      if (error) {
+        console.error('Error saving preferences:', error);
+        throw error;
+      }
+
       setPrefs(p => ({ ...p, ...updates }));
+      console.log('Preferences saved:', updates);
     } catch (err) {
       console.error('Error saving preferences:', err);
+      throw err;
     }
   };
 
