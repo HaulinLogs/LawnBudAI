@@ -227,6 +227,101 @@ The app uses custom React hooks for data management:
 
 See `TDD.md` for complete TDD guidelines and testing best practices.
 
+## Output Verification Requirements
+
+**Critical:** All infrastructure, deployment, and configuration changes must be verifiable and explicitly proven before claiming completion. This prevents unfounded assumptions and ensures trustworthy output.
+
+### For All Infrastructure/Deployment Changes
+
+When making changes to `.yml`, `.toml`, `.sql`, or configuration files:
+
+1. **Always READ the file AFTER editing** before claiming completion
+2. **Show the actual file contents** to prove changes were applied (not just claimed)
+3. **Explicitly flag assumptions** and verify them are correct
+4. **Acknowledge when contradicting** previous statements with full explanation
+5. **Document why** each requirement/secret exists and where it's used
+
+### Required Verification Process
+
+For any claim like "I updated X" or "I added Y to the deployment pipeline":
+
+✅ **Correct approach:**
+```
+1. [Read the file after making changes]
+2. "I updated deploy.yml. Here are the actual contents:
+   - Lines 28-39 now include the migration step
+   - The step runs 'supabase db push' with SUPABASE_ACCESS_TOKEN
+   - I added explicit project linking before migrations"
+3. [Show the actual file contents or diff]
+4. [Explain the reasoning and any assumptions]
+```
+
+❌ **Incorrect approach:**
+```
+"I updated deploy.yml to include migrations"
+[No verification, no file shown, assumption not verified]
+```
+
+### Red Flags to Call Out Immediately
+
+Stop work and flag these patterns:
+
+- ❌ "I updated X" without showing the actual file contents
+- ❌ "We need secret Y" without explaining where it's used in code
+- ❌ "This should work" without testing/verifying it
+- ❌ Changing requirements without acknowledging the error
+- ❌ Saying "let me verify" but never showing the verification
+- ❌ Treating assumptions as facts without flagging them
+- ❌ Removing previously stated requirements without explanation
+
+### Specific Checks for Deployment Files
+
+For `.github/workflows/deploy.yml`:
+- [ ] Confirm all steps are present (lint, test, migrate, build, deploy)
+- [ ] Verify environment variables/secrets are correct
+- [ ] Check that working directories are specified correctly
+- [ ] Confirm all dependencies (CLI tools) are installed before use
+- [ ] Verify the command syntax is correct
+
+For `supabase/migrations/*.sql`:
+- [ ] Confirm migration file naming follows `YYYYMMDDHHMMSS_description.sql`
+- [ ] Verify SQL syntax is valid
+- [ ] Check that RLS policies are included for user data
+- [ ] Confirm indexes are appropriate for query patterns
+
+For `.env.example` or documentation:
+- [ ] Verify requirements listed actually match the code that uses them
+- [ ] Remove requirements that are no longer needed
+- [ ] Explain clearly what each requirement is used for
+
+### Example of Correct Process
+
+**Bad (what happened before):**
+> "I've updated the deployment to include database migrations. You need SUPABASE_ACCESS_TOKEN and SUPABASE_DB_PASSWORD"
+>
+> [Later, when things don't work]
+>
+> "Actually, you only need SUPABASE_ACCESS_TOKEN"
+
+**Good (what should happen):**
+> "I've updated deploy.yml. Let me read the file to verify:
+>
+> [Shows actual file contents with lines 28-39]
+>
+> The migration step requires SUPABASE_ACCESS_TOKEN because supabase db push authenticates via the CLI API. It does NOT need SUPABASE_DB_PASSWORD because we're not using direct database connections.
+>
+> Here's where the token is used: [line 37-38 of deploy.yml shows the env var]"
+
+### When You're Skeptical
+
+If I make a claim and you're not sure it's correct, ask directly:
+- "Show me the file after the change"
+- "Where in the code is this used?"
+- "How did you verify this works?"
+- "Is that an assumption or a fact?"
+
+These are not adversarial questions - they're quality gates that improve the work product.
+
 ## Project Status
 
 **Phase 3.0 Progress:**
