@@ -5,11 +5,22 @@
  */
 
 import { test, expect } from '@playwright/test';
+import { signInTestUser } from './auth-setup';
 
 test.describe('Tab Navigation', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
+
+    // Check if we need to authenticate
+    const content = await page.content();
+    const needsAuth = content.includes('Sign In') || content.includes('sign in');
+
+    if (needsAuth) {
+      // Try to sign in
+      await signInTestUser(page);
+      await page.waitForTimeout(2000);
+    }
   });
 
   test('should navigate between tabs without errors', async ({ page }) => {
@@ -63,6 +74,16 @@ test.describe('Settings Screen', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
+
+    // Check if we need to authenticate
+    const content = await page.content();
+    const needsAuth = content.includes('Sign In') || content.includes('sign in');
+
+    if (needsAuth) {
+      // Try to sign in
+      await signInTestUser(page);
+      await page.waitForTimeout(2000);
+    }
   });
 
   test('should navigate to settings', async ({ page }) => {
@@ -98,6 +119,17 @@ test.describe('Settings Screen', () => {
 test.describe('Plan Tier Display', () => {
   test('should display plan information when available', async ({ page }) => {
     await page.goto('/');
+    await page.waitForLoadState('networkidle');
+
+    // Check if we need to authenticate
+    const content1 = await page.content();
+    const needsAuth = content1.includes('Sign In') || content1.includes('sign in');
+
+    if (needsAuth) {
+      // Try to sign in
+      await signInTestUser(page);
+      await page.waitForTimeout(2000);
+    }
 
     // Look for plan tier indicators
     const content = await page.content();
@@ -109,6 +141,17 @@ test.describe('Plan Tier Display', () => {
 
   test('should not crash when displaying plan information', async ({ page }) => {
     await page.goto('/');
+    await page.waitForLoadState('networkidle');
+
+    // Check if we need to authenticate
+    const content1 = await page.content();
+    const needsAuth = content1.includes('Sign In') || content1.includes('sign in');
+
+    if (needsAuth) {
+      // Try to sign in
+      await signInTestUser(page);
+      await page.waitForTimeout(2000);
+    }
 
     let hasErrors = false;
     page.on('console', (msg) => {

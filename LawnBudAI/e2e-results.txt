@@ -1,0 +1,420 @@
+
+Running 175 tests using 5 workers
+
+  ✓    4 [chromium] › e2e/playwright/auth.spec.ts:58:7 › Session Persistence › should maintain session after page reload (137ms)
+  ✓    6 [chromium] › e2e/playwright/auth.spec.ts:67:7 › Session Persistence › should handle auth errors gracefully (73ms)
+  ✓    1 [chromium] › e2e/playwright/auth.spec.ts:18:7 › Authentication Flow › should display sign in/sign up options when not authenticated (611ms)
+  ✓    3 [chromium] › e2e/playwright/auth.spec.ts:36:7 › Authentication Flow › should handle navigation after auth state changes (623ms)
+  ✓    2 [chromium] › e2e/playwright/auth.spec.ts:45:7 › Authentication Flow › should persist across page reloads (615ms)
+  ✓    5 [chromium] › e2e/playwright/auth.spec.ts:26:7 › Authentication Flow › should handle sign in flow (601ms)
+  ✘    7 [chromium] › e2e/playwright/mow-events.spec.ts:24:7 › Mowing Screen - End-to-End Tests › should display the mowing form (588ms)
+  ✓    8 [chromium] › e2e/playwright/mow-events.spec.ts:36:7 › Mowing Screen - End-to-End Tests › should validate required fields before submission (573ms)
+  ✓    9 [chromium] › e2e/playwright/mow-events.spec.ts:52:7 › Mowing Screen - End-to-End Tests › should record a mowing event successfully (582ms)
+  ✓   10 [chromium] › e2e/playwright/mow-events.spec.ts:81:7 › Mowing Screen - End-to-End Tests › should display mowing events in history (577ms)
+  ✓   11 [chromium] › e2e/playwright/mow-events.spec.ts:96:7 › Mowing Screen - End-to-End Tests › should display statistics when events exist (578ms)
+  ✓   12 [chromium] › e2e/playwright/mow-events.spec.ts:130:7 › Mowing Screen - End-to-End Tests › should handle delete operations on events (565ms)
+  ✓   13 [chromium] › e2e/playwright/mow-events.spec.ts:154:7 › Mowing Screen - End-to-End Tests › should not crash when submitting invalid heights (572ms)
+  ✓   14 [chromium] › e2e/playwright/mow-events.spec.ts:180:7 › Mowing Screen - End-to-End Tests › should format dates correctly in event history (576ms)
+  ✓   15 [chromium] › e2e/playwright/mow-events.spec.ts:190:7 › Mowing Screen - End-to-End Tests › should persist changes after page reload (574ms)
+  ✓   17 [chromium] › e2e/playwright/mow-events.spec.ts:219:7 › Mowing Screen - End-to-End Tests › should clear form after successful submission (573ms)
+  ✓   18 [chromium] › e2e/playwright/navigation.spec.ts:15:7 › Tab Navigation › should navigate between tabs without errors (569ms)
+  ✓   20 [chromium] › e2e/playwright/navigation.spec.ts:44:7 › Tab Navigation › should handle rapid navigation without crashing (577ms)
+  ✓   23 [chromium] › e2e/playwright/navigation.spec.ts:89:7 › Plan Tier Display › should display plan information when available (47ms)
+  ✓   16 [chromium] › e2e/playwright/mow-events.spec.ts:109:7 › Mowing Screen - End-to-End Tests › should allow adding optional notes (584ms)
+  ✓   21 [chromium] › e2e/playwright/navigation.spec.ts:58:7 › Settings Screen › should navigate to settings (558ms)
+  ✘   19 [chromium] › e2e/playwright/navigation.spec.ts:27:7 › Tab Navigation › should not have broken links in navigation (1.1s)
+  ✓   22 [chromium] › e2e/playwright/navigation.spec.ts:72:7 › Settings Screen › should display user info section in settings (560ms)
+  ✓   24 [chromium] › e2e/playwright/navigation.spec.ts:100:7 › Plan Tier Display › should not crash when displaying plan information (548ms)
+  ✘   25 [chromium] › e2e/playwright/water-events.spec.ts:24:7 › Watering Screen - End-to-End Tests › should display the watering form (570ms)
+  ✓   26 [chromium] › e2e/playwright/water-events.spec.ts:36:7 › Watering Screen - End-to-End Tests › should validate required fields before submission (560ms)
+  ✓   27 [chromium] › e2e/playwright/water-events.spec.ts:86:7 › Watering Screen - End-to-End Tests › should display watering events in history (560ms)
+  ✓   28 [chromium] › e2e/playwright/water-events.spec.ts:102:7 › Watering Screen - End-to-End Tests › should display statistics when events exist (559ms)
+  ✓   29 [chromium] › e2e/playwright/water-events.spec.ts:128:7 › Watering Screen - End-to-End Tests › should allow selecting water source from dropdown (561ms)
+  ✓   30 [chromium] › e2e/playwright/water-events.spec.ts:153:7 › Watering Screen - End-to-End Tests › should allow adding optional notes (562ms)
+  ✓   32 [chromium] › e2e/playwright/water-events.spec.ts:174:7 › Watering Screen - End-to-End Tests › should handle delete operations on events (559ms)
+  ✓   31 [chromium] › e2e/playwright/water-events.spec.ts:57:7 › Watering Screen - End-to-End Tests › should record a watering event successfully (584ms)
+  ✓   34 [chromium] › e2e/playwright/water-events.spec.ts:198:7 › Watering Screen - End-to-End Tests › should not crash when submitting invalid amounts (559ms)
+  ✓   35 [chromium] › e2e/playwright/water-events.spec.ts:224:7 › Watering Screen - End-to-End Tests › should persist changes after page reload (561ms)
+  ✓   33 [chromium] › e2e/playwright/water-events.spec.ts:115:7 › Watering Screen - End-to-End Tests › should display source breakdown visualization (585ms)
+  ✓   39 [firefox] › e2e/playwright/auth.spec.ts:45:7 › Authentication Flow › should persist across page reloads (1.6s)
+  ✓   36 [firefox] › e2e/playwright/auth.spec.ts:18:7 › Authentication Flow › should display sign in/sign up options when not authenticated (1.3s)
+  ✓   41 [firefox] › e2e/playwright/auth.spec.ts:67:7 › Session Persistence › should handle auth errors gracefully (345ms)
+  ✓   40 [firefox] › e2e/playwright/auth.spec.ts:58:7 › Session Persistence › should maintain session after page reload (1.2s)
+  ✓   43 [firefox] › e2e/playwright/mow-events.spec.ts:36:7 › Mowing Screen - End-to-End Tests › should validate required fields before submission (825ms)
+  ✓   38 [firefox] › e2e/playwright/auth.spec.ts:36:7 › Authentication Flow › should handle navigation after auth state changes (1.6s)
+  ✓   44 [firefox] › e2e/playwright/mow-events.spec.ts:52:7 › Mowing Screen - End-to-End Tests › should record a mowing event successfully (856ms)
+  ✘   42 [firefox] › e2e/playwright/mow-events.spec.ts:24:7 › Mowing Screen - End-to-End Tests › should display the mowing form (858ms)
+  ✓   37 [firefox] › e2e/playwright/auth.spec.ts:26:7 › Authentication Flow › should handle sign in flow (1.4s)
+  ✓   45 [firefox] › e2e/playwright/mow-events.spec.ts:81:7 › Mowing Screen - End-to-End Tests › should display mowing events in history (748ms)
+  ✓   46 [firefox] › e2e/playwright/mow-events.spec.ts:96:7 › Mowing Screen - End-to-End Tests › should display statistics when events exist (761ms)
+  ✓   47 [firefox] › e2e/playwright/mow-events.spec.ts:109:7 › Mowing Screen - End-to-End Tests › should allow adding optional notes (752ms)
+  ✓   48 [firefox] › e2e/playwright/mow-events.spec.ts:154:7 › Mowing Screen - End-to-End Tests › should not crash when submitting invalid heights (726ms)
+  ✓   49 [firefox] › e2e/playwright/mow-events.spec.ts:180:7 › Mowing Screen - End-to-End Tests › should format dates correctly in event history (730ms)
+  ✓   51 [firefox] › e2e/playwright/mow-events.spec.ts:190:7 › Mowing Screen - End-to-End Tests › should persist changes after page reload (794ms)
+  ✓   52 [firefox] › e2e/playwright/mow-events.spec.ts:219:7 › Mowing Screen - End-to-End Tests › should clear form after successful submission (780ms)
+  ✓   53 [firefox] › e2e/playwright/navigation.spec.ts:15:7 › Tab Navigation › should navigate between tabs without errors (734ms)
+  ✓   55 [firefox] › e2e/playwright/navigation.spec.ts:58:7 › Settings Screen › should navigate to settings (770ms)
+  ✓   56 [firefox] › e2e/playwright/navigation.spec.ts:44:7 › Tab Navigation › should handle rapid navigation without crashing (786ms)
+  ✓   57 [firefox] › e2e/playwright/navigation.spec.ts:72:7 › Settings Screen › should display user info section in settings (742ms)
+  ✓   58 [firefox] › e2e/playwright/navigation.spec.ts:89:7 › Plan Tier Display › should display plan information when available (205ms)
+  ✓   50 [firefox] › e2e/playwright/mow-events.spec.ts:130:7 › Mowing Screen - End-to-End Tests › should handle delete operations on events (1.3s)
+  ✓   54 [firefox] › e2e/playwright/navigation.spec.ts:27:7 › Tab Navigation › should not have broken links in navigation (1.2s)
+  ✓   59 [firefox] › e2e/playwright/navigation.spec.ts:100:7 › Plan Tier Display › should not crash when displaying plan information (701ms)
+  ✓   61 [firefox] › e2e/playwright/water-events.spec.ts:36:7 › Watering Screen - End-to-End Tests › should validate required fields before submission (741ms)
+  ✓   63 [firefox] › e2e/playwright/water-events.spec.ts:86:7 › Watering Screen - End-to-End Tests › should display watering events in history (744ms)
+  ✓   62 [firefox] › e2e/playwright/water-events.spec.ts:57:7 › Watering Screen - End-to-End Tests › should record a watering event successfully (764ms)
+  ✘   60 [firefox] › e2e/playwright/water-events.spec.ts:24:7 › Watering Screen - End-to-End Tests › should display the watering form (757ms)
+  ✓   64 [firefox] › e2e/playwright/water-events.spec.ts:102:7 › Watering Screen - End-to-End Tests › should display statistics when events exist (716ms)
+  ✓   65 [firefox] › e2e/playwright/water-events.spec.ts:115:7 › Watering Screen - End-to-End Tests › should display source breakdown visualization (724ms)
+  ✓   66 [firefox] › e2e/playwright/water-events.spec.ts:128:7 › Watering Screen - End-to-End Tests › should allow selecting water source from dropdown (737ms)
+  ✓   67 [firefox] › e2e/playwright/water-events.spec.ts:153:7 › Watering Screen - End-to-End Tests › should allow adding optional notes (737ms)
+  ✓   68 [firefox] › e2e/playwright/water-events.spec.ts:198:7 › Watering Screen - End-to-End Tests › should not crash when submitting invalid amounts (716ms)
+  ✓   69 [firefox] › e2e/playwright/water-events.spec.ts:224:7 › Watering Screen - End-to-End Tests › should persist changes after page reload (720ms)
+  ✓   70 [firefox] › e2e/playwright/water-events.spec.ts:174:7 › Watering Screen - End-to-End Tests › should handle delete operations on events (1.3s)
+  ✓   75 [webkit] › e2e/playwright/auth.spec.ts:58:7 › Session Persistence › should maintain session after page reload (817ms)
+  ✓   76 [webkit] › e2e/playwright/auth.spec.ts:67:7 › Session Persistence › should handle auth errors gracefully (164ms)
+  ✓   71 [webkit] › e2e/playwright/auth.spec.ts:18:7 › Authentication Flow › should display sign in/sign up options when not authenticated (1.3s)
+  ✓   73 [webkit] › e2e/playwright/auth.spec.ts:36:7 › Authentication Flow › should handle navigation after auth state changes (1.3s)
+  ✓   72 [webkit] › e2e/playwright/auth.spec.ts:26:7 › Authentication Flow › should handle sign in flow (1.3s)
+  ✓   74 [webkit] › e2e/playwright/auth.spec.ts:45:7 › Authentication Flow › should persist across page reloads (1.3s)
+  ✘   77 [webkit] › e2e/playwright/mow-events.spec.ts:24:7 › Mowing Screen - End-to-End Tests › should display the mowing form (660ms)
+  ✓   78 [webkit] › e2e/playwright/mow-events.spec.ts:36:7 › Mowing Screen - End-to-End Tests › should validate required fields before submission (738ms)
+  ✓   79 [webkit] › e2e/playwright/mow-events.spec.ts:52:7 › Mowing Screen - End-to-End Tests › should record a mowing event successfully (711ms)
+  ✓   80 [webkit] › e2e/playwright/mow-events.spec.ts:81:7 › Mowing Screen - End-to-End Tests › should display mowing events in history (730ms)
+  ✓   81 [webkit] › e2e/playwright/mow-events.spec.ts:96:7 › Mowing Screen - End-to-End Tests › should display statistics when events exist (723ms)
+  ✓   82 [webkit] › e2e/playwright/mow-events.spec.ts:130:7 › Mowing Screen - End-to-End Tests › should handle delete operations on events (671ms)
+  ✓   83 [webkit] › e2e/playwright/mow-events.spec.ts:154:7 › Mowing Screen - End-to-End Tests › should not crash when submitting invalid heights (685ms)
+  ✓   84 [webkit] › e2e/playwright/mow-events.spec.ts:180:7 › Mowing Screen - End-to-End Tests › should format dates correctly in event history (695ms)
+  ✓   85 [webkit] › e2e/playwright/mow-events.spec.ts:190:7 › Mowing Screen - End-to-End Tests › should persist changes after page reload (724ms)
+  ✓   86 [webkit] › e2e/playwright/mow-events.spec.ts:109:7 › Mowing Screen - End-to-End Tests › should allow adding optional notes (875ms)
+  ✓   87 [webkit] › e2e/playwright/mow-events.spec.ts:219:7 › Mowing Screen - End-to-End Tests › should clear form after successful submission (691ms)
+  ✓   88 [webkit] › e2e/playwright/navigation.spec.ts:15:7 › Tab Navigation › should navigate between tabs without errors (685ms)
+  ✓   90 [webkit] › e2e/playwright/navigation.spec.ts:44:7 › Tab Navigation › should handle rapid navigation without crashing (687ms)
+  ✓   93 [webkit] › e2e/playwright/navigation.spec.ts:89:7 › Plan Tier Display › should display plan information when available (142ms)
+  ✘   89 [webkit] › e2e/playwright/navigation.spec.ts:27:7 › Tab Navigation › should not have broken links in navigation (1.2s)
+  ✓   91 [webkit] › e2e/playwright/navigation.spec.ts:58:7 › Settings Screen › should navigate to settings (696ms)
+  ✓   92 [webkit] › e2e/playwright/navigation.spec.ts:72:7 › Settings Screen › should display user info section in settings (666ms)
+  ✓   94 [webkit] › e2e/playwright/navigation.spec.ts:100:7 › Plan Tier Display › should not crash when displaying plan information (641ms)
+  ✘   95 [webkit] › e2e/playwright/water-events.spec.ts:24:7 › Watering Screen - End-to-End Tests › should display the watering form (650ms)
+  ✓   97 [webkit] › e2e/playwright/water-events.spec.ts:86:7 › Watering Screen - End-to-End Tests › should display watering events in history (658ms)
+  ✓   96 [webkit] › e2e/playwright/water-events.spec.ts:57:7 › Watering Screen - End-to-End Tests › should record a watering event successfully (672ms)
+  ✓   98 [webkit] › e2e/playwright/water-events.spec.ts:102:7 › Watering Screen - End-to-End Tests › should display statistics when events exist (673ms)
+  ✓  100 [webkit] › e2e/playwright/water-events.spec.ts:128:7 › Watering Screen - End-to-End Tests › should allow selecting water source from dropdown (715ms)
+  ✓  101 [webkit] › e2e/playwright/water-events.spec.ts:153:7 › Watering Screen - End-to-End Tests › should allow adding optional notes (717ms)
+  ✓  102 [webkit] › e2e/playwright/water-events.spec.ts:174:7 › Watering Screen - End-to-End Tests › should handle delete operations on events (679ms)
+  ✓   99 [webkit] › e2e/playwright/water-events.spec.ts:36:7 › Watering Screen - End-to-End Tests › should validate required fields before submission (857ms)
+  ✓  103 [webkit] › e2e/playwright/water-events.spec.ts:115:7 › Watering Screen - End-to-End Tests › should display source breakdown visualization (841ms)
+  ✓  104 [webkit] › e2e/playwright/water-events.spec.ts:198:7 › Watering Screen - End-to-End Tests › should not crash when submitting invalid amounts (690ms)
+  ✓  105 [webkit] › e2e/playwright/water-events.spec.ts:224:7 › Watering Screen - End-to-End Tests › should persist changes after page reload (688ms)
+  ✓  106 [Mobile Chrome] › e2e/playwright/auth.spec.ts:18:7 › Authentication Flow › should display sign in/sign up options when not authenticated (576ms)
+  ✓  111 [Mobile Chrome] › e2e/playwright/auth.spec.ts:67:7 › Session Persistence › should handle auth errors gracefully (70ms)
+  ✓  107 [Mobile Chrome] › e2e/playwright/auth.spec.ts:26:7 › Authentication Flow › should handle sign in flow (599ms)
+  ✓  110 [Mobile Chrome] › e2e/playwright/auth.spec.ts:58:7 › Session Persistence › should maintain session after page reload (75ms)
+  ✓  108 [Mobile Chrome] › e2e/playwright/auth.spec.ts:36:7 › Authentication Flow › should handle navigation after auth state changes (576ms)
+  ✓  109 [Mobile Chrome] › e2e/playwright/auth.spec.ts:45:7 › Authentication Flow › should persist across page reloads (592ms)
+  ✘  112 [Mobile Chrome] › e2e/playwright/mow-events.spec.ts:24:7 › Mowing Screen - End-to-End Tests › should display the mowing form (583ms)
+  ✓  113 [Mobile Chrome] › e2e/playwright/mow-events.spec.ts:36:7 › Mowing Screen - End-to-End Tests › should validate required fields before submission (566ms)
+  ✓  114 [Mobile Chrome] › e2e/playwright/mow-events.spec.ts:52:7 › Mowing Screen - End-to-End Tests › should record a mowing event successfully (572ms)
+  ✓  115 [Mobile Chrome] › e2e/playwright/mow-events.spec.ts:81:7 › Mowing Screen - End-to-End Tests › should display mowing events in history (565ms)
+  ✓  116 [Mobile Chrome] › e2e/playwright/mow-events.spec.ts:96:7 › Mowing Screen - End-to-End Tests › should display statistics when events exist (567ms)
+  ✓  117 [Mobile Chrome] › e2e/playwright/mow-events.spec.ts:130:7 › Mowing Screen - End-to-End Tests › should handle delete operations on events (569ms)
+  ✓  118 [Mobile Chrome] › e2e/playwright/mow-events.spec.ts:154:7 › Mowing Screen - End-to-End Tests › should not crash when submitting invalid heights (563ms)
+  ✓  119 [Mobile Chrome] › e2e/playwright/mow-events.spec.ts:180:7 › Mowing Screen - End-to-End Tests › should format dates correctly in event history (562ms)
+  ✓  120 [Mobile Chrome] › e2e/playwright/mow-events.spec.ts:190:7 › Mowing Screen - End-to-End Tests › should persist changes after page reload (568ms)
+  ✓  122 [Mobile Chrome] › e2e/playwright/mow-events.spec.ts:219:7 › Mowing Screen - End-to-End Tests › should clear form after successful submission (564ms)
+  ✓  123 [Mobile Chrome] › e2e/playwright/navigation.spec.ts:15:7 › Tab Navigation › should navigate between tabs without errors (563ms)
+  ✓  121 [Mobile Chrome] › e2e/playwright/mow-events.spec.ts:109:7 › Mowing Screen - End-to-End Tests › should allow adding optional notes (587ms)
+  ✓  125 [Mobile Chrome] › e2e/playwright/navigation.spec.ts:44:7 › Tab Navigation › should handle rapid navigation without crashing (571ms)
+  ✓  128 [Mobile Chrome] › e2e/playwright/navigation.spec.ts:89:7 › Plan Tier Display › should display plan information when available (55ms)
+  ✓  126 [Mobile Chrome] › e2e/playwright/navigation.spec.ts:58:7 › Settings Screen › should navigate to settings (561ms)
+  ✓  127 [Mobile Chrome] › e2e/playwright/navigation.spec.ts:72:7 › Settings Screen › should display user info section in settings (559ms)
+  ✘  124 [Mobile Chrome] › e2e/playwright/navigation.spec.ts:27:7 › Tab Navigation › should not have broken links in navigation (1.1s)
+  ✓  129 [Mobile Chrome] › e2e/playwright/navigation.spec.ts:100:7 › Plan Tier Display › should not crash when displaying plan information (544ms)
+  ✘  130 [Mobile Chrome] › e2e/playwright/water-events.spec.ts:24:7 › Watering Screen - End-to-End Tests › should display the watering form (564ms)
+  ✓  131 [Mobile Chrome] › e2e/playwright/water-events.spec.ts:36:7 › Watering Screen - End-to-End Tests › should validate required fields before submission (561ms)
+  ✓  132 [Mobile Chrome] › e2e/playwright/water-events.spec.ts:57:7 › Watering Screen - End-to-End Tests › should record a watering event successfully (560ms)
+  ✓  133 [Mobile Chrome] › e2e/playwright/water-events.spec.ts:102:7 › Watering Screen - End-to-End Tests › should display statistics when events exist (560ms)
+  ✓  134 [Mobile Chrome] › e2e/playwright/water-events.spec.ts:128:7 › Watering Screen - End-to-End Tests › should allow selecting water source from dropdown (575ms)
+  ✓  135 [Mobile Chrome] › e2e/playwright/water-events.spec.ts:153:7 › Watering Screen - End-to-End Tests › should allow adding optional notes (573ms)
+  ✓  137 [Mobile Chrome] › e2e/playwright/water-events.spec.ts:174:7 › Watering Screen - End-to-End Tests › should handle delete operations on events (558ms)
+  ✓  138 [Mobile Chrome] › e2e/playwright/water-events.spec.ts:198:7 › Watering Screen - End-to-End Tests › should not crash when submitting invalid amounts (567ms)
+  ✓  139 [Mobile Chrome] › e2e/playwright/water-events.spec.ts:224:7 › Watering Screen - End-to-End Tests › should persist changes after page reload (566ms)
+  ✓  136 [Mobile Chrome] › e2e/playwright/water-events.spec.ts:86:7 › Watering Screen - End-to-End Tests › should display watering events in history (579ms)
+  ✓  140 [Mobile Chrome] › e2e/playwright/water-events.spec.ts:115:7 › Watering Screen - End-to-End Tests › should display source breakdown visualization (581ms)
+  ✓  141 [Mobile Safari] › e2e/playwright/auth.spec.ts:18:7 › Authentication Flow › should display sign in/sign up options when not authenticated (951ms)
+  ✓  142 [Mobile Safari] › e2e/playwright/auth.spec.ts:36:7 › Authentication Flow › should handle navigation after auth state changes (968ms)
+  ✓  146 [Mobile Safari] › e2e/playwright/auth.spec.ts:67:7 › Session Persistence › should handle auth errors gracefully (178ms)
+  ✓  143 [Mobile Safari] › e2e/playwright/auth.spec.ts:26:7 › Authentication Flow › should handle sign in flow (995ms)
+  ✓  145 [Mobile Safari] › e2e/playwright/auth.spec.ts:58:7 › Session Persistence › should maintain session after page reload (429ms)
+  ✓  144 [Mobile Safari] › e2e/playwright/auth.spec.ts:45:7 › Authentication Flow › should persist across page reloads (911ms)
+  ✓  148 [Mobile Safari] › e2e/playwright/mow-events.spec.ts:36:7 › Mowing Screen - End-to-End Tests › should validate required fields before submission (749ms)
+  ✘  147 [Mobile Safari] › e2e/playwright/mow-events.spec.ts:24:7 › Mowing Screen - End-to-End Tests › should display the mowing form (768ms)
+  ✓  149 [Mobile Safari] › e2e/playwright/mow-events.spec.ts:52:7 › Mowing Screen - End-to-End Tests › should record a mowing event successfully (754ms)
+  ✓  150 [Mobile Safari] › e2e/playwright/mow-events.spec.ts:81:7 › Mowing Screen - End-to-End Tests › should display mowing events in history (700ms)
+  ✓  151 [Mobile Safari] › e2e/playwright/mow-events.spec.ts:96:7 › Mowing Screen - End-to-End Tests › should display statistics when events exist (718ms)
+  ✓  152 [Mobile Safari] › e2e/playwright/mow-events.spec.ts:109:7 › Mowing Screen - End-to-End Tests › should allow adding optional notes (704ms)
+  ✓  153 [Mobile Safari] › e2e/playwright/mow-events.spec.ts:154:7 › Mowing Screen - End-to-End Tests › should not crash when submitting invalid heights (674ms)
+  ✓  154 [Mobile Safari] › e2e/playwright/mow-events.spec.ts:180:7 › Mowing Screen - End-to-End Tests › should format dates correctly in event history (676ms)
+  ✓  155 [Mobile Safari] › e2e/playwright/mow-events.spec.ts:190:7 › Mowing Screen - End-to-End Tests › should persist changes after page reload (687ms)
+  ✓  157 [Mobile Safari] › e2e/playwright/mow-events.spec.ts:219:7 › Mowing Screen - End-to-End Tests › should clear form after successful submission (675ms)
+  ✓  158 [Mobile Safari] › e2e/playwright/navigation.spec.ts:15:7 › Tab Navigation › should navigate between tabs without errors (672ms)
+  ✓  160 [Mobile Safari] › e2e/playwright/navigation.spec.ts:44:7 › Tab Navigation › should handle rapid navigation without crashing (675ms)
+  ✓  163 [Mobile Safari] › e2e/playwright/navigation.spec.ts:89:7 › Plan Tier Display › should display plan information when available (131ms)
+  ✓  156 [Mobile Safari] › e2e/playwright/mow-events.spec.ts:130:7 › Mowing Screen - End-to-End Tests › should handle delete operations on events (839ms)
+  ✘  159 [Mobile Safari] › e2e/playwright/navigation.spec.ts:27:7 › Tab Navigation › should not have broken links in navigation (1.2s)
+  ✓  162 [Mobile Safari] › e2e/playwright/navigation.spec.ts:72:7 › Settings Screen › should display user info section in settings (647ms)
+  ✓  161 [Mobile Safari] › e2e/playwright/navigation.spec.ts:58:7 › Settings Screen › should navigate to settings (670ms)
+  ✓  164 [Mobile Safari] › e2e/playwright/navigation.spec.ts:100:7 › Plan Tier Display › should not crash when displaying plan information (641ms)
+  ✘  165 [Mobile Safari] › e2e/playwright/water-events.spec.ts:24:7 › Watering Screen - End-to-End Tests › should display the watering form (680ms)
+  ✓  167 [Mobile Safari] › e2e/playwright/water-events.spec.ts:86:7 › Watering Screen - End-to-End Tests › should display watering events in history (658ms)
+  ✓  166 [Mobile Safari] › e2e/playwright/water-events.spec.ts:57:7 › Watering Screen - End-to-End Tests › should record a watering event successfully (673ms)
+  ✓  168 [Mobile Safari] › e2e/playwright/water-events.spec.ts:102:7 › Watering Screen - End-to-End Tests › should display statistics when events exist (676ms)
+  ✓  170 [Mobile Safari] › e2e/playwright/water-events.spec.ts:128:7 › Watering Screen - End-to-End Tests › should allow selecting water source from dropdown (698ms)
+  ✓  171 [Mobile Safari] › e2e/playwright/water-events.spec.ts:153:7 › Watering Screen - End-to-End Tests › should allow adding optional notes (695ms)
+  ✓  172 [Mobile Safari] › e2e/playwright/water-events.spec.ts:174:7 › Watering Screen - End-to-End Tests › should handle delete operations on events (659ms)
+  ✓  169 [Mobile Safari] › e2e/playwright/water-events.spec.ts:36:7 › Watering Screen - End-to-End Tests › should validate required fields before submission (859ms)
+  ✓  174 [Mobile Safari] › e2e/playwright/water-events.spec.ts:224:7 › Watering Screen - End-to-End Tests › should persist changes after page reload (673ms)
+  ✓  175 [Mobile Safari] › e2e/playwright/water-events.spec.ts:198:7 › Watering Screen - End-to-End Tests › should not crash when submitting invalid amounts (672ms)
+  ✓  173 [Mobile Safari] › e2e/playwright/water-events.spec.ts:115:7 › Watering Screen - End-to-End Tests › should display source breakdown visualization (868ms)
+
+
+  1) [chromium] › e2e/playwright/mow-events.spec.ts:24:7 › Mowing Screen - End-to-End Tests › should display the mowing form 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeGreaterThan[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: > [32m0[39m
+    Received:   [31m0[39m
+
+      29 |
+      30 |     // Should have form inputs
+    > 31 |     expect(await dateInput.count()).toBeGreaterThan(0);
+         |                                     ^
+      32 |     expect(await heightInput.count()).toBeGreaterThan(0);
+      33 |     expect(await submitButton.count()).toBeGreaterThan(0);
+      34 |   });
+        at /Users/kevin/Documents/LawnBudAI/LawnBudAI/e2e/playwright/mow-events.spec.ts:31:37
+
+  2) [chromium] › e2e/playwright/navigation.spec.ts:27:7 › Tab Navigation › should not have broken links in navigation 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m0[39m
+    Received: [31m2[39m
+
+      39 |
+      40 |     // Should not have errors in console
+    > 41 |     expect(consoleErrors.filter((e) => !e.includes('warning')).length).toBe(0);
+         |                                                                        ^
+      42 |   });
+      43 |
+      44 |   test('should handle rapid navigation without crashing', async ({ page }) => {
+        at /Users/kevin/Documents/LawnBudAI/LawnBudAI/e2e/playwright/navigation.spec.ts:41:72
+
+  3) [chromium] › e2e/playwright/water-events.spec.ts:24:7 › Watering Screen - End-to-End Tests › should display the watering form 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeGreaterThan[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: > [32m0[39m
+    Received:   [31m0[39m
+
+      29 |
+      30 |     // Should have form inputs
+    > 31 |     expect(await dateInput.count()).toBeGreaterThan(0);
+         |                                     ^
+      32 |     expect(await amountInput.count()).toBeGreaterThan(0);
+      33 |     expect(await submitButton.count()).toBeGreaterThan(0);
+      34 |   });
+        at /Users/kevin/Documents/LawnBudAI/LawnBudAI/e2e/playwright/water-events.spec.ts:31:37
+
+  4) [firefox] › e2e/playwright/mow-events.spec.ts:24:7 › Mowing Screen - End-to-End Tests › should display the mowing form 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeGreaterThan[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: > [32m0[39m
+    Received:   [31m0[39m
+
+      29 |
+      30 |     // Should have form inputs
+    > 31 |     expect(await dateInput.count()).toBeGreaterThan(0);
+         |                                     ^
+      32 |     expect(await heightInput.count()).toBeGreaterThan(0);
+      33 |     expect(await submitButton.count()).toBeGreaterThan(0);
+      34 |   });
+        at /Users/kevin/Documents/LawnBudAI/LawnBudAI/e2e/playwright/mow-events.spec.ts:31:37
+
+  5) [firefox] › e2e/playwright/water-events.spec.ts:24:7 › Watering Screen - End-to-End Tests › should display the watering form 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeGreaterThan[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: > [32m0[39m
+    Received:   [31m0[39m
+
+      29 |
+      30 |     // Should have form inputs
+    > 31 |     expect(await dateInput.count()).toBeGreaterThan(0);
+         |                                     ^
+      32 |     expect(await amountInput.count()).toBeGreaterThan(0);
+      33 |     expect(await submitButton.count()).toBeGreaterThan(0);
+      34 |   });
+        at /Users/kevin/Documents/LawnBudAI/LawnBudAI/e2e/playwright/water-events.spec.ts:31:37
+
+  6) [webkit] › e2e/playwright/mow-events.spec.ts:24:7 › Mowing Screen - End-to-End Tests › should display the mowing form 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeGreaterThan[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: > [32m0[39m
+    Received:   [31m0[39m
+
+      29 |
+      30 |     // Should have form inputs
+    > 31 |     expect(await dateInput.count()).toBeGreaterThan(0);
+         |                                     ^
+      32 |     expect(await heightInput.count()).toBeGreaterThan(0);
+      33 |     expect(await submitButton.count()).toBeGreaterThan(0);
+      34 |   });
+        at /Users/kevin/Documents/LawnBudAI/LawnBudAI/e2e/playwright/mow-events.spec.ts:31:37
+
+  7) [webkit] › e2e/playwright/navigation.spec.ts:27:7 › Tab Navigation › should not have broken links in navigation 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m0[39m
+    Received: [31m1[39m
+
+      39 |
+      40 |     // Should not have errors in console
+    > 41 |     expect(consoleErrors.filter((e) => !e.includes('warning')).length).toBe(0);
+         |                                                                        ^
+      42 |   });
+      43 |
+      44 |   test('should handle rapid navigation without crashing', async ({ page }) => {
+        at /Users/kevin/Documents/LawnBudAI/LawnBudAI/e2e/playwright/navigation.spec.ts:41:72
+
+  8) [webkit] › e2e/playwright/water-events.spec.ts:24:7 › Watering Screen - End-to-End Tests › should display the watering form 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeGreaterThan[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: > [32m0[39m
+    Received:   [31m0[39m
+
+      29 |
+      30 |     // Should have form inputs
+    > 31 |     expect(await dateInput.count()).toBeGreaterThan(0);
+         |                                     ^
+      32 |     expect(await amountInput.count()).toBeGreaterThan(0);
+      33 |     expect(await submitButton.count()).toBeGreaterThan(0);
+      34 |   });
+        at /Users/kevin/Documents/LawnBudAI/LawnBudAI/e2e/playwright/water-events.spec.ts:31:37
+
+  9) [Mobile Chrome] › e2e/playwright/mow-events.spec.ts:24:7 › Mowing Screen - End-to-End Tests › should display the mowing form 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeGreaterThan[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: > [32m0[39m
+    Received:   [31m0[39m
+
+      29 |
+      30 |     // Should have form inputs
+    > 31 |     expect(await dateInput.count()).toBeGreaterThan(0);
+         |                                     ^
+      32 |     expect(await heightInput.count()).toBeGreaterThan(0);
+      33 |     expect(await submitButton.count()).toBeGreaterThan(0);
+      34 |   });
+        at /Users/kevin/Documents/LawnBudAI/LawnBudAI/e2e/playwright/mow-events.spec.ts:31:37
+
+  10) [Mobile Chrome] › e2e/playwright/navigation.spec.ts:27:7 › Tab Navigation › should not have broken links in navigation 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m0[39m
+    Received: [31m2[39m
+
+      39 |
+      40 |     // Should not have errors in console
+    > 41 |     expect(consoleErrors.filter((e) => !e.includes('warning')).length).toBe(0);
+         |                                                                        ^
+      42 |   });
+      43 |
+      44 |   test('should handle rapid navigation without crashing', async ({ page }) => {
+        at /Users/kevin/Documents/LawnBudAI/LawnBudAI/e2e/playwright/navigation.spec.ts:41:72
+
+  11) [Mobile Chrome] › e2e/playwright/water-events.spec.ts:24:7 › Watering Screen - End-to-End Tests › should display the watering form 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeGreaterThan[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: > [32m0[39m
+    Received:   [31m0[39m
+
+      29 |
+      30 |     // Should have form inputs
+    > 31 |     expect(await dateInput.count()).toBeGreaterThan(0);
+         |                                     ^
+      32 |     expect(await amountInput.count()).toBeGreaterThan(0);
+      33 |     expect(await submitButton.count()).toBeGreaterThan(0);
+      34 |   });
+        at /Users/kevin/Documents/LawnBudAI/LawnBudAI/e2e/playwright/water-events.spec.ts:31:37
+
+  12) [Mobile Safari] › e2e/playwright/mow-events.spec.ts:24:7 › Mowing Screen - End-to-End Tests › should display the mowing form 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeGreaterThan[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: > [32m0[39m
+    Received:   [31m0[39m
+
+      29 |
+      30 |     // Should have form inputs
+    > 31 |     expect(await dateInput.count()).toBeGreaterThan(0);
+         |                                     ^
+      32 |     expect(await heightInput.count()).toBeGreaterThan(0);
+      33 |     expect(await submitButton.count()).toBeGreaterThan(0);
+      34 |   });
+        at /Users/kevin/Documents/LawnBudAI/LawnBudAI/e2e/playwright/mow-events.spec.ts:31:37
+
+  13) [Mobile Safari] › e2e/playwright/navigation.spec.ts:27:7 › Tab Navigation › should not have broken links in navigation 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m0[39m
+    Received: [31m1[39m
+
+      39 |
+      40 |     // Should not have errors in console
+    > 41 |     expect(consoleErrors.filter((e) => !e.includes('warning')).length).toBe(0);
+         |                                                                        ^
+      42 |   });
+      43 |
+      44 |   test('should handle rapid navigation without crashing', async ({ page }) => {
+        at /Users/kevin/Documents/LawnBudAI/LawnBudAI/e2e/playwright/navigation.spec.ts:41:72
+
+  14) [Mobile Safari] › e2e/playwright/water-events.spec.ts:24:7 › Watering Screen - End-to-End Tests › should display the watering form 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeGreaterThan[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: > [32m0[39m
+    Received:   [31m0[39m
+
+      29 |
+      30 |     // Should have form inputs
+    > 31 |     expect(await dateInput.count()).toBeGreaterThan(0);
+         |                                     ^
+      32 |     expect(await amountInput.count()).toBeGreaterThan(0);
+      33 |     expect(await submitButton.count()).toBeGreaterThan(0);
+      34 |   });
+        at /Users/kevin/Documents/LawnBudAI/LawnBudAI/e2e/playwright/water-events.spec.ts:31:37
+
+  14 failed
+    [chromium] › e2e/playwright/mow-events.spec.ts:24:7 › Mowing Screen - End-to-End Tests › should display the mowing form 
+    [chromium] › e2e/playwright/navigation.spec.ts:27:7 › Tab Navigation › should not have broken links in navigation 
+    [chromium] › e2e/playwright/water-events.spec.ts:24:7 › Watering Screen - End-to-End Tests › should display the watering form 
+    [firefox] › e2e/playwright/mow-events.spec.ts:24:7 › Mowing Screen - End-to-End Tests › should display the mowing form 
+    [firefox] › e2e/playwright/water-events.spec.ts:24:7 › Watering Screen - End-to-End Tests › should display the watering form 
+    [webkit] › e2e/playwright/mow-events.spec.ts:24:7 › Mowing Screen - End-to-End Tests › should display the mowing form 
+    [webkit] › e2e/playwright/navigation.spec.ts:27:7 › Tab Navigation › should not have broken links in navigation 
+    [webkit] › e2e/playwright/water-events.spec.ts:24:7 › Watering Screen - End-to-End Tests › should display the watering form 
+    [Mobile Chrome] › e2e/playwright/mow-events.spec.ts:24:7 › Mowing Screen - End-to-End Tests › should display the mowing form 
+    [Mobile Chrome] › e2e/playwright/navigation.spec.ts:27:7 › Tab Navigation › should not have broken links in navigation 
+    [Mobile Chrome] › e2e/playwright/water-events.spec.ts:24:7 › Watering Screen - End-to-End Tests › should display the watering form 
+    [Mobile Safari] › e2e/playwright/mow-events.spec.ts:24:7 › Mowing Screen - End-to-End Tests › should display the mowing form 
+    [Mobile Safari] › e2e/playwright/navigation.spec.ts:27:7 › Tab Navigation › should not have broken links in navigation 
+    [Mobile Safari] › e2e/playwright/water-events.spec.ts:24:7 › Watering Screen - End-to-End Tests › should display the watering form 
+  161 passed (2.2m)

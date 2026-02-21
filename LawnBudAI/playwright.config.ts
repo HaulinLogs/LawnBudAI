@@ -47,7 +47,7 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: 'npx expo export -p web && npx serve dist -l 3000',
+    command: 'npx expo export -p web && node ./scripts/serve-dist.js',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,

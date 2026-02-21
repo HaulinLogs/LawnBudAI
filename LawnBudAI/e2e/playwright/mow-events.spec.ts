@@ -6,6 +6,7 @@
  */
 
 import { test, expect } from '@playwright/test';
+import { signInTestUser } from './auth-setup';
 
 test.describe('Mowing Screen - End-to-End Tests', () => {
   test.beforeEach(async ({ page }) => {
@@ -13,8 +14,18 @@ test.describe('Mowing Screen - End-to-End Tests', () => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
 
+    // Check if we need to authenticate
+    const content = await page.content();
+    const needsAuth = content.includes('Sign In') || content.includes('sign in');
+
+    if (needsAuth) {
+      // Try to sign in
+      await signInTestUser(page);
+      await page.waitForTimeout(2000);
+    }
+
     // Navigate to Mowing tab
-    const mowingTab = page.locator('button, a').filter({ hasText: /mow/i }).first();
+    const mowingTab = page.locator('button, a, [role="button"]').filter({ hasText: /mow/i }).first();
     if ((await mowingTab.count()) > 0) {
       await mowingTab.click();
       await page.waitForLoadState('networkidle');

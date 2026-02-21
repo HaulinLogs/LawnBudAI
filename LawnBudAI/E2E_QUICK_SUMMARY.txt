@@ -1,0 +1,127 @@
+================================================================================
+E2E TEST DISCOVERY PHASE - QUICK SUMMARY
+================================================================================
+
+TEST RESULTS: 175 Total Tests
+- PASSING: 161 (92%)
+- FAILING: 14 (8%)
+- Duration: 2.2 minutes
+
+================================================================================
+FAILING TESTS (Only 3 Unique Tests Failing Across 5 Browsers)
+================================================================================
+
+1. mow-events.spec.ts:24 - "should display the mowing form"
+   FAILING: 5/5 browsers (Chromium, Firefox, WebKit, Mobile Chrome, Mobile Safari)
+   ERROR: Form input elements not found (count = 0)
+   
+   Looking for:
+   - Date input: input[type="text"], input[placeholder*="YYYY"]
+   - Height input: input[placeholder*="height"], input[placeholder*="2.5"]
+   - Submit button: button with /record|submit|save/i text
+
+2. water-events.spec.ts:24 - "should display the watering form"
+   FAILING: 5/5 browsers (Chromium, Firefox, WebKit, Mobile Chrome, Mobile Safari)
+   ERROR: Form input elements not found (count = 0)
+   
+   Looking for:
+   - Date input: input[type="text"], input[placeholder*="YYYY"]
+   - Amount input: input[placeholder*="gallons"], input[placeholder*="25"]
+   - Submit button: button with /record|submit|save/i text
+
+3. navigation.spec.ts:27 - "should not have broken links in navigation"
+   FAILING: 3/5 browsers (Chromium, WebKit, Mobile Chrome, Mobile Safari)
+   PASSING: Firefox (0 console errors)
+   ERROR: Unhandled console errors detected
+   
+   Error counts:
+   - Chromium: 2 errors
+   - WebKit: 1 error
+   - Mobile Chrome: 2 errors
+   - Mobile Safari: 1 error
+   - Firefox: 0 errors (PASS)
+
+================================================================================
+ISSUE PATTERNS
+================================================================================
+
+Pattern 1: ELEMENT NOT FOUND (8 failures)
+- Both form screens missing required input elements
+- Selectors: inputs with specific placeholders, buttons with specific text
+- Severity: CRITICAL - blocks core functionality testing
+
+Pattern 2: CONSOLE ERRORS (6 failures)
+- Unhandled JavaScript errors during navigation
+- Affects Chromium, WebKit, and Mobile browsers (not Firefox)
+- Severity: HIGH - indicates app stability issues
+
+================================================================================
+PASSING TESTS (for reference)
+================================================================================
+
+auth.spec.ts: 6/6 PASSING (all browsers)
+- Sign in/sign up display ✓
+- Sign in flow ✓
+- Navigation after auth ✓
+- Session persistence ✓
+- Reloads ✓
+- Error handling ✓
+
+mow-events.spec.ts: 6/8 passing (per browser, except "display form" test)
+- Validate required fields ✓
+- Record event ✓
+- Display events in history ✓
+- Display statistics ✓
+- Handle delete ✓
+- Invalid height handling ✓
+
+water-events.spec.ts: 6/8 passing (per browser, except "display form" test)
+- Validate required fields ✓
+- Record event ✓
+- Display events in history ✓
+- Source breakdown visualization ✓
+- Display statistics ✓
+- Handle delete ✓
+
+navigation.spec.ts: 2/3 passing (per browser, except "broken links" test)
+- Navigate between tabs ✓ (all browsers)
+- Rapid navigation ✓ (all browsers)
+
+================================================================================
+FILES TO INVESTIGATE
+================================================================================
+
+App Code:
+- /Users/kevin/Documents/LawnBudAI/LawnBudAI/app/(tabs)/mowing.tsx
+- /Users/kevin/Documents/LawnBudAI/LawnBudAI/app/(tabs)/watering.tsx
+- /Users/kevin/Documents/LawnBudAI/LawnBudAI/app/(tabs)/_layout.tsx
+- /Users/kevin/Documents/LawnBudAI/LawnBudAI/app/_layout.tsx
+
+Test Files:
+- /Users/kevin/Documents/LawnBudAI/LawnBudAI/e2e/playwright/mow-events.spec.ts
+- /Users/kevin/Documents/LawnBudAI/LawnBudAI/e2e/playwright/water-events.spec.ts
+- /Users/kevin/Documents/LawnBudAI/LawnBudAI/e2e/playwright/navigation.spec.ts
+- /Users/kevin/Documents/LawnBudAI/LawnBudAI/e2e/playwright/auth.spec.ts (reference - all passing)
+
+Test Results:
+- /Users/kevin/Documents/LawnBudAI/LawnBudAI/e2e-results.txt (raw output)
+- /Users/kevin/Documents/LawnBudAI/LawnBudAI/E2E_TEST_ANALYSIS.md (detailed analysis)
+
+================================================================================
+DISCOVERY PHASE STATUS: COMPLETE
+================================================================================
+
+Analysis reveals:
+1. Form elements on mowing/watering screens are NOT rendering or not found
+2. Navigation generates console errors (platform-specific)
+3. Auth flow works perfectly (all tests passing)
+4. Most individual features work (validation, recording, deletion, statistics)
+5. Issue is likely at the form rendering/selector level
+
+Ready for debugging phase to:
+- Inspect actual form HTML structure
+- Verify form element rendering
+- Identify correct CSS selectors
+- Debug console error sources
+- Fix rendering/display issues
+
