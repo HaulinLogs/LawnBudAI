@@ -8,17 +8,28 @@ import { useRole } from '@/hooks/useRole';
 export function useAuth() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { role, isAdmin, isPremium } = useRole();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
+    try {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        setSession(session);
+        setLoading(false);
+      }).catch((err) => {
+        console.error('[useAuth] Failed to get session:', err);
+        setError(`Authentication initialization failed: ${err?.message || 'Unknown error'}`);
+        setLoading(false);
+      });
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        (_event, session) => setSession(session)
+      );
+      return () => subscription.unsubscribe();
+    } catch (err: any) {
+      console.error('[useAuth] Error in initialization:', err);
+      setError(`Authentication initialization failed: ${err?.message || 'Unknown error'}`);
       setLoading(false);
-    });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => setSession(session)
-    );
-    return () => subscription.unsubscribe();
+    }
   }, []);
 
   const signIn = async (email: string, password: string) => {
@@ -56,6 +67,7 @@ export function useAuth() {
   return {
     session,
     loading,
+    error,
     signIn,
     signUp,
     signOut,
