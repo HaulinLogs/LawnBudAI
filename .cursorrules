@@ -1,0 +1,31 @@
+# Cursor Rules for LawnBudAI
+
+This project uses a comprehensive set of development rules. **All team members must follow the rules in RULES.md** before coding.
+
+See the root `RULES.md` file for complete mandatory rules including:
+- Research-First Before Implementation (always use Context7/WebSearch)
+- All Test Execution Must Use Subagents (never run tests directly)
+- Environment Variables Must Be Sourced (protect credentials)
+- Evidence-Based Claims Only (verify everything)
+- When in Doubt, Ask First (no assumptions)
+- Consistency Matters (don't repeat mistakes)
+
+## Quick Reference
+
+🔴 **NEVER:**
+- Start implementation without researching in docs first
+- Run tests directly with bash (`yarn test:playwright`)
+- Put credentials on command lines
+- Claim work is done without showing proof
+- Proceed when uncertain
+
+✅ **ALWAYS:**
+- Use Context7 MCP or WebSearch for documentation
+- Use Task tool with subagent for any test execution
+- Source environment variables from .env files
+- Verify changes by reading files after editing
+- Ask for clarification when uncertain
+
+---
+
+For full details, see `RULES.md` in the repository root.
