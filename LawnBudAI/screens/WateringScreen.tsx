@@ -93,10 +93,6 @@ export default function WateringScreen() {
     },
   });
 
-  const handleSubmit = useCallback(() => {
-    formik.handleSubmit();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formik]);
 
   const handleDelete = useCallback((eventId: string) => {
     Alert.alert('Delete Event', 'Are you sure?', [
