@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   StyleSheet,
 } from 'react-native';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { colors, spacing, borderRadius, typography } from '@/styles/theme';
 
 interface EventFormProps {

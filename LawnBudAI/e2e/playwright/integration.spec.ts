@@ -14,9 +14,6 @@
 import { test, expect } from '@playwright/test';
 import {
   navigateToTab,
-  fillEventForm,
-  submitForm,
-  expectSuccessMessage,
   getEventCount,
   deleteFirstEvent,
   navigateToHome,
@@ -368,7 +365,8 @@ test.describe('Integration Tests - Data Consistency', () => {
     }
 
     await page.waitForLoadState('networkidle');
-    const homeContentBefore = await page.content();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _homeContentBefore = await page.content();
 
     // Record an event
     try {

@@ -62,7 +62,7 @@ function formatDate(dateString: string): string {
 function WeatherCardComponent({ weather }: Props) {
   return (
     <>
-      <Text style={styles.sectionTitle}>Today's Weather</Text>
+      <Text style={styles.sectionTitle}>Today&apos;s Weather</Text>
       <View style={styles.weatherRow}>
         <Text style={styles.weatherText}>
           {weather?.current_condition[0]?.weatherDesc[0]?.value} · {weather?.current_condition[0].temp_F}°F · {getRainForecast(weather?.weather)}

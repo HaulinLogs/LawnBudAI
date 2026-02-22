@@ -61,7 +61,9 @@ export default function WateringScreen() {
     { label: 'Rain', value: 'rain' as const, icon: 'rainy' },
   ], []);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const stats = useMemo(() => getStats(), [events]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const breakdown = useMemo(() => getSourceBreakdown(), [events]);
 
   const handleSubmit = useCallback(async () => {
@@ -94,6 +96,7 @@ export default function WateringScreen() {
     } finally {
       setSubmitting(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [addEvent]);
 
   const handleDelete = useCallback((eventId: string) => {

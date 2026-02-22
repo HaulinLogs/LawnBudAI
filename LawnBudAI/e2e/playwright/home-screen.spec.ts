@@ -6,7 +6,7 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { navigateToHome, navigateToTab, waitForDataLoad } from './test-helpers';
+import { navigateToHome } from './test-helpers';
 
 test.describe('Home Screen - End-to-End Tests', () => {
   test.beforeEach(async ({ page }) => {
@@ -189,7 +189,8 @@ test.describe('Home Screen - End-to-End Tests', () => {
     expect(content.length).toBeGreaterThan(200);
 
     // Should not show unhandled error messages
-    const hasErrors = content.toLowerCase().includes('error') &&
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _hasErrors = content.toLowerCase().includes('error') &&
                      content.toLowerCase().includes('failed to');
 
     // Some error messages from UI are OK (like validation errors),

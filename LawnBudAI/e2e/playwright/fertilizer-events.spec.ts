@@ -115,10 +115,6 @@ test.describe('Fertilizer Screen - End-to-End Tests', () => {
       await amountInput.fill('3.5');
     }
 
-    // Fill N-P-K fields
-    const inputs = page.locator('input[type="text"], input');
-    const npkInputs = inputs.filter({ hasText: /\d+/ });
-
     // Get all numeric inputs and fill N-P-K values
     const npkInputs = await page.locator('input[placeholder*="N"], input[placeholder*="P"], input[placeholder*="K"]').all();
     if (npkInputs.length >= 3) {

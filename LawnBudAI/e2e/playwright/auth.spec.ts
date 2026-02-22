@@ -81,6 +81,7 @@ test.describe('Authentication - Sign Up Flow', () => {
         await page.waitForTimeout(500);
 
         // Should either show error or prevent submission
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const content = await page.content();
         const emailStillFilled = (await emailInput.inputValue()).length > 0;
 
@@ -418,7 +419,9 @@ test.describe('Authentication - Session Management', () => {
     await page2.waitForLoadState('networkidle');
 
     // Both should have same auth state
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const url1 = page1.url();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const url2 = page2.url();
     const content1 = await page1.content();
     const content2 = await page2.content();

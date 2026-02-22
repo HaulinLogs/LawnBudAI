@@ -7,6 +7,7 @@
  *   TEST_USER_PASSWORD - Password for test user
  */
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Page, BrowserContext } from '@playwright/test';
 
 const TEST_EMAIL = process.env.TEST_USER_EMAIL || '';

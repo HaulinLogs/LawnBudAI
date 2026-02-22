@@ -6,7 +6,7 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { navigateToSettings, fillUserPreferences, waitForDataLoad } from './test-helpers';
+import { navigateToSettings } from './test-helpers';
 
 test.describe('Settings Screen - End-to-End Tests', () => {
   test.beforeEach(async ({ page }) => {

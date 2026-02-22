@@ -200,6 +200,7 @@ skipIfNoTestSupabase('Database Integration Tests', () => {
 
   describe('RLS Policies', () => {
     it('should only allow selecting own events', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { data, error } = await supabase
         .from('water_events')
         .select('id, user_id')

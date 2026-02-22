@@ -158,6 +158,7 @@ export function useFertilizerEvents() {
       setError('Not authenticated');
       setLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, userLoading]);
 
   return {

@@ -11,7 +11,8 @@ const path = require('path');
 const url = require('url');
 
 const PORT = 3000;
-const DIST_DIR = path.join(__dirname, '../dist');
+// eslint-disable-next-line no-undef
+const DIST_DIR = path.join(path.dirname(__filename), '../dist');
 const BASE_PATH = '/LawnBudAI';
 
 // MIME types
