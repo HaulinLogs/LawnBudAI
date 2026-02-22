@@ -18,53 +18,53 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
+          cache: 'yarn'
 
       - name: Install dependencies
-        run: npm install --frozen-lockfile
+        run: yarn install --frozen-lockfile
 
       # ========================================================================
       # GATE 1: Schema Validation (CRITICAL)
       # ========================================================================
       - name: Validate database schema
-        run: npm run validate:schema
+        run: yarn validate:schema
 
       # ========================================================================
       # GATE 2: Type Generation & Type Safety Check
       # ========================================================================
       - name: Generate types from database
-        run: npm run types:generate
+        run: yarn types:generate
         env:
           SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
         continue-on-error: true  # Type generation requires secrets; skip in PR if unavailable
 
       - name: Check TypeScript types
-        run: npm run types:check
+        run: yarn types:check
 
       # ========================================================================
       # GATE 3: Linting (Code Quality)
       # ========================================================================
       - name: Lint code
-        run: npm run lint:ci
+        run: yarn lint:ci
 
       # ========================================================================
       # GATE 4: Unit Tests
       # ========================================================================
       - name: Run unit tests
-        run: npm run testFinal
+        run: yarn testFinal
 
       # ========================================================================
       # GATE 5: Schema Validation Tests (Contract Testing)
       # ========================================================================
       - name: Run schema validation tests
-        run: npm run testFinal -- --testPathPattern=schema.validation
+        run: yarn testFinal --testPathPattern=schema.validation
 
       # ========================================================================
       # GATE 6: Integration Tests (Against Test Supabase)
       # ========================================================================
       - name: Run integration tests
-        run: npm run test:integration
+        run: yarn test:integration
         env:
           TEST_SUPABASE_URL: ${{ secrets.TEST_SUPABASE_URL }}
           TEST_SUPABASE_ANON_KEY: ${{ secrets.TEST_SUPABASE_ANON_KEY }}
@@ -74,14 +74,14 @@ jobs:
       # GATE 7: Test Coverage Threshold
       # ========================================================================
       - name: Check test coverage
-        run: npm run test:coverage -- --coverage-reporters=text-summary
+        run: yarn test:coverage --coverage-reporters=text-summary
         continue-on-error: true  # Coverage is informational, doesn't block
 
       # ========================================================================
       # GATE 8: Security Audit
       # ========================================================================
       - name: Security audit
-        run: npm audit --omit=dev --audit-level=moderate
+        run: yarn audit --mode dev --level moderate
         continue-on-error: true  # Audit is informational for main, blocking for PRs
 
       # ========================================================================
@@ -89,11 +89,11 @@ jobs:
       # ========================================================================
       - name: Install Playwright
         if: github.ref == 'refs/heads/main'
-        run: npx playwright install --with-deps
+        run: yarn add -D @playwright/test && yarn playwright install --with-deps
 
       - name: Run E2E tests
         if: github.ref == 'refs/heads/main'
-        run: npm run test:playwright
+        run: yarn test:playwright
         env:
           TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
           TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
