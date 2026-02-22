@@ -7,7 +7,6 @@ import {
   StyleSheet,
 } from 'react-native';
 import { Stack } from 'expo-router';
-// eslint-disable-next-line import/no-unresolved
 import { useFormik } from 'formik';
 import { useMowEvents } from '@/hooks/useMowEvents';
 import { MowEventInput } from '@/models/events';

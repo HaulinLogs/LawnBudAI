@@ -307,12 +307,6 @@ test.describe('Mowing Screen - End-to-End Tests', () => {
 
   // TEST 11: Loading State (Initial Data Fetch)
   test('TEST 11: Loading state displays during data fetch', async ({ page }) => {
-    // Navigate to mowing tab to trigger load
-    const mowingTab = page
-      .locator('button, a, [role="button"]')
-      .filter({ hasText: /mow/i })
-      .first();
-
     // Data should eventually load
     await page.waitForTimeout(2000);
 

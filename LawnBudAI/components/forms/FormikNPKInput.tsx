@@ -5,7 +5,6 @@ import {
   TextInput,
   StyleSheet,
 } from 'react-native';
-// eslint-disable-next-line import/no-unresolved
 import { FormikProps } from 'formik';
 import { spacing, typography, colors, borderRadius } from '@/styles/theme';
 

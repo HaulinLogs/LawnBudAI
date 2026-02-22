@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
 } from 'react-native';
-// eslint-disable-next-line import/no-unresolved
 import { FormikProps } from 'formik';
 import EventForm from '@/components/EventForm';
 import { spacing, typography } from '@/styles/theme';

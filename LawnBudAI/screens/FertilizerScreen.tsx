@@ -8,7 +8,6 @@ import {
 } from 'react-native';
 import { Stack } from 'expo-router';
 import Icon from '@expo/vector-icons/Ionicons';
-// eslint-disable-next-line import/no-unresolved
 import { useFormik } from 'formik';
 import { useFertilizerEvents } from '@/hooks/useFertilizerEvents';
 import { FertilizerEventInput, ApplicationForm, ApplicationMethod } from '@/models/events';
