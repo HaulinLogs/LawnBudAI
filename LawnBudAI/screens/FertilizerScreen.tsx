@@ -199,7 +199,11 @@ export default function FertilizerScreen() {
         <View style={localStyles.section}>
           <Text style={localStyles.sectionTitle}>Log Fertilizer Application</Text>
 
-          {/* Date and Amount using FormikEventForm */}
+          {/* Fertilizer Type and Method Pickers - BEFORE submit button for correct form flow */}
+          {typePicker}
+          {methodPicker}
+
+          {/* Date, Amount, Notes, and Submit Button */}
           <FormikEventForm
             formik={formik}
             fieldNames={{
@@ -212,10 +216,6 @@ export default function FertilizerScreen() {
             amountKeyboardType="decimal-pad"
             submitLabel="Record Application"
           />
-
-          {/* Fertilizer Type and Method Pickers */}
-          {typePicker}
-          {methodPicker}
         </View>
 
         {/* Statistics Section */}
