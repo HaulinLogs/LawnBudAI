@@ -19,7 +19,7 @@ export function useMowEvents() {
 
       const { data, error: fetchError } = await supabase
         .from('mow_events')
-        .select('id, date, height_inches, notes')
+        .select('*')
         .eq('user_id', user.id)
         .order('date', { ascending: false })
         .limit(20);

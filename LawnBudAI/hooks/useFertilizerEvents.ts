@@ -19,7 +19,7 @@ export function useFertilizerEvents() {
 
       const { data, error: fetchError } = await supabase
         .from('fertilizer_events')
-        .select('id, date, amount_lbs_per_1000sqft, nitrogen_pct, phosphorus_pct, potassium_pct, application_form, application_method, notes')
+        .select('*')
         .eq('user_id', user.id)
         .order('date', { ascending: false })
         .limit(20);
@@ -46,12 +46,9 @@ export function useFertilizerEvents() {
           {
             user_id: user.id,
             date: input.date,
-            amount_lbs_per_1000sqft: input.amount_lbs_per_1000sqft,
-            nitrogen_pct: input.nitrogen_pct,
-            phosphorus_pct: input.phosphorus_pct,
-            potassium_pct: input.potassium_pct,
-            application_form: input.application_form,
-            application_method: input.application_method,
+            amount_lbs: input.amount_lbs,
+            type: input.type,
+            application_method: input.application_method || null,
             notes: input.notes || null,
           },
         ])
@@ -96,9 +93,8 @@ export function useFertilizerEvents() {
     if (events.length === 0) {
       return {
         lastApplicationDaysAgo: null,
-        totalPoundsPerThousandSqftApplied: '0',
-        averagePoundsPerThousandSqftPerApplication: null,
-        averageNPK: { nitrogen: '0', phosphorus: '0', potassium: '0' },
+        totalPoundsApplied: '0',
+        averagePoundsPerApplication: null,
       };
     }
 
@@ -107,56 +103,41 @@ export function useFertilizerEvents() {
     const today = new Date();
     const daysAgo = Math.floor((today.getTime() - lastAppDate.getTime()) / (1000 * 60 * 60 * 24));
 
-    // Calculate total pounds applied per 1000 sqft
-    const totalPounds = events.reduce((sum, e) => sum + e.amount_lbs_per_1000sqft, 0);
+    // Calculate total pounds applied
+    const totalPounds = events.reduce((sum, e) => sum + e.amount_lbs, 0);
 
     // Calculate average per application
     const averagePounds = events.length > 0
-      ? (events.reduce((sum, e) => sum + e.amount_lbs_per_1000sqft, 0) / events.length).toFixed(1)
+      ? (events.reduce((sum, e) => sum + e.amount_lbs, 0) / events.length).toFixed(1)
       : null;
-
-    // Calculate average N-P-K ratios
-    const avgNitrogen = (events.reduce((sum, e) => sum + e.nitrogen_pct, 0) / events.length).toFixed(1);
-    const avgPhosphorus = (events.reduce((sum, e) => sum + e.phosphorus_pct, 0) / events.length).toFixed(1);
-    const avgPotassium = (events.reduce((sum, e) => sum + e.potassium_pct, 0) / events.length).toFixed(1);
 
     return {
       lastApplicationDaysAgo: daysAgo,
-      totalPoundsPerThousandSqftApplied: totalPounds.toFixed(1),
-      averagePoundsPerThousandSqftPerApplication: averagePounds,
-      averageNPK: {
-        nitrogen: avgNitrogen,
-        phosphorus: avgPhosphorus,
-        potassium: avgPotassium,
-      },
+      totalPoundsApplied: totalPounds.toFixed(1),
+      averagePoundsPerApplication: averagePounds,
     };
   };
 
-  // Get application form breakdown (liquid vs granular)
-  const getFormBreakdown = () => {
-    const breakdown = {
-      liquid: 0,
-      granular: 0,
-    };
+  // Get fertilizer type breakdown
+  const getTypeBreakdown = () => {
+    const breakdown: { [key: string]: number } = {};
 
     events.forEach(event => {
-      breakdown[event.application_form]++;
+      breakdown[event.type] = (breakdown[event.type] || 0) + 1;
     });
 
     return breakdown;
   };
 
-  // Get application method breakdown (broadcast, spot, edge, custom)
+  // Get application method breakdown
   const getMethodBreakdown = () => {
-    const breakdown = {
-      broadcast: 0,
-      spot: 0,
-      edge: 0,
-      custom: 0,
-    };
+    const breakdown: { [key: string]: number } = {};
 
     events.forEach(event => {
-      breakdown[event.application_method]++;
+      if (event.application_method) {
+        breakdown[event.application_method] =
+          (breakdown[event.application_method] || 0) + 1;
+      }
     });
 
     return breakdown;
@@ -186,7 +167,7 @@ export function useFertilizerEvents() {
     addEvent,
     deleteEvent,
     getStats,
-    getFormBreakdown,
+    getTypeBreakdown,
     getMethodBreakdown,
     refetch: fetchEvents,
   };

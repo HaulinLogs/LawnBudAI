@@ -6,6 +6,68 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **LawnBudAI** is a React Native mobile application built with Expo that helps users manage lawn care activities. The app provides tools for tracking mowing, watering, and fertilizing schedules, integrates real-time weather data, and stores historical lawn care events in Supabase PostgreSQL with Row Level Security (RLS) for multi-user data isolation.
 
+## ⚠️ PRE-IMPLEMENTATION PROTOCOL (REQUIRED)
+
+**Before writing ANY code, you MUST follow this checklist:**
+
+### Every Task Requires:
+
+1. **Check for a PLAN**
+   - Does the user provide a plan in their message?
+   - Is there a PLAN.md file in the repo?
+   - If yes: Read it completely. Follow it exactly. Do not deviate.
+   - If unclear: Ask the user for clarification before starting.
+
+2. **Review RULES.md** (in repo root)
+   - Verify your approach doesn't violate any established rules
+   - Rules are non-negotiable across all AI tools
+   - If you're about to break a rule, STOP and ask the user first
+
+3. **Check CLAUDE.md Context** (this file)
+   - Verify your task aligns with project patterns
+   - Understand testing requirements (TDD)
+   - Check if special handling is needed
+   - Look for "Output Verification Requirements" section if modifying config files
+
+4. **Ask Clarifying Questions** (if needed)
+   - If requirements are ambiguous or incomplete
+   - If there's a conflict between sources
+   - If you're uncertain about scope
+   - Do this BEFORE implementing
+
+5. **Only Then Implement**
+   - Follow the plan exactly
+   - Run tests before claiming completion
+   - Verify changes against requirements
+   - Show your work (read files after editing)
+
+### The Cost of Skipping This
+
+- ❌ Implementations that don't match requirements
+- ❌ Wasted time on rework
+- ❌ Rules violations that must be fixed
+- ❌ User frustration from repeated corrections
+
+### This is Not Optional
+
+This protocol exists because:
+- Plans contain critical context and requirements
+- RULES.md prevents repeated mistakes
+- Asking first saves time vs. rework later
+- Following patterns prevents technical debt
+
+**Every task, every time. No exceptions.**
+
+### Quick Reference
+
+| Situation | Action |
+|-----------|--------|
+| User provides plan in message | Read it completely, implement exactly per plan |
+| No plan provided, task seems ambiguous | Ask user for plan/clarification first |
+| Your approach conflicts with RULES.md | Stop, ask for permission |
+| Task requires modifying config/infrastructure | Read "Output Verification Requirements" |
+| You finish implementing | Read files after editing to verify changes |
+
 ## Development Commands
 
 ### Running the App

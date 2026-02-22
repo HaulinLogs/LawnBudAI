@@ -16,11 +16,15 @@
     "testDebug": "jest -o --watch --coverage=false",
     "testFinal": "jest",
     "test:coverage": "jest --coverage",
+    "test:integration": "jest --testPathPattern=integration",
     "updateSnapshots": "jest -u --coverage=false",
     "test:playwright": "playwright test",
     "test:playwright:ui": "playwright test --ui",
     "test:maestro": "maestro test .maestro/",
-    "quality-gates": "npm run lint:ci && npm run testFinal && npm run test:coverage && npm audit",
+    "validate:schema": "node scripts/validate-schema.js",
+    "types:generate": "supabase gen types typescript --project-id $SUPABASE_PROJECT_ID > types/database.types.ts",
+    "types:check": "tsc --noEmit",
+    "quality-gates": "npm run validate:schema && npm run lint:ci && npm run testFinal && npm run test:coverage && npm audit",
     "prepare": "husky install"
   },
   "dependencies": {
@@ -76,6 +80,7 @@
     "lint-staged": "^15.2.10",
     "prettier": "^3.3.3",
     "react-test-renderer": "^19.1.0",
+    "supabase": "^2.76.12",
     "typescript": "~5.8.3"
   },
   "private": true,
