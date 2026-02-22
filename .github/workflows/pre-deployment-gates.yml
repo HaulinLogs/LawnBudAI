@@ -22,18 +22,21 @@ jobs:
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
+        working-directory: ./LawnBudAI
 
       # ========================================================================
       # GATE 1: Schema Validation (CRITICAL)
       # ========================================================================
       - name: Validate database schema
         run: yarn validate:schema
+        working-directory: ./LawnBudAI
 
       # ========================================================================
       # GATE 2: Type Generation & Type Safety Check
       # ========================================================================
       - name: Generate types from database
         run: yarn types:generate
+        working-directory: ./LawnBudAI
         env:
           SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
@@ -41,30 +44,35 @@ jobs:
 
       - name: Check TypeScript types
         run: yarn types:check
+        working-directory: ./LawnBudAI
 
       # ========================================================================
       # GATE 3: Linting (Code Quality)
       # ========================================================================
       - name: Lint code
         run: yarn lint:ci
+        working-directory: ./LawnBudAI
 
       # ========================================================================
       # GATE 4: Unit Tests
       # ========================================================================
       - name: Run unit tests
         run: yarn testFinal
+        working-directory: ./LawnBudAI
 
       # ========================================================================
       # GATE 5: Schema Validation Tests (Contract Testing)
       # ========================================================================
       - name: Run schema validation tests
         run: yarn testFinal --testPathPattern=schema.validation
+        working-directory: ./LawnBudAI
 
       # ========================================================================
       # GATE 6: Integration Tests (Against Test Supabase)
       # ========================================================================
       - name: Run integration tests
         run: yarn test:integration
+        working-directory: ./LawnBudAI
         env:
           TEST_SUPABASE_URL: ${{ secrets.TEST_SUPABASE_URL }}
           TEST_SUPABASE_ANON_KEY: ${{ secrets.TEST_SUPABASE_ANON_KEY }}
@@ -75,6 +83,7 @@ jobs:
       # ========================================================================
       - name: Check test coverage
         run: yarn test:coverage --coverage-reporters=text-summary
+        working-directory: ./LawnBudAI
         continue-on-error: true  # Coverage is informational, doesn't block
 
       # ========================================================================
@@ -82,6 +91,7 @@ jobs:
       # ========================================================================
       - name: Security audit
         run: yarn audit --mode dev --level moderate
+        working-directory: ./LawnBudAI
         continue-on-error: true  # Audit is informational for main, blocking for PRs
 
       # ========================================================================
@@ -90,10 +100,12 @@ jobs:
       - name: Install Playwright
         if: github.ref == 'refs/heads/main'
         run: yarn add -D @playwright/test && yarn playwright install --with-deps
+        working-directory: ./LawnBudAI
 
       - name: Run E2E tests
         if: github.ref == 'refs/heads/main'
         run: yarn test:playwright
+        working-directory: ./LawnBudAI
         env:
           TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
           TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
