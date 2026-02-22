@@ -119,4 +119,30 @@ These rules are **not suggestions** - they are **mandatory** and must be followe
 
 ---
 
+## 7. All Workflow Tests Must Pass Before Pushing
+
+**NEVER push to GitHub without running and passing all tests defined in the CI/CD workflow.**
+
+- ❌ **Never do this:**
+  - Push commits without verifying tests pass locally
+  - Assume tests will pass in CI/CD "we'll fix it if it fails"
+  - Push when only running some of the tests
+
+- ✅ **Always do this:**
+  1. **Run ALL workflow tests locally** before pushing:
+     - `yarn types:check` (TypeScript compilation)
+     - `yarn lint:ci` (Linting with 0 warnings)
+     - `yarn testFinal` (All unit tests)
+     - `yarn test:coverage` (Coverage check)
+     - `yarn validate:schema` (Schema validation)
+  2. **Verify each test passes** (show evidence of passing)
+  3. **Only then push to GitHub**
+  4. If any test fails locally, fix it before pushing
+
+**Why:** The CI/CD workflow gates are designed to prevent regressions. Running them locally first catches issues early, reduces wasted CI/CD resources, and ensures code quality before it reaches the repository.
+
+**Reference:** See `.github/workflows/pre-deployment-gates.yml` for complete list of quality gates that run on push.
+
+---
+
 **If any of these rules are about to be broken, STOP and ask for permission first.**
