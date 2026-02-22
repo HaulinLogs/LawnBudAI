@@ -96,6 +96,9 @@ jobs:
       - name: Run E2E tests
         if: github.ref == 'refs/heads/main'
         run: npm run test:playwright
+        env:
+          TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
+          TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
         continue-on-error: true  # E2E tests are slower; informational
 
   # ============================================================================
