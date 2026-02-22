@@ -28,8 +28,6 @@ jobs:
       # ========================================================================
       - name: Validate database schema
         run: npm run validate:schema
-        env:
-          # Schema validation only reads config, doesn't need credentials
 
       # ========================================================================
       # GATE 2: Type Generation & Type Safety Check
