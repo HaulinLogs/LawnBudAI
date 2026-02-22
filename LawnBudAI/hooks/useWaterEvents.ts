@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { WaterEvent, WaterEventInput } from '@/models/events';
+import { useSupabaseUser } from '@/hooks/useSupabaseUser';
 
 export function useWaterEvents() {
   const [events, setEvents] = useState<WaterEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { user, loading: userLoading } = useSupabaseUser();
 
   // Fetch all watering events for current user
   const fetchEvents = async () => {
@@ -13,15 +15,14 @@ export function useWaterEvents() {
       setLoading(true);
       setError(null);
 
-      const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
       const { data, error: fetchError } = await supabase
         .from('water_events')
-        .select('*')
+        .select('id, date, amount_gallons, source, notes')
         .eq('user_id', user.id)
         .order('date', { ascending: false })
-        .limit(100);
+        .limit(20);
 
       if (fetchError) throw fetchError;
       setEvents(data || []);
@@ -37,7 +38,6 @@ export function useWaterEvents() {
   // Add new watering event
   const addEvent = async (input: WaterEventInput) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
       const { data, error: insertError } = await supabase
@@ -134,10 +134,22 @@ export function useWaterEvents() {
     return breakdown;
   };
 
-  // Initial fetch on component mount
+  // Initial fetch when user is available
   useEffect(() => {
-    fetchEvents();
-  }, []);
+    // Still waiting for user authentication status to be determined
+    if (userLoading) {
+      return;
+    }
+
+    // User is authenticated, fetch events
+    if (user) {
+      fetchEvents();
+    } else {
+      // User is not authenticated and loading is complete
+      setError('Not authenticated');
+      setLoading(false);
+    }
+  }, [user, userLoading]);
 
   return {
     events,

@@ -59,7 +59,7 @@ function formatDate(dateString: string): string {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
-export function WeatherCard({ weather }: Props) {
+function WeatherCardComponent({ weather }: Props) {
   return (
     <>
       <Text style={styles.sectionTitle}>Today's Weather</Text>
@@ -113,3 +113,5 @@ export function WeatherCard({ weather }: Props) {
     </>
   );
 }
+
+export const WeatherCard = React.memo(WeatherCardComponent);

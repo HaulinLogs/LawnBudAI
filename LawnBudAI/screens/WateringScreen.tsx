@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -55,16 +55,16 @@ export default function WateringScreen() {
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  const sourceOptions = [
+  const sourceOptions = useMemo(() => [
     { label: 'Sprinkler', value: 'sprinkler' as const, icon: 'water' },
     { label: 'Manual', value: 'manual' as const, icon: 'hand-right' },
     { label: 'Rain', value: 'rain' as const, icon: 'rainy' },
-  ];
+  ], []);
 
-  const stats = getStats();
-  const breakdown = getSourceBreakdown();
+  const stats = useMemo(() => getStats(), [events]);
+  const breakdown = useMemo(() => getSourceBreakdown(), [events]);
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     // Validate form using centralized validation utilities
     const validation = validateForm([
       () => validateRequiredField(date, 'Date'),
@@ -94,9 +94,9 @@ export default function WateringScreen() {
     } finally {
       setSubmitting(false);
     }
-  };
+  }, [addEvent]);
 
-  const handleDelete = (eventId: string) => {
+  const handleDelete = useCallback((eventId: string) => {
     Alert.alert('Delete Event', 'Are you sure?', [
       { text: 'Cancel', onPress: () => {} },
       {
@@ -112,16 +112,23 @@ export default function WateringScreen() {
         style: 'destructive',
       },
     ]);
-  };
+  }, [deleteEvent]);
 
-  const sourcePicker = (
+  const renderEventDetail = useCallback((event: any) => (
+    <Text style={{ fontSize: 12, color: '#6b7280', marginTop: 4 }}>
+      {event.amount_gallons} gal • {event.source}
+      {event.notes && <Text>{'\n'}{event.notes}</Text>}
+    </Text>
+  ), []);
+
+  const sourcePicker = useMemo(() => (
     <GenericPicker
       label="Source"
       options={sourceOptions}
       value={source}
       onChange={setSource}
     />
-  );
+  ), [sourceOptions, source]);
 
   return (
     <View style={localStyles.container}>
@@ -202,12 +209,7 @@ export default function WateringScreen() {
             events={events}
             loading={loading}
             error={error}
-            renderEventDetail={(event) => (
-              <Text style={{ fontSize: 12, color: '#6b7280', marginTop: 4 }}>
-                {event.amount_gallons} gal • {event.source}
-                {event.notes && <Text>{'\n'}{event.notes}</Text>}
-              </Text>
-            )}
+            renderEventDetail={renderEventDetail}
             onDelete={handleDelete}
             emptyStateIcon="water"
             emptyStateText="No watering events yet"

@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
   },
 });
 
-export default function EventHistory({
+function EventHistoryComponent({
   events,
   loading,
   error,
@@ -132,3 +132,5 @@ export default function EventHistory({
     </View>
   );
 }
+
+export default React.memo(EventHistoryComponent);

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -112,15 +112,15 @@ export default function FertilizerScreen() {
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  const stats = getStats();
-  const formBreakdown = getFormBreakdown();
-  const methodBreakdown = getMethodBreakdown();
+  const stats = useMemo(() => getStats(), [events]);
+  const formBreakdown = useMemo(() => getFormBreakdown(), [events]);
+  const methodBreakdown = useMemo(() => getMethodBreakdown(), [events]);
 
   // Calculate NPK total and warn if > 100
-  const npkTotal = (parseFloat(nitrogen) || 0) + (parseFloat(phosphorus) || 0) + (parseFloat(potassium) || 0);
-  const npkWarning = npkTotal > 100 ? 'N-P-K total exceeds 100%' : null;
+  const npkTotal = useMemo(() => (parseFloat(nitrogen) || 0) + (parseFloat(phosphorus) || 0) + (parseFloat(potassium) || 0), [nitrogen, phosphorus, potassium]);
+  const npkWarning = useMemo(() => npkTotal > 100 ? 'N-P-K total exceeds 100%' : null, [npkTotal]);
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     // Validate form using centralized validation utilities
     const validation = validateForm([
       () => validateRequiredField(date, 'Date'),
@@ -162,9 +162,9 @@ export default function FertilizerScreen() {
     } finally {
       setSubmitting(false);
     }
-  };
+  }, [addEvent]);
 
-  const handleDelete = (eventId: string) => {
+  const handleDelete = useCallback((eventId: string) => {
     Alert.alert('Delete Event', 'Are you sure?', [
       { text: 'Cancel', onPress: () => {} },
       {
@@ -180,25 +180,32 @@ export default function FertilizerScreen() {
         style: 'destructive',
       },
     ]);
-  };
+  }, [deleteEvent]);
 
-  const formPicker = (
+  const renderEventDetail = useCallback((event: any) => (
+    <Text style={{ fontSize: 12, color: '#6b7280', marginTop: 4 }}>
+      {event.amount_lbs_per_1000sqft} lbs/1000 sq ft • {event.nitrogen_pct}-{event.phosphorus_pct}-{event.potassium_pct} • {event.application_form} • {event.application_method}
+      {event.notes && <Text>{'\n'}{event.notes}</Text>}
+    </Text>
+  ), []);
+
+  const formPicker = useMemo(() => (
     <GenericPicker
       label="Application Form"
       options={APPLICATION_FORMS}
       value={applicationForm}
       onChange={setApplicationForm}
     />
-  );
+  ), [applicationForm]);
 
-  const methodPicker = (
+  const methodPicker = useMemo(() => (
     <GenericPicker
       label="Application Method"
       options={APPLICATION_METHODS}
       value={applicationMethod}
       onChange={setApplicationMethod}
     />
-  );
+  ), [applicationMethod]);
 
   return (
     <View style={localStyles.container}>
@@ -347,12 +354,7 @@ export default function FertilizerScreen() {
             events={events}
             loading={loading}
             error={error}
-            renderEventDetail={(event) => (
-              <Text style={{ fontSize: 12, color: '#6b7280', marginTop: 4 }}>
-                {event.amount_lbs_per_1000sqft} lbs/1000 sq ft • {event.nitrogen_pct}-{event.phosphorus_pct}-{event.potassium_pct} • {event.application_form} • {event.application_method}
-                {event.notes && <Text>{'\n'}{event.notes}</Text>}
-              </Text>
-            )}
+            renderEventDetail={renderEventDetail}
             onDelete={handleDelete}
             emptyStateIcon="leaf"
             emptyStateText="No fertilizer applications yet"

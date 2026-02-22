@@ -17,6 +17,15 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
   clear: jest.fn(() => Promise.resolve()),
 }));
 
+// Mock useSupabaseUser hook
+jest.mock('@/hooks/useSupabaseUser', () => ({
+  useSupabaseUser: jest.fn(() => ({
+    user: null,
+    loading: true,
+    error: null,
+  })),
+}));
+
 // Mock fetch for tests that use it
 global.fetch = jest.fn();
 

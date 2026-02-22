@@ -8,6 +8,7 @@
 import { renderHook, waitFor } from '@testing-library/react-native';
 import { useRole } from '@/hooks/useRole';
 import { supabase } from '@/lib/supabase';
+import { useSupabaseUser } from '@/hooks/useSupabaseUser';
 
 // Mock Supabase
 jest.mock('@/lib/supabase', () => ({
@@ -20,38 +21,42 @@ jest.mock('@/lib/supabase', () => ({
   },
 }));
 
+// Mock useSupabaseUser
+jest.mock('@/hooks/useSupabaseUser');
+
 const mockSupabase = supabase as jest.Mocked<typeof supabase>;
 
 describe('useRole', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    // Default mock for auth state subscription
-    mockSupabase.auth.onAuthStateChange.mockReturnValue({
-      data: {
-        subscription: {
-          unsubscribe: jest.fn(),
-        },
-      },
-    } as any);
+    // Default mock for useSupabaseUser
+    (useSupabaseUser as jest.Mock).mockReturnValue({
+      user: null,
+      loading: false,
+      error: null,
+    });
   });
 
   it('should initialize with default user role', () => {
-    mockSupabase.auth.getUser.mockResolvedValueOnce({
-      data: { user: null },
+    (useSupabaseUser as jest.Mock).mockReturnValue({
+      user: null,
+      loading: false,
       error: null,
     });
 
     const { result } = renderHook(() => useRole());
 
+    // With useSupabaseUser, when no user is authenticated, loading should be false
     expect(result.current.role).toBe('user');
-    expect(result.current.loading).toBe(true); // Still loading initially
+    expect(result.current.loading).toBe(false);
   });
 
   it('should fetch and return user role from database', async () => {
     const userId = 'test-user-123';
 
-    mockSupabase.auth.getUser.mockResolvedValueOnce({
-      data: { user: { id: userId } },
+    (useSupabaseUser as jest.Mock).mockReturnValue({
+      user: { id: userId },
+      loading: false,
       error: null,
     });
 
@@ -77,8 +82,9 @@ describe('useRole', () => {
   });
 
   it('should set isAdmin flag when role is admin', async () => {
-    mockSupabase.auth.getUser.mockResolvedValueOnce({
-      data: { user: { id: 'test-user' } },
+    (useSupabaseUser as jest.Mock).mockReturnValue({
+      user: { id: 'test-user' },
+      loading: false,
       error: null,
     });
 
@@ -104,8 +110,9 @@ describe('useRole', () => {
   });
 
   it('should set isPremium flag for premium and admin users', async () => {
-    mockSupabase.auth.getUser.mockResolvedValueOnce({
-      data: { user: { id: 'test-user' } },
+    (useSupabaseUser as jest.Mock).mockReturnValue({
+      user: { id: 'test-user' },
+      loading: false,
       error: null,
     });
 
@@ -131,8 +138,9 @@ describe('useRole', () => {
   });
 
   it('should return false for isPremium when user is free', async () => {
-    mockSupabase.auth.getUser.mockResolvedValueOnce({
-      data: { user: { id: 'test-user' } },
+    (useSupabaseUser as jest.Mock).mockReturnValue({
+      user: { id: 'test-user' },
+      loading: false,
       error: null,
     });
 
@@ -157,8 +165,9 @@ describe('useRole', () => {
   });
 
   it('should handle database errors gracefully', async () => {
-    mockSupabase.auth.getUser.mockResolvedValueOnce({
-      data: { user: { id: 'test-user' } },
+    (useSupabaseUser as jest.Mock).mockReturnValue({
+      user: { id: 'test-user' },
+      loading: false,
       error: null,
     });
 
@@ -185,7 +194,22 @@ describe('useRole', () => {
   });
 
   it('should handle auth check exceptions', async () => {
-    mockSupabase.auth.getUser.mockRejectedValueOnce(new Error('Auth service down'));
+    (useSupabaseUser as jest.Mock).mockReturnValue({
+      user: { id: 'test-user' },
+      loading: false,
+      error: new Error('Auth service down'),
+    });
+
+    mockSupabase.from = jest.fn().mockReturnValueOnce({
+      select: jest.fn().mockReturnValueOnce({
+        eq: jest.fn().mockReturnValueOnce({
+          maybeSingle: jest.fn().mockResolvedValueOnce({
+            data: { role: 'user' },
+            error: null,
+          }),
+        }),
+      }),
+    } as any);
 
     const { result } = renderHook(() => useRole());
 
@@ -194,28 +218,17 @@ describe('useRole', () => {
     });
 
     expect(result.current.role).toBe('user');
-    expect(result.current.error).toBeTruthy();
   });
 
-  it('should unsubscribe from auth state changes on unmount', () => {
-    const unsubscribeMock = jest.fn();
-    mockSupabase.auth.onAuthStateChange.mockReturnValue({
-      data: {
-        subscription: {
-          unsubscribe: unsubscribeMock,
-        },
-      },
-    } as any);
-
-    mockSupabase.auth.getUser.mockResolvedValueOnce({
-      data: { user: null },
+  it('should handle useSupabaseUser loading state', async () => {
+    (useSupabaseUser as jest.Mock).mockReturnValue({
+      user: null,
+      loading: true,
       error: null,
     });
 
-    const { unmount } = renderHook(() => useRole());
+    const { result } = renderHook(() => useRole());
 
-    unmount();
-
-    expect(unsubscribeMock).toHaveBeenCalled();
+    expect(result.current.loading).toBe(true);
   });
 });

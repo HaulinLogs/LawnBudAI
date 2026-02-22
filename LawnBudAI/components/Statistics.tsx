@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
   },
 });
 
-export default function Statistics({
+function StatisticsComponent({
   stats,
   showBreakdown,
   title,
@@ -79,3 +79,5 @@ export default function Statistics({
     </View>
   );
 }
+
+export default React.memo(StatisticsComponent);

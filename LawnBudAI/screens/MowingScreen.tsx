@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -40,9 +40,9 @@ export default function MowingScreen() {
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  const stats = getStats();
+  const stats = useMemo(() => getStats(), [events]);
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     // Validate form using centralized validation utilities
     const validation = validateForm([
       () => validateRequiredField(date, 'Date'),
@@ -71,9 +71,9 @@ export default function MowingScreen() {
     } finally {
       setSubmitting(false);
     }
-  };
+  }, [addEvent]);
 
-  const handleDelete = (eventId: string) => {
+  const handleDelete = useCallback((eventId: string) => {
     Alert.alert('Delete Event', 'Are you sure?', [
       { text: 'Cancel', onPress: () => {} },
       {
@@ -89,7 +89,20 @@ export default function MowingScreen() {
         style: 'destructive',
       },
     ]);
-  };
+  }, [deleteEvent]);
+
+  const renderEventDetail = useCallback((event: any) => (
+    <>
+      <Text style={{ fontSize: 12, color: '#6b7280', marginTop: 4 }}>
+        Height: {event.height_inches}&quot;
+      </Text>
+      {event.notes && (
+        <Text style={{ fontSize: 12, color: '#6b7280', marginTop: 4 }}>
+          {event.notes}
+        </Text>
+      )}
+    </>
+  ), []);
 
   return (
     <View style={localStyles.container}>
@@ -140,18 +153,7 @@ export default function MowingScreen() {
             events={events}
             loading={loading}
             error={error}
-            renderEventDetail={(event) => (
-              <>
-                <Text style={{ fontSize: 12, color: '#6b7280', marginTop: 4 }}>
-                  Height: {event.height_inches}&quot;
-                </Text>
-                {event.notes && (
-                  <Text style={{ fontSize: 12, color: '#6b7280', marginTop: 4 }}>
-                    {event.notes}
-                  </Text>
-                )}
-              </>
-            )}
+            renderEventDetail={renderEventDetail}
             onDelete={handleDelete}
             emptyStateIcon="cut"
             emptyStateText="No mowing events yet"

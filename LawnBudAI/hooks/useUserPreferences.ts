@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useSupabaseUser } from '@/hooks/useSupabaseUser';
 
 interface UserPreferences {
   city: string;
@@ -18,11 +19,11 @@ export function useUserPreferences() {
     lawn_size_sqft: null
   });
   const [loading, setLoading] = useState(true);
+  const { user, loading: userLoading } = useSupabaseUser();
 
   useEffect(() => {
     const fetchPreferences = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
           console.log('No authenticated user');
           setLoading(false);
@@ -70,12 +71,19 @@ export function useUserPreferences() {
       }
     };
 
-    fetchPreferences();
-  }, []);
+    if (userLoading) {
+      return;
+    }
+
+    if (user) {
+      fetchPreferences();
+    } else {
+      setLoading(false);
+    }
+  }, [user, userLoading]);
 
   const save = async (updates: Partial<UserPreferences>) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
       const { error } = await supabase.from('user_preferences').upsert({

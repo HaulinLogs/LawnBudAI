@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useSupabaseUser } from '@/hooks/useSupabaseUser';
 
 export type UserRole = 'user' | 'premium' | 'admin';
 
@@ -7,11 +8,11 @@ export function useRole() {
   const [role, setRole] = useState<UserRole>('user');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { user, loading: userLoading } = useSupabaseUser();
 
   useEffect(() => {
     const fetchRole = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
           setRole('user');
           setLoading(false);
@@ -42,16 +43,17 @@ export function useRole() {
       }
     };
 
-    fetchRole();
+    if (userLoading) {
+      return;
+    }
 
-    // Re-fetch when auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
-      setLoading(true);
+    if (user) {
       fetchRole();
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
+    } else {
+      setRole('user');
+      setLoading(false);
+    }
+  }, [user, userLoading]);
 
   return {
     role,

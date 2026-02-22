@@ -2,6 +2,7 @@ import { renderHook, act, waitFor } from '@testing-library/react-native';
 import { useFertilizerEvents } from '@/hooks/useFertilizerEvents';
 import { FertilizerEventInput } from '@/models/events';
 import { supabase } from '@/lib/supabase';
+import { useSupabaseUser } from '@/hooks/useSupabaseUser';
 
 // Mock Supabase
 jest.mock('@/lib/supabase', () => ({
@@ -12,6 +13,9 @@ jest.mock('@/lib/supabase', () => ({
     from: jest.fn(),
   },
 }));
+
+// Mock useSupabaseUser
+jest.mock('@/hooks/useSupabaseUser');
 
 describe('useFertilizerEvents', () => {
   const mockUser = { id: 'user-123', email: 'test@example.com' };
@@ -53,8 +57,10 @@ describe('useFertilizerEvents', () => {
   describe('fetchEvents', () => {
     it('should fetch fertilizer events from Supabase', async () => {
       // Arrange
-      (supabase.auth.getUser as jest.Mock).mockResolvedValue({
-        data: { user: mockUser },
+      (useSupabaseUser as jest.Mock).mockReturnValue({
+        user: mockUser,
+        loading: false,
+        error: null,
       });
 
       const mockSelect = jest.fn().mockReturnValue({
@@ -90,8 +96,10 @@ describe('useFertilizerEvents', () => {
     it('should handle fetch errors gracefully', async () => {
       // Arrange
       const errorMessage = 'Failed to fetch events';
-      (supabase.auth.getUser as jest.Mock).mockResolvedValue({
-        data: { user: mockUser },
+      (useSupabaseUser as jest.Mock).mockReturnValue({
+        user: mockUser,
+        loading: false,
+        error: null,
       });
 
       const mockSelect = jest.fn().mockReturnValue({
@@ -123,8 +131,10 @@ describe('useFertilizerEvents', () => {
 
     it('should handle unauthenticated user', async () => {
       // Arrange
-      (supabase.auth.getUser as jest.Mock).mockResolvedValue({
-        data: { user: null },
+      (useSupabaseUser as jest.Mock).mockReturnValue({
+        user: null,
+        loading: false,
+        error: null,
       });
 
       // Act
@@ -143,8 +153,10 @@ describe('useFertilizerEvents', () => {
   describe('addEvent', () => {
     it('should add a new fertilizer event', async () => {
       // Arrange
-      (supabase.auth.getUser as jest.Mock).mockResolvedValue({
-        data: { user: mockUser },
+      (useSupabaseUser as jest.Mock).mockReturnValue({
+        user: mockUser,
+        loading: false,
+        error: null,
       });
 
       const newEvent = mockEvents[0];
@@ -199,8 +211,10 @@ describe('useFertilizerEvents', () => {
 
     it('should handle add event errors', async () => {
       // Arrange
-      (supabase.auth.getUser as jest.Mock).mockResolvedValue({
-        data: { user: mockUser },
+      (useSupabaseUser as jest.Mock).mockReturnValue({
+        user: mockUser,
+        loading: false,
+        error: null,
       });
 
       const errorMessage = 'Insert failed';
@@ -251,8 +265,10 @@ describe('useFertilizerEvents', () => {
   describe('deleteEvent', () => {
     it('should delete a fertilizer event', async () => {
       // Arrange
-      (supabase.auth.getUser as jest.Mock).mockResolvedValue({
-        data: { user: mockUser },
+      (useSupabaseUser as jest.Mock).mockReturnValue({
+        user: mockUser,
+        loading: false,
+        error: null,
       });
 
       const mockDelete = jest.fn().mockReturnValue({
@@ -295,8 +311,10 @@ describe('useFertilizerEvents', () => {
 
     it('should handle delete errors', async () => {
       // Arrange
-      (supabase.auth.getUser as jest.Mock).mockResolvedValue({
-        data: { user: mockUser },
+      (useSupabaseUser as jest.Mock).mockReturnValue({
+        user: mockUser,
+        loading: false,
+        error: null,
       });
 
       const errorMessage = 'Delete failed';
@@ -334,8 +352,10 @@ describe('useFertilizerEvents', () => {
   describe('getStats', () => {
     it('should calculate last application days ago', async () => {
       // Arrange
-      (supabase.auth.getUser as jest.Mock).mockResolvedValue({
-        data: { user: mockUser },
+      (useSupabaseUser as jest.Mock).mockReturnValue({
+        user: mockUser,
+        loading: false,
+        error: null,
       });
 
       (supabase.from as jest.Mock).mockReturnValue({
@@ -368,8 +388,10 @@ describe('useFertilizerEvents', () => {
 
     it('should calculate total pounds per 1000 sqft applied', async () => {
       // Arrange
-      (supabase.auth.getUser as jest.Mock).mockResolvedValue({
-        data: { user: mockUser },
+      (useSupabaseUser as jest.Mock).mockReturnValue({
+        user: mockUser,
+        loading: false,
+        error: null,
       });
 
       (supabase.from as jest.Mock).mockReturnValue({
@@ -401,8 +423,10 @@ describe('useFertilizerEvents', () => {
 
     it('should calculate average N-P-K ratios', async () => {
       // Arrange
-      (supabase.auth.getUser as jest.Mock).mockResolvedValue({
-        data: { user: mockUser },
+      (useSupabaseUser as jest.Mock).mockReturnValue({
+        user: mockUser,
+        loading: false,
+        error: null,
       });
 
       (supabase.from as jest.Mock).mockReturnValue({
@@ -437,8 +461,10 @@ describe('useFertilizerEvents', () => {
 
     it('should get application form breakdown', async () => {
       // Arrange
-      (supabase.auth.getUser as jest.Mock).mockResolvedValue({
-        data: { user: mockUser },
+      (useSupabaseUser as jest.Mock).mockReturnValue({
+        user: mockUser,
+        loading: false,
+        error: null,
       });
 
       (supabase.from as jest.Mock).mockReturnValue({
@@ -472,8 +498,10 @@ describe('useFertilizerEvents', () => {
 
     it('should get application method breakdown', async () => {
       // Arrange
-      (supabase.auth.getUser as jest.Mock).mockResolvedValue({
-        data: { user: mockUser },
+      (useSupabaseUser as jest.Mock).mockReturnValue({
+        user: mockUser,
+        loading: false,
+        error: null,
       });
 
       (supabase.from as jest.Mock).mockReturnValue({
@@ -509,8 +537,10 @@ describe('useFertilizerEvents', () => {
 
     it('should return null stats when no events exist', async () => {
       // Arrange
-      (supabase.auth.getUser as jest.Mock).mockResolvedValue({
-        data: { user: mockUser },
+      (useSupabaseUser as jest.Mock).mockReturnValue({
+        user: mockUser,
+        loading: false,
+        error: null,
       });
 
       (supabase.from as jest.Mock).mockReturnValue({
