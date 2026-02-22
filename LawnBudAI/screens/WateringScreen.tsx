@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -8,13 +8,16 @@ import {
 } from 'react-native';
 import { Stack } from 'expo-router';
 import Icon from '@expo/vector-icons/Ionicons';
+// eslint-disable-next-line import/no-unresolved
+import { useFormik } from 'formik';
 import { useWaterEvents } from '@/hooks/useWaterEvents';
 import { WaterEventInput } from '@/models/events';
-import EventForm from '@/components/EventForm';
+import FormikEventForm from '@/components/forms/FormikEventForm';
 import EventHistory from '@/components/EventHistory';
 import Statistics from '@/components/Statistics';
 import GenericPicker from '@/components/ui/GenericPicker';
-import { validateRequiredField, validatePositiveNumber, validateForm } from '@/lib/validation';
+import { wateringEventSchema, WateringFormValues } from '@/lib/schemas/watering.schema';
+import { spacing, typography } from '@/styles/theme';
 
 const localStyles = StyleSheet.create({
   container: {
@@ -49,11 +52,6 @@ const localStyles = StyleSheet.create({
 
 export default function WateringScreen() {
   const { events, loading, error, addEvent, deleteEvent, getStats, getSourceBreakdown } = useWaterEvents();
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-  const [amount, setAmount] = useState('');
-  const [source, setSource] = useState<'sprinkler' | 'manual' | 'rain'>('manual');
-  const [notes, setNotes] = useState('');
-  const [submitting, setSubmitting] = useState(false);
 
   const sourceOptions = useMemo(() => [
     { label: 'Sprinkler', value: 'sprinkler' as const, icon: 'water' },
@@ -66,38 +64,39 @@ export default function WateringScreen() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const breakdown = useMemo(() => getSourceBreakdown(), [events]);
 
-  const handleSubmit = useCallback(async () => {
-    // Validate form using centralized validation utilities
-    const validation = validateForm([
-      () => validateRequiredField(date, 'Date'),
-      () => validatePositiveNumber(amount, 'Amount'),
-    ]);
+  const formik = useFormik<WateringFormValues>({
+    initialValues: {
+      date: new Date().toISOString().split('T')[0],
+      amount_gallons: '',
+      source: 'manual',
+      notes: '',
+    },
+    validationSchema: wateringEventSchema,
+    validateOnChange: true,  // Real-time validation
+    validateOnBlur: true,    // Validate on field blur
+    onSubmit: async (values, { resetForm }) => {
+      try {
+        const input: WaterEventInput = {
+          date: values.date,
+          amount_gallons: parseFloat(String(values.amount_gallons)),
+          source: values.source as 'sprinkler' | 'manual' | 'rain',
+          notes: String(values.notes).trim() || undefined,
+        };
+        await addEvent(input);
+        // Form resets naturally after successful submission
+        resetForm();
+        // Optional: Show success alert
+        Alert.alert('Success', 'Watering event recorded!');
+      } catch {
+        Alert.alert('Error', 'Failed to record watering event');
+      }
+    },
+  });
 
-    if (!validation.valid) {
-      Alert.alert('Error', validation.error || 'Please fill in all required fields');
-      return;
-    }
-
-    setSubmitting(true);
-    try {
-      const input: WaterEventInput = {
-        date,
-        amount_gallons: parseFloat(amount),
-        source,
-        notes: notes.trim() || undefined,
-      };
-      await addEvent(input);
-      Alert.alert('Success', 'Watering event recorded!');
-      setAmount('');
-      setNotes('');
-      setDate(new Date().toISOString().split('T')[0]);
-    } catch {
-      Alert.alert('Error', 'Failed to record watering event');
-    } finally {
-      setSubmitting(false);
-    }
+  const handleSubmit = useCallback(() => {
+    formik.handleSubmit();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [addEvent]);
+  }, [formik]);
 
   const handleDelete = useCallback((eventId: string) => {
     Alert.alert('Delete Event', 'Are you sure?', [
@@ -124,14 +123,28 @@ export default function WateringScreen() {
     </Text>
   ), []);
 
-  const sourcePicker = useMemo(() => (
-    <GenericPicker
-      label="Source"
-      options={sourceOptions}
-      value={source}
-      onChange={setSource}
-    />
-  ), [sourceOptions, source]);
+  const sourcePicker = useMemo(() => {
+    const hasSourceError = formik.touched.source && formik.errors.source;
+    return (
+      <View>
+        <GenericPicker
+          label="Source"
+          options={sourceOptions}
+          value={String(formik.values.source)}
+          onChange={(value) => {
+            formik.setFieldValue('source', value);
+            formik.setFieldTouched('source', true);
+          }}
+        />
+        {hasSourceError && (
+          <Text style={[typography.errorText, { marginLeft: spacing.lg }]}>
+            {formik.errors.source}
+          </Text>
+        )}
+      </View>
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formik.values.source, formik.errors.source, formik.touched.source, sourceOptions]);
 
   return (
     <View style={localStyles.container}>
@@ -140,20 +153,18 @@ export default function WateringScreen() {
         {/* Form Section */}
         <View style={localStyles.section}>
           <Text style={localStyles.sectionTitle}>Log Watering Event</Text>
-          <EventForm
-            date={date}
-            onDateChange={setDate}
-            amount={amount}
-            onAmountChange={setAmount}
+          <FormikEventForm
+            formik={formik}
+            fieldNames={{
+              date: 'date',
+              amount: 'amount_gallons',
+              notes: 'notes',
+            }}
             amountLabel="Amount (gallons)"
             amountPlaceholder="e.g., 25.5"
             amountKeyboardType="decimal-pad"
-            notes={notes}
-            onNotesChange={setNotes}
-            optionalField={sourcePicker}
             submitLabel="Record Watering"
-            onSubmit={handleSubmit}
-            submitting={submitting}
+            optionalField={sourcePicker}
           />
         </View>
 
