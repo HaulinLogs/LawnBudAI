@@ -19,7 +19,7 @@ export function useWaterEvents() {
 
       const { data, error: fetchError } = await supabase
         .from('water_events')
-        .select('id, date, amount_gallons, source, notes')
+        .select('*')
         .eq('user_id', user.id)
         .order('date', { ascending: false })
         .limit(20);

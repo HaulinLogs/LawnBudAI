@@ -19,7 +19,7 @@ export function useFertilizerEvents() {
 
       const { data, error: fetchError } = await supabase
         .from('fertilizer_events')
-        .select('id, date, amount_lbs_per_1000sqft, nitrogen_pct, phosphorus_pct, potassium_pct, application_form, application_method, notes')
+        .select('*')
         .eq('user_id', user.id)
         .order('date', { ascending: false })
         .limit(20);
