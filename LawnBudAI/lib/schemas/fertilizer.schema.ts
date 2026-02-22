@@ -51,4 +51,15 @@ export const fertilizerEventSchema = Yup.object({
   notes: Yup.string().optional(),
 });
 
-export type FertilizerFormValues = Yup.InferType<typeof fertilizerEventSchema>;
+export type FertilizerFormValues = {
+  date: string;
+  amount_lbs_per_1000sqft: string | number;
+  nitrogen_pct: string | number;
+  phosphorus_pct: string | number;
+  potassium_pct: string | number;
+  application_form: 'liquid' | 'granular' | string;
+  application_method: 'broadcast' | 'spot' | 'edge' | 'custom' | string;
+  notes: string;
+};
+
+export type FertilizerValidatedValues = Yup.InferType<typeof fertilizerEventSchema>;

@@ -29,4 +29,11 @@ export const wateringEventSchema = Yup.object({
   notes: Yup.string().optional(),
 });
 
-export type WateringFormValues = Yup.InferType<typeof wateringEventSchema>;
+export type WateringFormValues = {
+  date: string;
+  amount_gallons: string | number;
+  source: 'sprinkler' | 'manual' | 'rain' | string;
+  notes: string;
+};
+
+export type WateringValidatedValues = Yup.InferType<typeof wateringEventSchema>;

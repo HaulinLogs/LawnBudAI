@@ -202,10 +202,7 @@ describe('Schema Validation: Database Columns vs Hook Queries', () => {
 
       for (const badColumn of badColumns) {
         const exists = schema.some(c => c.name === badColumn);
-        expect(exists).toBe(
-          false,
-          `Column "${badColumn}" should not exist in fertilizer_events`
-        );
+        expect(exists).toBe(false);
       }
     });
 

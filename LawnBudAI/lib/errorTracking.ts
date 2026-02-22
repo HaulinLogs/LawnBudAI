@@ -10,7 +10,7 @@
  */
 
 export interface ErrorContext {
-  timestamp: string;
+  timestamp?: string;
   userId?: string;
   errorType: 'api' | 'auth' | 'network' | 'database' | 'permission' | 'other';
   message: string;

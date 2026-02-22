@@ -16,20 +16,26 @@ export interface WaterEvent {
   id: string;
   user_id: string;
   date: string; // DATE format: YYYY-MM-DD
-  amount_inches: number;
+  amount_gallons: number;
   source: 'sprinkler' | 'manual' | 'rain';
   notes?: string;
   created_at: string;
   updated_at: string;
 }
 
+export type ApplicationForm = 'liquid' | 'granular';
+export type ApplicationMethod = 'broadcast' | 'spot' | 'edge' | 'custom';
+
 export interface FertilizerEvent {
   id: string;
   user_id: string;
   date: string; // DATE format: YYYY-MM-DD
-  amount_lbs: number;
-  type: 'nitrogen' | 'phosphorus' | 'potassium' | 'npk' | 'organic' | 'liquid' | 'granular';
-  application_method?: 'spreader' | 'spray' | 'liquid' | 'granular';
+  amount_lbs_per_1000sqft: number;
+  nitrogen_pct: number;
+  phosphorus_pct: number;
+  potassium_pct: number;
+  application_form: ApplicationForm;
+  application_method: ApplicationMethod;
   notes?: string;
   created_at: string;
   updated_at: string;
@@ -47,15 +53,18 @@ export interface MowEventInput {
 
 export interface WaterEventInput {
   date: string;
-  amount_inches: number;
+  amount_gallons: number;
   source: 'sprinkler' | 'manual' | 'rain';
   notes?: string;
 }
 
 export interface FertilizerEventInput {
   date: string;
-  amount_lbs: number;
-  type: 'nitrogen' | 'phosphorus' | 'potassium' | 'npk' | 'organic' | 'liquid' | 'granular';
-  application_method?: 'spreader' | 'spray' | 'liquid' | 'granular';
+  amount_lbs_per_1000sqft: number;
+  nitrogen_pct: number;
+  phosphorus_pct: number;
+  potassium_pct: number;
+  application_form: ApplicationForm;
+  application_method: ApplicationMethod;
   notes?: string;
 }

@@ -41,7 +41,7 @@ export default function HomeScreen() {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#ecfdf5', paddingHorizontal: 20 }}>
         <View style={{ backgroundColor: '#fee2e2', borderRadius: 12, padding: 24, borderLeftWidth: 4, borderLeftColor: '#dc2626', alignItems: 'center' }}>
-          <IconSymbol name="exclamationtriangle" size={48} color="#dc2626" />
+          <IconSymbol name="exclamationmark.triangle" size={48} color="#dc2626" />
           <Text style={{ color: '#7f1d1d', fontSize: 18, fontWeight: 'bold', marginBottom: 8, marginTop: 16 }}>
             Weather Unavailable
           </Text>

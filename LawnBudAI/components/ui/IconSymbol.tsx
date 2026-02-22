@@ -25,7 +25,7 @@ const MAPPING = {
   'exclamationtriangle': 'warning',
   'shield': 'admin-panel-settings',
   'crown': 'workspace-premium',
-} as IconMapping;
+} as const satisfies Partial<IconMapping>;
 
 /**
  * An icon component that uses native SF Symbols on iOS, and Material Icons on Android and web.

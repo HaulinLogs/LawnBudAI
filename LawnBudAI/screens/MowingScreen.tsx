@@ -131,7 +131,7 @@ export default function MowingScreen() {
                   label: 'Days since last mow',
                 },
                 {
-                  value: stats.averageHeight,
+                  value: stats.averageHeight || '–',
                   label: 'Avg height (in)',
                 },
               ]}

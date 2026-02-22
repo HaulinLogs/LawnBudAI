@@ -178,7 +178,7 @@ export default function WateringScreen() {
                   label: 'Gallons this month',
                 },
                 {
-                  value: stats.averageGallonsPerWatering,
+                  value: stats.averageGallonsPerWatering || '–',
                   label: 'Avg gallons',
                 },
               ]}
@@ -187,7 +187,7 @@ export default function WateringScreen() {
             <Text style={[localStyles.sectionTitle, { marginTop: 16 }]}>Source Breakdown</Text>
             <View style={localStyles.sourceBreakdown}>
               <View style={localStyles.breakdownItem}>
-                <Icon name="droplet" size={24} color="#22c55e" />
+                <Icon name="water" size={24} color="#22c55e" />
                 <Text style={{ fontSize: 20, fontWeight: '700', color: '#22c55e', marginBottom: 4 }}>
                   {breakdown.sprinkler}
                 </Text>

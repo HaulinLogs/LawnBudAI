@@ -129,7 +129,7 @@ export default function GenericPicker<T extends string | number>({
           <View style={styles.optionContent}>
             {selectedOption?.icon && (
               <Icon
-                name={selectedOption.icon}
+                name={selectedOption.icon as any}
                 size={16}
                 color="#22c55e"
               />
@@ -162,7 +162,7 @@ export default function GenericPicker<T extends string | number>({
                 <View style={styles.optionContent}>
                   {opt.icon && (
                     <Icon
-                      name={opt.icon}
+                      name={opt.icon as any}
                       size={16}
                       color={value === opt.value ? '#22c55e' : '#6b7280'}
                     />

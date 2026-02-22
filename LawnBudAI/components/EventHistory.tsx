@@ -100,7 +100,7 @@ function EventHistoryComponent({
     return (
       <View style={styles.container}>
         <View style={styles.emptyState}>
-          <Icon name={emptyStateIcon} size={48} color={colors.border} />
+          <Icon name={emptyStateIcon as any} size={48} color={colors.border} />
           <Text style={styles.emptyStateText}>{emptyStateText}</Text>
         </View>
       </View>

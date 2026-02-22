@@ -25,4 +25,10 @@ export const mowingEventSchema = Yup.object({
   notes: Yup.string().optional(),
 });
 
-export type MowingFormValues = Yup.InferType<typeof mowingEventSchema>;
+export type MowingFormValues = {
+  date: string;
+  height_inches: string | number;
+  notes: string;
+};
+
+export type MowingValidatedValues = Yup.InferType<typeof mowingEventSchema>;
