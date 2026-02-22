@@ -4,13 +4,10 @@ import * as Yup from 'yup';
  * Yup validation schema for Fertilizer events
  * Enforces:
  * - Date is required, in YYYY-MM-DD format, and not a future date
- * - Amount is required, must be a positive number
- * - Nitrogen, Phosphorus, Potassium each required, 0-100%
- * - Application form is required (liquid|granular)
- * - Application method is required (broadcast|spot|edge|custom)
+ * - Amount (lbs) is required, must be a positive number
+ * - Type is required (nitrogen|phosphorus|potassium|npk|organic|liquid|granular)
+ * - Application method is required (spreader|spray|liquid|granular)
  * - Notes are optional
- *
- * Note: NPK total > 100% is allowed (shows warning but doesn't block submission)
  */
 export const fertilizerEventSchema = Yup.object({
   date: Yup.string()
@@ -23,42 +20,25 @@ export const fertilizerEventSchema = Yup.object({
       today.setHours(0, 0, 0, 0);
       return selectedDate <= today;
     }),
-  amount_lbs_per_1000sqft: Yup.number()
+  amount_lbs: Yup.number()
     .required('Amount is required')
     .positive('Amount must be a positive number')
+    .max(100, 'Amount must be 100 lbs or less')
     .typeError('Amount must be a valid number'),
-  nitrogen_pct: Yup.number()
-    .required('Nitrogen is required')
-    .min(0, 'Nitrogen must be 0 or greater')
-    .max(100, 'Nitrogen must be 100 or less')
-    .typeError('Nitrogen must be a valid number'),
-  phosphorus_pct: Yup.number()
-    .required('Phosphorus is required')
-    .min(0, 'Phosphorus must be 0 or greater')
-    .max(100, 'Phosphorus must be 100 or less')
-    .typeError('Phosphorus must be a valid number'),
-  potassium_pct: Yup.number()
-    .required('Potassium is required')
-    .min(0, 'Potassium must be 0 or greater')
-    .max(100, 'Potassium must be 100 or less')
-    .typeError('Potassium must be a valid number'),
-  application_form: Yup.string()
-    .oneOf(['liquid', 'granular'], 'Please select a valid application form')
-    .required('Application form is required'),
+  type: Yup.string()
+    .oneOf(['nitrogen', 'phosphorus', 'potassium', 'npk', 'organic', 'liquid', 'granular'], 'Please select a valid fertilizer type')
+    .required('Fertilizer type is required'),
   application_method: Yup.string()
-    .oneOf(['broadcast', 'spot', 'edge', 'custom'], 'Please select a valid application method')
+    .oneOf(['spreader', 'spray', 'liquid', 'granular'], 'Please select a valid application method')
     .required('Application method is required'),
   notes: Yup.string().optional(),
 });
 
 export type FertilizerFormValues = {
   date: string;
-  amount_lbs_per_1000sqft: string | number;
-  nitrogen_pct: string | number;
-  phosphorus_pct: string | number;
-  potassium_pct: string | number;
-  application_form: 'liquid' | 'granular' | string;
-  application_method: 'broadcast' | 'spot' | 'edge' | 'custom' | string;
+  amount_lbs: string | number;
+  type: 'nitrogen' | 'phosphorus' | 'potassium' | 'npk' | 'organic' | 'liquid' | 'granular' | string;
+  application_method: 'spreader' | 'spray' | 'liquid' | 'granular' | string;
   notes: string;
 };
 

@@ -10,9 +10,8 @@ import { Stack } from 'expo-router';
 import Icon from '@expo/vector-icons/Ionicons';
 import { useFormik } from 'formik';
 import { useFertilizerEvents } from '@/hooks/useFertilizerEvents';
-import { FertilizerEventInput, ApplicationForm, ApplicationMethod } from '@/models/events';
+import { FertilizerEventInput, FertilizerType, ApplicationMethod } from '@/models/events';
 import FormikEventForm from '@/components/forms/FormikEventForm';
-import FormikNPKInput from '@/components/forms/FormikNPKInput';
 import EventHistory from '@/components/EventHistory';
 import Statistics from '@/components/Statistics';
 import GenericPicker from '@/components/ui/GenericPicker';
@@ -35,27 +34,6 @@ const localStyles = StyleSheet.create({
     fontWeight: '700',
     color: '#1f2937',
     marginBottom: 12,
-  },
-  npkInputContainer: {
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 12,
-  },
-  npkInput: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    fontSize: 16,
-    backgroundColor: '#fff',
-  },
-  npkLabel: {
-    fontSize: 12,
-    color: '#6b7280',
-    marginTop: 4,
-    textAlign: 'center',
   },
   warningText: {
     color: '#f97316',
@@ -81,46 +59,41 @@ const localStyles = StyleSheet.create({
     fontSize: 12,
     color: '#6b7280',
   },
-  npkRatioDisplay: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#22c55e',
-    textAlign: 'center',
-    marginBottom: 12,
-  },
 });
 
-const APPLICATION_FORMS = [
+const FERTILIZER_TYPES = [
+  { label: 'Nitrogen', value: 'nitrogen' as const, icon: 'leaf' },
+  { label: 'Phosphorus', value: 'phosphorus' as const, icon: 'flower' },
+  { label: 'Potassium', value: 'potassium' as const, icon: 'nutrition' },
+  { label: 'NPK', value: 'npk' as const, icon: 'layers' },
+  { label: 'Organic', value: 'organic' as const, icon: 'leaf-outline' },
   { label: 'Liquid', value: 'liquid' as const, icon: 'water' },
   { label: 'Granular', value: 'granular' as const, icon: 'cube' },
 ];
 
 const APPLICATION_METHODS = [
-  { label: 'Broadcast', value: 'broadcast' as const, icon: 'radio-button-on' },
-  { label: 'Spot', value: 'spot' as const, icon: 'locate' },
-  { label: 'Edge', value: 'edge' as const, icon: 'cut' },
-  { label: 'Custom', value: 'custom' as const, icon: 'settings' },
+  { label: 'Spreader', value: 'spreader' as const, icon: 'radio-button-on' },
+  { label: 'Spray', value: 'spray' as const, icon: 'water' },
+  { label: 'Liquid', value: 'liquid' as const, icon: 'droplet' },
+  { label: 'Granular', value: 'granular' as const, icon: 'cube' },
 ];
 
 export default function FertilizerScreen() {
-  const { events, loading, error, addEvent, deleteEvent, getStats, getFormBreakdown, getMethodBreakdown } = useFertilizerEvents();
+  const { events, loading, error, addEvent, deleteEvent, getStats, getTypeBreakdown, getMethodBreakdown } = useFertilizerEvents();
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const stats = useMemo(() => getStats(), [events]);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const formBreakdown = useMemo(() => getFormBreakdown(), [events]);
+  const typeBreakdown = useMemo(() => getTypeBreakdown(), [events]);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const methodBreakdown = useMemo(() => getMethodBreakdown(), [events]);
 
   const formik = useFormik<FertilizerFormValues>({
     initialValues: {
       date: new Date().toISOString().split('T')[0],
-      amount_lbs_per_1000sqft: '',
-      nitrogen_pct: '',
-      phosphorus_pct: '',
-      potassium_pct: '',
-      application_form: 'granular',
-      application_method: 'broadcast',
+      amount_lbs: '',
+      type: 'npk',
+      application_method: 'spreader',
       notes: '',
     },
     validationSchema: fertilizerEventSchema,
@@ -130,11 +103,8 @@ export default function FertilizerScreen() {
       try {
         const input: FertilizerEventInput = {
           date: values.date,
-          amount_lbs_per_1000sqft: parseFloat(String(values.amount_lbs_per_1000sqft)),
-          nitrogen_pct: parseFloat(String(values.nitrogen_pct)),
-          phosphorus_pct: parseFloat(String(values.phosphorus_pct)),
-          potassium_pct: parseFloat(String(values.potassium_pct)),
-          application_form: values.application_form as ApplicationForm,
+          amount_lbs: parseFloat(String(values.amount_lbs)),
+          type: values.type as FertilizerType,
           application_method: values.application_method as ApplicationMethod,
           notes: String(values.notes).trim() || undefined,
         };
@@ -170,33 +140,33 @@ export default function FertilizerScreen() {
 
   const renderEventDetail = useCallback((event: any) => (
     <Text style={{ fontSize: 12, color: '#6b7280', marginTop: 4 }}>
-      {event.amount_lbs_per_1000sqft} lbs/1000 sq ft • {event.nitrogen_pct}-{event.phosphorus_pct}-{event.potassium_pct} • {event.application_form} • {event.application_method}
+      {event.amount_lbs} lbs • {event.type} • {event.application_method}
       {event.notes && <Text>{'\n'}{event.notes}</Text>}
     </Text>
   ), []);
 
-  const formPicker = useMemo(() => {
-    const hasFormError = formik.touched.application_form && formik.errors.application_form;
+  const typePicker = useMemo(() => {
+    const hasTypeError = formik.touched.type && formik.errors.type;
     return (
       <View>
         <GenericPicker
-          label="Application Form"
-          options={APPLICATION_FORMS}
-          value={String(formik.values.application_form)}
+          label="Fertilizer Type"
+          options={FERTILIZER_TYPES}
+          value={String(formik.values.type)}
           onChange={(value) => {
-            formik.setFieldValue('application_form', value);
-            formik.setFieldTouched('application_form', true);
+            formik.setFieldValue('type', value);
+            formik.setFieldTouched('type', true);
           }}
         />
-        {hasFormError && (
+        {hasTypeError && (
           <Text style={[typography.errorText, { marginLeft: spacing.lg }]}>
-            {formik.errors.application_form}
+            {formik.errors.type}
           </Text>
         )}
       </View>
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formik.values.application_form, formik.errors.application_form, formik.touched.application_form]);
+  }, [formik.values.type, formik.errors.type, formik.touched.type]);
 
   const methodPicker = useMemo(() => {
     const hasMethodError = formik.touched.application_method && formik.errors.application_method;
@@ -234,26 +204,17 @@ export default function FertilizerScreen() {
             formik={formik}
             fieldNames={{
               date: 'date',
-              amount: 'amount_lbs_per_1000sqft',
+              amount: 'amount_lbs',
               notes: 'notes',
             }}
-            amountLabel="Amount (lbs/1000 sq ft)"
+            amountLabel="Amount (lbs)"
             amountPlaceholder="e.g., 3.5"
             amountKeyboardType="decimal-pad"
             submitLabel="Record Application"
           />
 
-          {/* N-P-K Inputs */}
-          <FormikNPKInput
-            formik={formik}
-            nitrogenField="nitrogen_pct"
-            phosphorusField="phosphorus_pct"
-            potassiumField="potassium_pct"
-            showNPKWarning
-          />
-
-          {/* Application Form and Method Pickers */}
-          {formPicker}
+          {/* Fertilizer Type and Method Pickers */}
+          {typePicker}
           {methodPicker}
         </View>
 
@@ -268,57 +229,36 @@ export default function FertilizerScreen() {
                   label: 'Days since application',
                 },
                 {
-                  value: stats.totalPoundsPerThousandSqftApplied,
-                  label: 'Total lbs/1000 sq ft',
+                  value: stats.totalAmountLbs,
+                  label: 'Total lbs applied',
                 },
                 {
-                  value: stats.averagePoundsPerThousandSqftPerApplication || '–',
-                  label: 'Avg lbs/1000 sq ft per app',
+                  value: stats.averageAmountLbs || '–',
+                  label: 'Avg lbs per application',
                 },
               ]}
             />
 
-            <Text style={[localStyles.sectionTitle, { marginTop: 16 }]}>Average N-P-K Ratio</Text>
-            <Text style={localStyles.npkRatioDisplay}>
-              {stats.averageNPK.nitrogen}-{stats.averageNPK.phosphorus}-{stats.averageNPK.potassium}
-            </Text>
-
-            <Text style={[localStyles.sectionTitle, { marginTop: 16 }]}>Application Form</Text>
+            <Text style={[localStyles.sectionTitle, { marginTop: 16 }]}>Fertilizer Types Used</Text>
             <View style={localStyles.breakdownRow}>
-              <View style={localStyles.breakdownItem}>
-                <Icon name="water" size={24} color="#22c55e" />
-                <Text style={localStyles.breakdownValue}>{formBreakdown.liquid}</Text>
-                <Text style={localStyles.breakdownLabel}>Liquid</Text>
-              </View>
-              <View style={localStyles.breakdownItem}>
-                <Icon name="cube" size={24} color="#22c55e" />
-                <Text style={localStyles.breakdownValue}>{formBreakdown.granular}</Text>
-                <Text style={localStyles.breakdownLabel}>Granular</Text>
-              </View>
+              {Object.entries(typeBreakdown).map(([type, count]) => (
+                <View key={type} style={localStyles.breakdownItem}>
+                  <Icon name="leaf" size={24} color="#22c55e" />
+                  <Text style={localStyles.breakdownValue}>{count}</Text>
+                  <Text style={localStyles.breakdownLabel}>{type}</Text>
+                </View>
+              ))}
             </View>
 
-            <Text style={[localStyles.sectionTitle, { marginTop: 16 }]}>Application Method</Text>
+            <Text style={[localStyles.sectionTitle, { marginTop: 16 }]}>Application Methods</Text>
             <View style={localStyles.breakdownRow}>
-              <View style={localStyles.breakdownItem}>
-                <Icon name="radio-button-on" size={24} color="#22c55e" />
-                <Text style={localStyles.breakdownValue}>{methodBreakdown.broadcast}</Text>
-                <Text style={localStyles.breakdownLabel}>Broadcast</Text>
-              </View>
-              <View style={localStyles.breakdownItem}>
-                <Icon name="locate" size={24} color="#22c55e" />
-                <Text style={localStyles.breakdownValue}>{methodBreakdown.spot}</Text>
-                <Text style={localStyles.breakdownLabel}>Spot</Text>
-              </View>
-              <View style={localStyles.breakdownItem}>
-                <Icon name="cut" size={24} color="#22c55e" />
-                <Text style={localStyles.breakdownValue}>{methodBreakdown.edge}</Text>
-                <Text style={localStyles.breakdownLabel}>Edge</Text>
-              </View>
-              <View style={localStyles.breakdownItem}>
-                <Icon name="settings" size={24} color="#22c55e" />
-                <Text style={localStyles.breakdownValue}>{methodBreakdown.custom}</Text>
-                <Text style={localStyles.breakdownLabel}>Custom</Text>
-              </View>
+              {Object.entries(methodBreakdown).map(([method, count]) => (
+                <View key={method} style={localStyles.breakdownItem}>
+                  <Icon name="settings" size={24} color="#22c55e" />
+                  <Text style={localStyles.breakdownValue}>{count}</Text>
+                  <Text style={localStyles.breakdownLabel}>{method}</Text>
+                </View>
+              ))}
             </View>
           </View>
         )}

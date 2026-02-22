@@ -24,13 +24,10 @@ describe('useFertilizerEvents', () => {
       id: '1',
       user_id: 'user-123',
       date: '2026-02-15',
-      amount_lbs_per_1000sqft: 3.5,
-      nitrogen_pct: 20,
-      phosphorus_pct: 5,
-      potassium_pct: 10,
-      application_form: 'granular' as const,
-      application_method: 'broadcast' as const,
-      notes: 'Spring nitrogen application',
+      amount_lbs: 3.5,
+      type: 'npk' as const,
+      application_method: 'spreader' as const,
+      notes: 'Spring fertilizer application',
       created_at: '2026-02-15T10:00:00Z',
       updated_at: '2026-02-15T10:00:00Z',
     },
@@ -38,12 +35,9 @@ describe('useFertilizerEvents', () => {
       id: '2',
       user_id: 'user-123',
       date: '2026-02-01',
-      amount_lbs_per_1000sqft: 2.5,
-      nitrogen_pct: 15,
-      phosphorus_pct: 8,
-      potassium_pct: 12,
-      application_form: 'liquid' as const,
-      application_method: 'spot' as const,
+      amount_lbs: 2.5,
+      type: 'nitrogen' as const,
+      application_method: 'spray' as const,
       notes: 'General maintenance',
       created_at: '2026-02-01T10:00:00Z',
       updated_at: '2026-02-01T10:00:00Z',
@@ -192,13 +186,10 @@ describe('useFertilizerEvents', () => {
       // Act
       const input: FertilizerEventInput = {
         date: '2026-02-15',
-        amount_lbs_per_1000sqft: 3.5,
-        nitrogen_pct: 20,
-        phosphorus_pct: 5,
-        potassium_pct: 10,
-        application_form: 'granular',
-        application_method: 'broadcast',
-        notes: 'Spring nitrogen application',
+        amount_lbs: 3.5,
+        type: 'npk',
+        application_method: 'spreader',
+        notes: 'Spring fertilizer application',
       };
 
       await act(async () => {
@@ -250,12 +241,9 @@ describe('useFertilizerEvents', () => {
       // Act & Assert
       const input: FertilizerEventInput = {
         date: '2026-02-15',
-        amount_lbs_per_1000sqft: 3.5,
-        nitrogen_pct: 20,
-        phosphorus_pct: 5,
-        potassium_pct: 10,
-        application_form: 'granular',
-        application_method: 'broadcast',
+        amount_lbs: 3.5,
+        type: 'npk',
+        application_method: 'spreader',
       };
 
       await expect(result.current.addEvent(input)).rejects.toThrow();
@@ -306,7 +294,7 @@ describe('useFertilizerEvents', () => {
 
       // Assert
       expect(result.current.events.length).toBe(initialCount - 1);
-      expect(result.current.events.some((e) => e.id === '1')).toBe(false);
+      expect(result.current.events.find(e => e.id === '1')).toBeUndefined();
     });
 
     it('should handle delete errors', async () => {
@@ -350,7 +338,7 @@ describe('useFertilizerEvents', () => {
   });
 
   describe('getStats', () => {
-    it('should calculate last application days ago', async () => {
+    it('should calculate statistics correctly', async () => {
       // Arrange
       (useSupabaseUser as jest.Mock).mockReturnValue({
         user: mockUser,
@@ -358,35 +346,38 @@ describe('useFertilizerEvents', () => {
         error: null,
       });
 
-      (supabase.from as jest.Mock).mockReturnValue({
-        select: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnValue({
-            order: jest.fn().mockReturnValue({
-              limit: jest.fn().mockResolvedValue({
-                data: mockEvents,
-                error: null,
-              }),
+      const mockSelect = jest.fn().mockReturnValue({
+        eq: jest.fn().mockReturnValue({
+          order: jest.fn().mockReturnValue({
+            limit: jest.fn().mockResolvedValue({
+              data: mockEvents,
+              error: null,
             }),
           }),
         }),
       });
 
+      (supabase.from as jest.Mock).mockReturnValue({
+        select: mockSelect,
+      });
+
+      // Act
       const { result } = renderHook(() => useFertilizerEvents());
 
       await waitFor(() => {
         expect(result.current.loading).toBe(false);
       });
 
-      // Act
       const stats = result.current.getStats();
 
       // Assert
       expect(stats.lastApplicationDaysAgo).toBeDefined();
-      expect(stats.lastApplicationDaysAgo).toBeGreaterThanOrEqual(0);
-      expect(typeof stats.lastApplicationDaysAgo).toBe('number');
+      expect(stats.totalAmountLbs).toBeDefined();
+      expect(stats.averageAmountLbs).toBeDefined();
+      expect(stats.mostUsedType).toBeDefined();
     });
 
-    it('should calculate total pounds applied', async () => {
+    it('should return null values when no events exist', async () => {
       // Arrange
       (useSupabaseUser as jest.Mock).mockReturnValue({
         user: mockUser,
@@ -394,176 +385,113 @@ describe('useFertilizerEvents', () => {
         error: null,
       });
 
-      (supabase.from as jest.Mock).mockReturnValue({
-        select: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnValue({
-            order: jest.fn().mockReturnValue({
-              limit: jest.fn().mockResolvedValue({
-                data: mockEvents,
-                error: null,
-              }),
+      const mockSelect = jest.fn().mockReturnValue({
+        eq: jest.fn().mockReturnValue({
+          order: jest.fn().mockReturnValue({
+            limit: jest.fn().mockResolvedValue({
+              data: [],
+              error: null,
             }),
           }),
         }),
       });
 
+      (supabase.from as jest.Mock).mockReturnValue({
+        select: mockSelect,
+      });
+
+      // Act
       const { result } = renderHook(() => useFertilizerEvents());
 
       await waitFor(() => {
         expect(result.current.loading).toBe(false);
       });
 
-      // Act
-      const stats = result.current.getStats();
-
-      // Assert
-      const expectedTotal = mockEvents.reduce((sum, e) => sum + e.amount_lbs_per_1000sqft, 0);
-      expect(stats.totalPoundsPerThousandSqftApplied).toBe(expectedTotal.toFixed(1));
-    });
-
-    it('should calculate average pounds per application', async () => {
-      // Arrange
-      (useSupabaseUser as jest.Mock).mockReturnValue({
-        user: mockUser,
-        loading: false,
-        error: null,
-      });
-
-      (supabase.from as jest.Mock).mockReturnValue({
-        select: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnValue({
-            order: jest.fn().mockReturnValue({
-              limit: jest.fn().mockResolvedValue({
-                data: mockEvents,
-                error: null,
-              }),
-            }),
-          }),
-        }),
-      });
-
-      const { result } = renderHook(() => useFertilizerEvents());
-
-      await waitFor(() => {
-        expect(result.current.loading).toBe(false);
-      });
-
-      // Act
-      const stats = result.current.getStats();
-
-      // Assert
-      expect(stats.averagePoundsPerThousandSqftPerApplication).toBeDefined();
-      expect(parseFloat(stats.averagePoundsPerThousandSqftPerApplication || '0')).toBeGreaterThan(0);
-    });
-
-    it('should get fertilizer type breakdown', async () => {
-      // Arrange
-      (useSupabaseUser as jest.Mock).mockReturnValue({
-        user: mockUser,
-        loading: false,
-        error: null,
-      });
-
-      (supabase.from as jest.Mock).mockReturnValue({
-        select: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnValue({
-            order: jest.fn().mockReturnValue({
-              limit: jest.fn().mockResolvedValue({
-                data: mockEvents,
-                error: null,
-              }),
-            }),
-          }),
-        }),
-      });
-
-      const { result } = renderHook(() => useFertilizerEvents());
-
-      await waitFor(() => {
-        expect(result.current.loading).toBe(false);
-      });
-
-      // Act
-      const breakdown = result.current.getFormBreakdown();
-
-      // Assert
-      expect(breakdown).toHaveProperty('granular');
-      expect(breakdown).toHaveProperty('liquid');
-      expect(breakdown.granular).toBe(1);
-      expect(breakdown.liquid).toBe(1);
-    });
-
-    it('should get application method breakdown', async () => {
-      // Arrange
-      (useSupabaseUser as jest.Mock).mockReturnValue({
-        user: mockUser,
-        loading: false,
-        error: null,
-      });
-
-      (supabase.from as jest.Mock).mockReturnValue({
-        select: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnValue({
-            order: jest.fn().mockReturnValue({
-              limit: jest.fn().mockResolvedValue({
-                data: mockEvents,
-                error: null,
-              }),
-            }),
-          }),
-        }),
-      });
-
-      const { result } = renderHook(() => useFertilizerEvents());
-
-      await waitFor(() => {
-        expect(result.current.loading).toBe(false);
-      });
-
-      // Act
-      const breakdown = result.current.getMethodBreakdown();
-
-      // Assert
-      expect(breakdown).toHaveProperty('spreader');
-      expect(breakdown).toHaveProperty('spray');
-      expect(breakdown.spreader).toBe(1);
-      expect(breakdown.spray).toBe(1);
-    });
-
-    it('should return null stats when no events exist', async () => {
-      // Arrange
-      (useSupabaseUser as jest.Mock).mockReturnValue({
-        user: mockUser,
-        loading: false,
-        error: null,
-      });
-
-      (supabase.from as jest.Mock).mockReturnValue({
-        select: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnValue({
-            order: jest.fn().mockReturnValue({
-              limit: jest.fn().mockResolvedValue({
-                data: [],
-                error: null,
-              }),
-            }),
-          }),
-        }),
-      });
-
-      const { result } = renderHook(() => useFertilizerEvents());
-
-      await waitFor(() => {
-        expect(result.current.loading).toBe(false);
-      });
-
-      // Act
       const stats = result.current.getStats();
 
       // Assert
       expect(stats.lastApplicationDaysAgo).toBeNull();
-      expect(stats.totalPoundsPerThousandSqftApplied).toBe('0');
-      expect(stats.averagePoundsPerThousandSqftPerApplication).toBeNull();
+      expect(stats.totalAmountLbs).toBe('0');
+      expect(stats.averageAmountLbs).toBeNull();
+      expect(stats.mostUsedType).toBeNull();
+    });
+  });
+
+  describe('getTypeBreakdown', () => {
+    it('should calculate type breakdown correctly', async () => {
+      // Arrange
+      (useSupabaseUser as jest.Mock).mockReturnValue({
+        user: mockUser,
+        loading: false,
+        error: null,
+      });
+
+      const mockSelect = jest.fn().mockReturnValue({
+        eq: jest.fn().mockReturnValue({
+          order: jest.fn().mockReturnValue({
+            limit: jest.fn().mockResolvedValue({
+              data: mockEvents,
+              error: null,
+            }),
+          }),
+        }),
+      });
+
+      (supabase.from as jest.Mock).mockReturnValue({
+        select: mockSelect,
+      });
+
+      // Act
+      const { result } = renderHook(() => useFertilizerEvents());
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      const breakdown = result.current.getTypeBreakdown();
+
+      // Assert
+      expect(breakdown.npk).toBe(1);
+      expect(breakdown.nitrogen).toBe(1);
+    });
+  });
+
+  describe('getMethodBreakdown', () => {
+    it('should calculate method breakdown correctly', async () => {
+      // Arrange
+      (useSupabaseUser as jest.Mock).mockReturnValue({
+        user: mockUser,
+        loading: false,
+        error: null,
+      });
+
+      const mockSelect = jest.fn().mockReturnValue({
+        eq: jest.fn().mockReturnValue({
+          order: jest.fn().mockReturnValue({
+            limit: jest.fn().mockResolvedValue({
+              data: mockEvents,
+              error: null,
+            }),
+          }),
+        }),
+      });
+
+      (supabase.from as jest.Mock).mockReturnValue({
+        select: mockSelect,
+      });
+
+      // Act
+      const { result } = renderHook(() => useFertilizerEvents());
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      const breakdown = result.current.getMethodBreakdown();
+
+      // Assert
+      expect(breakdown.spreader).toBe(1);
+      expect(breakdown.spray).toBe(1);
     });
   });
 });

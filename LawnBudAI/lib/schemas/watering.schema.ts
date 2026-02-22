@@ -19,7 +19,7 @@ export const wateringEventSchema = Yup.object({
       today.setHours(0, 0, 0, 0);
       return selectedDate <= today;
     }),
-  amount_gallons: Yup.number()
+  amount_inches: Yup.number()
     .required('Amount is required')
     .positive('Amount must be a positive number')
     .typeError('Amount must be a valid number'),
@@ -31,7 +31,7 @@ export const wateringEventSchema = Yup.object({
 
 export type WateringFormValues = {
   date: string;
-  amount_gallons: string | number;
+  amount_inches: string | number;
   source: 'sprinkler' | 'manual' | 'rain' | string;
   notes: string;
 };

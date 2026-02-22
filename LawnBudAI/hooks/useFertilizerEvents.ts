@@ -46,11 +46,8 @@ export function useFertilizerEvents() {
           {
             user_id: user.id,
             date: input.date,
-            amount_lbs_per_1000sqft: input.amount_lbs_per_1000sqft,
-            nitrogen_pct: input.nitrogen_pct,
-            phosphorus_pct: input.phosphorus_pct,
-            potassium_pct: input.potassium_pct,
-            application_form: input.application_form,
+            amount_lbs: input.amount_lbs,
+            type: input.type,
             application_method: input.application_method,
             notes: input.notes || null,
           },
@@ -96,9 +93,9 @@ export function useFertilizerEvents() {
     if (events.length === 0) {
       return {
         lastApplicationDaysAgo: null,
-        totalPoundsPerThousandSqftApplied: '0',
-        averagePoundsPerThousandSqftPerApplication: null,
-        averageNPK: { n: 0, p: 0, k: 0 },
+        totalAmountLbs: '0',
+        averageAmountLbs: null,
+        mostUsedType: null,
       };
     }
 
@@ -107,39 +104,37 @@ export function useFertilizerEvents() {
     const today = new Date();
     const daysAgo = Math.floor((today.getTime() - lastAppDate.getTime()) / (1000 * 60 * 60 * 24));
 
-    // Calculate total pounds per 1000 sqft applied
-    const totalPounds = events.reduce((sum, e) => sum + e.amount_lbs_per_1000sqft, 0);
+    // Calculate total pounds applied
+    const totalPounds = events.reduce((sum, e) => sum + e.amount_lbs, 0);
 
     // Calculate average per application
     const averagePounds = events.length > 0
-      ? (events.reduce((sum, e) => sum + e.amount_lbs_per_1000sqft, 0) / events.length).toFixed(1)
+      ? (events.reduce((sum, e) => sum + e.amount_lbs, 0) / events.length).toFixed(1)
       : null;
 
-    // Calculate average NPK
-    const averageN = events.length > 0
-      ? events.reduce((sum, e) => sum + e.nitrogen_pct, 0) / events.length
-      : 0;
-    const averageP = events.length > 0
-      ? events.reduce((sum, e) => sum + e.phosphorus_pct, 0) / events.length
-      : 0;
-    const averageK = events.length > 0
-      ? events.reduce((sum, e) => sum + e.potassium_pct, 0) / events.length
-      : 0;
+    // Find most used fertilizer type
+    const typeCount: { [key: string]: number } = {};
+    events.forEach(event => {
+      typeCount[event.type] = (typeCount[event.type] || 0) + 1;
+    });
+    const mostUsedType = Object.keys(typeCount).length > 0
+      ? Object.entries(typeCount).reduce((a, b) => a[1] > b[1] ? a : b)[0]
+      : null;
 
     return {
       lastApplicationDaysAgo: daysAgo,
-      totalPoundsPerThousandSqftApplied: totalPounds.toFixed(1),
-      averagePoundsPerThousandSqftPerApplication: averagePounds,
-      averageNPK: { nitrogen: averageN.toFixed(1), phosphorus: averageP.toFixed(1), potassium: averageK.toFixed(1) },
+      totalAmountLbs: totalPounds.toFixed(1),
+      averageAmountLbs: averagePounds,
+      mostUsedType,
     };
   };
 
-  // Get application form breakdown (liquid vs granular)
-  const getFormBreakdown = () => {
+  // Get fertilizer type breakdown
+  const getTypeBreakdown = () => {
     const breakdown: { [key: string]: number } = {};
 
     events.forEach(event => {
-      breakdown[event.application_form] = (breakdown[event.application_form] || 0) + 1;
+      breakdown[event.type] = (breakdown[event.type] || 0) + 1;
     });
 
     return breakdown;
@@ -184,7 +179,7 @@ export function useFertilizerEvents() {
     addEvent,
     deleteEvent,
     getStats,
-    getFormBreakdown,
+    getTypeBreakdown,
     getMethodBreakdown,
     refetch: fetchEvents,
   };

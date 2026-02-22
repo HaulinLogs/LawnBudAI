@@ -46,7 +46,7 @@ export function useWaterEvents() {
           {
             user_id: user.id,
             date: input.date,
-            amount_gallons: input.amount_gallons,
+            amount_inches: input.amount_inches,
             source: input.source,
             notes: input.notes || null,
           },
@@ -102,20 +102,20 @@ export function useWaterEvents() {
     const today = new Date();
     const daysAgo = Math.floor((today.getTime() - lastWaterDate.getTime()) / (1000 * 60 * 60 * 24));
 
-    // Calculate total gallons this month
+    // Calculate total inches this month
     const thisMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     const eventsThisMonth = events.filter(e => new Date(e.date) >= thisMonth);
-    const totalGallons = eventsThisMonth.reduce((sum, e) => sum + e.amount_gallons, 0);
+    const totalInches = eventsThisMonth.reduce((sum, e) => sum + e.amount_inches, 0);
 
     // Calculate average
-    const averageGallons = events.length > 0
-      ? (events.reduce((sum, e) => sum + e.amount_gallons, 0) / events.length).toFixed(1)
+    const averageInches = events.length > 0
+      ? (events.reduce((sum, e) => sum + e.amount_inches, 0) / events.length).toFixed(1)
       : null;
 
     return {
       lastWateredDaysAgo: daysAgo,
-      totalGallonsThisMonth: totalGallons.toFixed(1),
-      averageGallonsPerWatering: averageGallons,
+      totalInchesThisMonth: totalInches.toFixed(1),
+      averageInchesPerWatering: averageInches,
     };
   };
 

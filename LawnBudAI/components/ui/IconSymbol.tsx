@@ -22,7 +22,6 @@ const MAPPING = {
   'cloud.rain': 'water',
   'ladybug': 'bug-report',
   'gear': 'settings',
-  'exclamationtriangle': 'warning',
   'exclamationmark.triangle': 'warning',
   'shield': 'admin-panel-settings',
   'crown': 'workspace-premium',

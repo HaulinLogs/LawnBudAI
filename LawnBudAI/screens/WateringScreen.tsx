@@ -66,7 +66,7 @@ export default function WateringScreen() {
   const formik = useFormik<WateringFormValues>({
     initialValues: {
       date: new Date().toISOString().split('T')[0],
-      amount_gallons: '',
+      amount_inches: '',
       source: 'manual',
       notes: '',
     },
@@ -77,7 +77,7 @@ export default function WateringScreen() {
       try {
         const input: WaterEventInput = {
           date: values.date,
-          amount_gallons: parseFloat(String(values.amount_gallons)),
+          amount_inches: parseFloat(String(values.amount_inches)),
           source: values.source as 'sprinkler' | 'manual' | 'rain',
           notes: String(values.notes).trim() || undefined,
         };
@@ -113,7 +113,7 @@ export default function WateringScreen() {
 
   const renderEventDetail = useCallback((event: any) => (
     <Text style={{ fontSize: 12, color: '#6b7280', marginTop: 4 }}>
-      {event.amount_gallons} gal • {event.source}
+      {event.amount_inches}&quot; • {event.source}
       {event.notes && <Text>{'\n'}{event.notes}</Text>}
     </Text>
   ), []);
@@ -152,11 +152,11 @@ export default function WateringScreen() {
             formik={formik}
             fieldNames={{
               date: 'date',
-              amount: 'amount_gallons',
+              amount: 'amount_inches',
               notes: 'notes',
             }}
-            amountLabel="Amount (gallons)"
-            amountPlaceholder="e.g., 25.5"
+            amountLabel="Amount (inches)"
+            amountPlaceholder="e.g., 0.5"
             amountKeyboardType="decimal-pad"
             submitLabel="Record Watering"
             optionalField={sourcePicker}
@@ -174,12 +174,12 @@ export default function WateringScreen() {
                   label: 'Days since watering',
                 },
                 {
-                  value: stats.totalGallonsThisMonth,
-                  label: 'Gallons this month',
+                  value: stats.totalInchesThisMonth || "–",
+                  label: 'Inches this month',
                 },
                 {
-                  value: stats.averageGallonsPerWatering || '–',
-                  label: 'Avg gallons',
+                  value: stats.averageInchesPerWatering || '–',
+                  label: 'Avg inches',
                 },
               ]}
             />
