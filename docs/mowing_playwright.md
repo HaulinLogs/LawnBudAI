@@ -532,12 +532,12 @@ await expect(page.locator('text=/3.0"')).toBeVisible();
 await expect(page.locator('text=/2.0"')).toBeVisible();
 ```
 
-## TEST 14: Future Date Validation
+## TEST 14: Duplicate Date Prevention
 
 ### Preconditions
 - User is authenticated
 - On Mowing screen
-- Database has events for today (or events from previous days exist)
+- An event already exists for today (e.g., height 2.5" recorded today)
 
 ### Steps
 1. Verify "Log Mowing Event" form is visible
@@ -547,37 +547,153 @@ await expect(page.locator('text=/2.0"')).toBeVisible();
 5. "Record Mowing" button is visible and disabled until height is entered
 
 ### User Actions
-1. Change date to a future date (e.g., tomorrow)
-2. Enter height: `2.5`
+1. Keep date as today (matches existing event)
+2. Enter height: `3.0`
 3. Leave notes empty
-4. "Record Mowing" button remains disabled (cannot submit future date)
+4. "Record Mowing" button becomes enabled
+5. Click "Record Mowing"
 
 ### Expected Results
 
-**Immediately after submit (no alert required)**
+**When form is submitted with duplicate date:**
 - Form does NOT submit
-- Error message appears near date field: "Date cannot be in the future"
-- Form inputs remain unchanged (date still future, height still 2.5)
-- Submit button remains DISABLED
-- User must correct date to submit
-  
+- Error message appears BELOW date field: "An event already exists for this date. Delete the existing event or update the date."
+- Error text is red/error color
+- Form inputs remain unchanged:
+  - Date still shows: today
+  - Height still shows: `3.0`
+  - Notes still empty
+- Submit button remains ENABLED (user can try different date)
+- No new event is added to history
+- Existing event count remains the same
+
 ### Assertions (Playwright Test)
 ```typescript
-// 1. Form clears immediately (no alert dialog needed)
-await expect(page.locator('input[placeholder*="Height"]')).toHaveValue('');
+// 1. Date field contains today
+const dateInput = page.locator('input[placeholder*="YYYY-MM-DD"]');
+await expect(dateInput).toHaveValue(/\d{4}-\d{2}-\d{2}/);
 
-// 2. Submit button is enabled and ready
-await expect(page.locator('button').filter({ hasText: /record mowing/i })).toBeDisabled();
+// 2. Enter height for new event
+const heightInput = page.locator('input[placeholder*="Height"]');
+await heightInput.fill('3.0');
 
-const dateInput = page.locator('input[type="date"]');
+// 3. Submit button becomes enabled
+const submitBtn = page.locator('button').filter({ hasText: /record mowing/i });
+await expect(submitBtn).toBeEnabled();
 
-// 3. Error message appears ON THE FIELD
-const errorMsg = dateInput.locator('~').filter({ hasText: /future/i });
+// 4. Click submit
+await submitBtn.click();
+
+// 5. Error message appears ON THE DATE FIELD
+const errorMsg = dateInput.locator('~').filter({ hasText: /already exists|duplicate|delete/i });
 await expect(errorMsg).toBeVisible();
 
-// 4. Button still disabled2
-await expect(submitBtn).toBeDisabled();
+// 6. Submit button still enabled (not disabled)
+await expect(submitBtn).toBeEnabled();
 
+// 7. Form data unchanged
+await expect(dateInput).toHaveValue(/\d{4}-\d{2}-\d{2}/);
+await expect(heightInput).toHaveValue('3.0');
+
+// 8. Event count unchanged (no new event added)
+const eventsBefore = await page.locator('[testid="mowing-event"]').count();
+await expect(eventsBefore).toBe(1); // Original event still there
+```
+
+---
+
+## TEST 15: Future Date Validation
+
+### Preconditions
+- User is authenticated
+- On Mowing screen
+- No event exists for tomorrow
+
+### Steps
+1. Verify "Log Mowing Event" form is visible
+2. Date field contains today's date (auto-filled)
+3. Height field is empty
+4. Notes field is empty
+5. "Record Mowing" button is visible and disabled until height is entered
+
+### User Actions
+1. Change date to a future date (e.g., tomorrow using format YYYY-MM-DD)
+2. Enter height: `2.5`
+3. Leave notes empty
+4. Try to click "Record Mowing"
+
+### Expected Results
+
+**When form is submitted with future date:**
+- Form does NOT submit
+- Error message appears BELOW date field: "You cannot choose a future date"
+- Error text is red/error color
+- Form inputs remain unchanged:
+  - Date still shows: future date
+  - Height still shows: `2.5`
+  - Notes still empty
+- Submit button remains ENABLED (user can correct date and retry)
+- No event is added to history
+
+**When user corrects date to today:**
+- Error message disappears
+- Submit succeeds normally (happy path)
+
+### Assertions (Playwright Test)
+```typescript
+// 1. Date field initially contains today
+const dateInput = page.locator('input[placeholder*="YYYY-MM-DD"]');
+const todayStr = new Date().toISOString().split('T')[0];
+await expect(dateInput).toHaveValue(todayStr);
+
+// 2. Change to future date (tomorrow)
+const tomorrow = new Date();
+tomorrow.setDate(tomorrow.getDate() + 1);
+const tomorrowStr = tomorrow.toISOString().split('T')[0];
+await dateInput.fill(tomorrowStr);
+
+// 3. Enter valid height
+const heightInput = page.locator('input[placeholder*="Height"]');
+await heightInput.fill('2.5');
+
+// 4. Submit button becomes enabled
+const submitBtn = page.locator('button').filter({ hasText: /record mowing/i });
+await expect(submitBtn).toBeEnabled();
+
+// 5. Try to submit with future date
+await submitBtn.click();
+
+// 6. Error message appears ON THE DATE FIELD
+const errorMsg = dateInput.locator('~').filter({ hasText: /future|cannot choose/i });
+await expect(errorMsg).toBeVisible();
+
+// 7. Submit button still enabled (not disabled)
+await expect(submitBtn).toBeEnabled();
+
+// 8. Form data unchanged
+await expect(dateInput).toHaveValue(tomorrowStr);
+await expect(heightInput).toHaveValue('2.5');
+
+// 9. No event in history
+const events = page.locator('[testid="mowing-event"]');
+await expect(events).toHaveCount(0);
+
+// 10. User corrects date to today
+await dateInput.fill(todayStr);
+
+// 11. Error message disappears
+await expect(errorMsg).not.toBeVisible();
+
+// 12. Button remains enabled
+await expect(submitBtn).toBeEnabled();
+
+// 13. Submit succeeds
+await submitBtn.click();
+
+// 14. Form clears and event appears
+await expect(heightInput).toHaveValue('');
+const eventItem = page.locator('text=/2.5"').first();
+await expect(eventItem).toBeVisible();
 ```
 
 ---
@@ -599,8 +715,8 @@ await expect(submitBtn).toBeDisabled();
 | 11 | Loading state | NO | TODO |
 | 12 | API error handling | YES | TODO |
 | 13 | Multiple submissions | NO | TODO |
-| 14 | Future date validation | YES | TODO |
-| 15 | Same day multiple events | YES | TODO |
+| 14 | Duplicate date prevention | YES | TODO |
+| 15 | Future date validation | YES | TODO |
 
 **Critical tests**: Must pass for production release
 **Nice-to-have tests**: Improve coverage but not blockers
