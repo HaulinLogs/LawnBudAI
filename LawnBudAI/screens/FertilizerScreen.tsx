@@ -1,21 +1,24 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   View,
   Text,
   ScrollView,
   Alert,
   StyleSheet,
-  TextInput,
 } from 'react-native';
 import { Stack } from 'expo-router';
 import Icon from '@expo/vector-icons/Ionicons';
+// eslint-disable-next-line import/no-unresolved
+import { useFormik } from 'formik';
 import { useFertilizerEvents } from '@/hooks/useFertilizerEvents';
 import { FertilizerEventInput, ApplicationForm, ApplicationMethod } from '@/models/events';
-import EventForm from '@/components/EventForm';
+import FormikEventForm from '@/components/forms/FormikEventForm';
+import FormikNPKInput from '@/components/forms/FormikNPKInput';
 import EventHistory from '@/components/EventHistory';
 import Statistics from '@/components/Statistics';
 import GenericPicker from '@/components/ui/GenericPicker';
-import { validateRequiredField, validatePositiveNumber, validateNumberInRange, validateForm } from '@/lib/validation';
+import { fertilizerEventSchema, FertilizerFormValues } from '@/lib/schemas/fertilizer.schema';
+import { spacing, typography } from '@/styles/theme';
 
 const localStyles = StyleSheet.create({
   container: {
@@ -102,15 +105,6 @@ const APPLICATION_METHODS = [
 
 export default function FertilizerScreen() {
   const { events, loading, error, addEvent, deleteEvent, getStats, getFormBreakdown, getMethodBreakdown } = useFertilizerEvents();
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-  const [amount, setAmount] = useState('');
-  const [nitrogen, setNitrogen] = useState('');
-  const [phosphorus, setPhosphorus] = useState('');
-  const [potassium, setPotassium] = useState('');
-  const [applicationForm, setApplicationForm] = useState<ApplicationForm>('granular');
-  const [applicationMethod, setApplicationMethod] = useState<ApplicationMethod>('broadcast');
-  const [notes, setNotes] = useState('');
-  const [submitting, setSubmitting] = useState(false);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const stats = useMemo(() => getStats(), [events]);
@@ -119,54 +113,47 @@ export default function FertilizerScreen() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const methodBreakdown = useMemo(() => getMethodBreakdown(), [events]);
 
-  // Calculate NPK total and warn if > 100
-  const npkTotal = useMemo(() => (parseFloat(nitrogen) || 0) + (parseFloat(phosphorus) || 0) + (parseFloat(potassium) || 0), [nitrogen, phosphorus, potassium]);
-  const npkWarning = useMemo(() => npkTotal > 100 ? 'N-P-K total exceeds 100%' : null, [npkTotal]);
+  const formik = useFormik<FertilizerFormValues>({
+    initialValues: {
+      date: new Date().toISOString().split('T')[0],
+      amount_lbs_per_1000sqft: '',
+      nitrogen_pct: '',
+      phosphorus_pct: '',
+      potassium_pct: '',
+      application_form: 'granular',
+      application_method: 'broadcast',
+      notes: '',
+    },
+    validationSchema: fertilizerEventSchema,
+    validateOnChange: true,  // Real-time validation
+    validateOnBlur: true,    // Validate on field blur
+    onSubmit: async (values, { resetForm }) => {
+      try {
+        const input: FertilizerEventInput = {
+          date: values.date,
+          amount_lbs_per_1000sqft: parseFloat(String(values.amount_lbs_per_1000sqft)),
+          nitrogen_pct: parseFloat(String(values.nitrogen_pct)),
+          phosphorus_pct: parseFloat(String(values.phosphorus_pct)),
+          potassium_pct: parseFloat(String(values.potassium_pct)),
+          application_form: values.application_form as ApplicationForm,
+          application_method: values.application_method as ApplicationMethod,
+          notes: String(values.notes).trim() || undefined,
+        };
+        await addEvent(input);
+        // Form resets naturally after successful submission
+        resetForm();
+        // Optional: Show success alert
+        Alert.alert('Success', 'Fertilizer application recorded!');
+      } catch {
+        Alert.alert('Error', 'Failed to record fertilizer application');
+      }
+    },
+  });
 
-  const handleSubmit = useCallback(async () => {
-    // Validate form using centralized validation utilities
-    const validation = validateForm([
-      () => validateRequiredField(date, 'Date'),
-      () => validatePositiveNumber(amount, 'Amount'),
-      () => validateNumberInRange(nitrogen, 'Nitrogen', 0, 100),
-      () => validateNumberInRange(phosphorus, 'Phosphorus', 0, 100),
-      () => validateNumberInRange(potassium, 'Potassium', 0, 100),
-    ]);
-
-    if (!validation.valid) {
-      Alert.alert('Error', validation.error || 'Please fill in all required fields');
-      return;
-    }
-
-    setSubmitting(true);
-    try {
-      const input: FertilizerEventInput = {
-        date,
-        amount_lbs_per_1000sqft: parseFloat(amount),
-        nitrogen_pct: parseFloat(nitrogen),
-        phosphorus_pct: parseFloat(phosphorus),
-        potassium_pct: parseFloat(potassium),
-        application_form: applicationForm,
-        application_method: applicationMethod,
-        notes: notes.trim() || undefined,
-      };
-      await addEvent(input);
-      Alert.alert('Success', 'Fertilizer application recorded!');
-      setAmount('');
-      setNitrogen('');
-      setPhosphorus('');
-      setPotassium('');
-      setNotes('');
-      setDate(new Date().toISOString().split('T')[0]);
-      setApplicationForm('granular');
-      setApplicationMethod('broadcast');
-    } catch {
-      Alert.alert('Error', 'Failed to record fertilizer application');
-    } finally {
-      setSubmitting(false);
-    }
+  const handleSubmit = useCallback(() => {
+    formik.handleSubmit();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [addEvent]);
+  }, [formik]);
 
   const handleDelete = useCallback((eventId: string) => {
     Alert.alert('Delete Event', 'Are you sure?', [
@@ -193,23 +180,51 @@ export default function FertilizerScreen() {
     </Text>
   ), []);
 
-  const formPicker = useMemo(() => (
-    <GenericPicker
-      label="Application Form"
-      options={APPLICATION_FORMS}
-      value={applicationForm}
-      onChange={setApplicationForm}
-    />
-  ), [applicationForm]);
+  const formPicker = useMemo(() => {
+    const hasFormError = formik.touched.application_form && formik.errors.application_form;
+    return (
+      <View>
+        <GenericPicker
+          label="Application Form"
+          options={APPLICATION_FORMS}
+          value={String(formik.values.application_form)}
+          onChange={(value) => {
+            formik.setFieldValue('application_form', value);
+            formik.setFieldTouched('application_form', true);
+          }}
+        />
+        {hasFormError && (
+          <Text style={[typography.errorText, { marginLeft: spacing.lg }]}>
+            {formik.errors.application_form}
+          </Text>
+        )}
+      </View>
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formik.values.application_form, formik.errors.application_form, formik.touched.application_form]);
 
-  const methodPicker = useMemo(() => (
-    <GenericPicker
-      label="Application Method"
-      options={APPLICATION_METHODS}
-      value={applicationMethod}
-      onChange={setApplicationMethod}
-    />
-  ), [applicationMethod]);
+  const methodPicker = useMemo(() => {
+    const hasMethodError = formik.touched.application_method && formik.errors.application_method;
+    return (
+      <View>
+        <GenericPicker
+          label="Application Method"
+          options={APPLICATION_METHODS}
+          value={String(formik.values.application_method)}
+          onChange={(value) => {
+            formik.setFieldValue('application_method', value);
+            formik.setFieldTouched('application_method', true);
+          }}
+        />
+        {hasMethodError && (
+          <Text style={[typography.errorText, { marginLeft: spacing.lg }]}>
+            {formik.errors.application_method}
+          </Text>
+        )}
+      </View>
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formik.values.application_method, formik.errors.application_method, formik.touched.application_method]);
 
   return (
     <View style={localStyles.container}>
@@ -219,66 +234,28 @@ export default function FertilizerScreen() {
         <View style={localStyles.section}>
           <Text style={localStyles.sectionTitle}>Log Fertilizer Application</Text>
 
-          {/* Date and Amount using EventForm */}
-          <EventForm
-            date={date}
-            onDateChange={setDate}
-            amount={amount}
-            onAmountChange={setAmount}
+          {/* Date and Amount using FormikEventForm */}
+          <FormikEventForm
+            formik={formik}
+            fieldNames={{
+              date: 'date',
+              amount: 'amount_lbs_per_1000sqft',
+              notes: 'notes',
+            }}
             amountLabel="Amount (lbs/1000 sq ft)"
             amountPlaceholder="e.g., 3.5"
             amountKeyboardType="decimal-pad"
-            notes={notes}
-            onNotesChange={setNotes}
             submitLabel="Record Application"
-            onSubmit={handleSubmit}
-            submitting={submitting}
           />
 
           {/* N-P-K Inputs */}
-          <Text style={{ fontSize: 14, fontWeight: '600', color: '#374151', marginBottom: 6, marginTop: 12 }}>
-            N-P-K Ratio (%)
-          </Text>
-          <View style={localStyles.npkInputContainer}>
-            <View style={{ flex: 1 }}>
-              <TextInput
-                style={localStyles.npkInput}
-                placeholder="N"
-                placeholderTextColor="#9ca3af"
-                keyboardType="decimal-pad"
-                value={nitrogen}
-                onChangeText={setNitrogen}
-                maxLength={6}
-              />
-              <Text style={localStyles.npkLabel}>Nitrogen</Text>
-            </View>
-            <View style={{ flex: 1 }}>
-              <TextInput
-                style={localStyles.npkInput}
-                placeholder="P"
-                placeholderTextColor="#9ca3af"
-                keyboardType="decimal-pad"
-                value={phosphorus}
-                onChangeText={setPhosphorus}
-                maxLength={6}
-              />
-              <Text style={localStyles.npkLabel}>Phosphorus</Text>
-            </View>
-            <View style={{ flex: 1 }}>
-              <TextInput
-                style={localStyles.npkInput}
-                placeholder="K"
-                placeholderTextColor="#9ca3af"
-                keyboardType="decimal-pad"
-                value={potassium}
-                onChangeText={setPotassium}
-                maxLength={6}
-              />
-              <Text style={localStyles.npkLabel}>Potassium</Text>
-            </View>
-          </View>
-
-          {npkWarning && <Text style={localStyles.warningText}>⚠️ {npkWarning}</Text>}
+          <FormikNPKInput
+            formik={formik}
+            nitrogenField="nitrogen_pct"
+            phosphorusField="phosphorus_pct"
+            potassiumField="potassium_pct"
+            showNPKWarning
+          />
 
           {/* Application Form and Method Pickers */}
           {formPicker}
