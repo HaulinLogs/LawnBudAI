@@ -196,7 +196,7 @@ export async function expectErrorMessage(page: Page, expectedError?: string) {
  */
 export async function getEventCount(page: Page): Promise<number> {
   // Count event items in history (look for date patterns like "Feb 21")
-  const eventElements = page.locator('text=/[A-Za-z]{3} \\d{1,2}/').all();
+  const eventElements = await page.locator('text=/[A-Za-z]{3} \\d{1,2}/').all();
   return eventElements.length;
 }
 

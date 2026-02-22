@@ -23,6 +23,8 @@ jest.mock('@/lib/supabase', () => ({
 }));
 
 const mockSupabase = supabase as jest.Mocked<typeof supabase>;
+const mockRpc = (mockSupabase.rpc as jest.Mock);
+const mockGetUser = (mockSupabase.auth.getUser as jest.Mock);
 
 describe('rateLimiter', () => {
   beforeEach(() => {
@@ -31,7 +33,7 @@ describe('rateLimiter', () => {
 
   describe('checkRateLimit', () => {
     it('should return allowed=false when user is not authenticated', async () => {
-      mockSupabase.auth.getUser.mockResolvedValueOnce({
+      mockGetUser.mockResolvedValueOnce({
         data: { user: null },
         error: null,
       });
@@ -44,19 +46,19 @@ describe('rateLimiter', () => {
 
     it('should return allowed=true when rate limit not exceeded', async () => {
       const userId = 'test-user-123';
-      mockSupabase.auth.getUser.mockResolvedValueOnce({
+      mockGetUser.mockResolvedValueOnce({
         data: { user: { id: userId } },
         error: null,
       });
 
-      mockSupabase.rpc.mockResolvedValueOnce({
+      mockRpc.mockResolvedValueOnce({
         data: {
           allowed: true,
           current_count: 50,
           limit: 100,
         },
         error: null,
-      });
+      } as any);
 
       const result = await checkRateLimit('test_endpoint', 'user');
 
@@ -70,12 +72,12 @@ describe('rateLimiter', () => {
     });
 
     it('should return allowed=false when rate limit exceeded', async () => {
-      mockSupabase.auth.getUser.mockResolvedValueOnce({
+      mockGetUser.mockResolvedValueOnce({
         data: { user: { id: 'test-user' } },
         error: null,
       });
 
-      mockSupabase.rpc.mockResolvedValueOnce({
+      mockRpc.mockResolvedValueOnce({
         data: {
           allowed: false,
           current_count: 100,
@@ -91,12 +93,12 @@ describe('rateLimiter', () => {
     });
 
     it('should apply correct limit for premium users', async () => {
-      mockSupabase.auth.getUser.mockResolvedValueOnce({
+      mockGetUser.mockResolvedValueOnce({
         data: { user: { id: 'test-user' } },
         error: null,
       });
 
-      mockSupabase.rpc.mockResolvedValueOnce({
+      mockRpc.mockResolvedValueOnce({
         data: {
           allowed: true,
           current_count: 500,
@@ -115,12 +117,12 @@ describe('rateLimiter', () => {
     });
 
     it('should apply unlimited limit for admin users', async () => {
-      mockSupabase.auth.getUser.mockResolvedValueOnce({
+      mockGetUser.mockResolvedValueOnce({
         data: { user: { id: 'test-user' } },
         error: null,
       });
 
-      mockSupabase.rpc.mockResolvedValueOnce({
+      mockRpc.mockResolvedValueOnce({
         data: {
           allowed: true,
           current_count: 999998,
@@ -139,15 +141,15 @@ describe('rateLimiter', () => {
     });
 
     it('should fail open when RPC call errors', async () => {
-      mockSupabase.auth.getUser.mockResolvedValueOnce({
+      mockGetUser.mockResolvedValueOnce({
         data: { user: { id: 'test-user' } },
         error: null,
       });
 
-      mockSupabase.rpc.mockResolvedValueOnce({
+      mockRpc.mockResolvedValueOnce({
         data: null,
-        error: new Error('RPC connection failed'),
-      });
+        error: new Error('RPC connection failed') as any,
+      } as any);
 
       const result = await checkRateLimit('test_endpoint', 'user');
 
@@ -157,7 +159,7 @@ describe('rateLimiter', () => {
     });
 
     it('should handle exceptions gracefully', async () => {
-      mockSupabase.auth.getUser.mockRejectedValueOnce(new Error('Auth check failed'));
+      mockGetUser.mockRejectedValueOnce(new Error('Auth check failed'));
 
       const result = await checkRateLimit('test_endpoint', 'user');
 
@@ -168,12 +170,12 @@ describe('rateLimiter', () => {
 
   describe('enforceRateLimit', () => {
     it('should throw error when rate limit exceeded', async () => {
-      mockSupabase.auth.getUser.mockResolvedValueOnce({
+      mockGetUser.mockResolvedValueOnce({
         data: { user: { id: 'test-user' } },
         error: null,
       });
 
-      mockSupabase.rpc.mockResolvedValueOnce({
+      mockRpc.mockResolvedValueOnce({
         data: {
           allowed: false,
           current_count: 100,
@@ -188,19 +190,19 @@ describe('rateLimiter', () => {
     });
 
     it('should not throw when rate limit not exceeded', async () => {
-      mockSupabase.auth.getUser.mockResolvedValueOnce({
+      mockGetUser.mockResolvedValueOnce({
         data: { user: { id: 'test-user' } },
         error: null,
       });
 
-      mockSupabase.rpc.mockResolvedValueOnce({
+      mockRpc.mockResolvedValueOnce({
         data: {
           allowed: true,
           current_count: 50,
           limit: 100,
         },
         error: null,
-      });
+      } as any);
 
       await expect(enforceRateLimit('test_endpoint', 'user')).resolves.not.toThrow();
     });
@@ -208,12 +210,12 @@ describe('rateLimiter', () => {
 
   describe('getRateLimitInfo', () => {
     it('should return rate limit info with current, limit, and remaining counts', async () => {
-      mockSupabase.auth.getUser.mockResolvedValueOnce({
+      mockGetUser.mockResolvedValueOnce({
         data: { user: { id: 'test-user' } },
         error: null,
       });
 
-      mockSupabase.rpc.mockResolvedValueOnce({
+      mockRpc.mockResolvedValueOnce({
         data: {
           allowed: true,
           current_count: 75,
@@ -230,12 +232,12 @@ describe('rateLimiter', () => {
     });
 
     it('should show zero remaining when limit is reached', async () => {
-      mockSupabase.auth.getUser.mockResolvedValueOnce({
+      mockGetUser.mockResolvedValueOnce({
         data: { user: { id: 'test-user' } },
         error: null,
       });
 
-      mockSupabase.rpc.mockResolvedValueOnce({
+      mockRpc.mockResolvedValueOnce({
         data: {
           allowed: false,
           current_count: 100,

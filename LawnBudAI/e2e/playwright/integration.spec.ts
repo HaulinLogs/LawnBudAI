@@ -431,7 +431,7 @@ test.describe('Integration Tests - Data Consistency', () => {
     const count1 = await getEventCount(page);
 
     // Simulate returning from background by hiding and showing tab
-    await page.hide();
+    await (page as any).hide?.();
     await page.waitForTimeout(500);
 
     // Re-show

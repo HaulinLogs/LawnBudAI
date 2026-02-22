@@ -70,7 +70,7 @@ skipIfNoTestSupabase('Database Integration Tests', () => {
 
       expect(error).toBeNull();
       if (data && data.length > 0) {
-        const event = data[0];
+        const event = data[0] as any;
         // Verify all expected columns exist and are the right type
         expect(event).toHaveProperty('id');
         expect(event).toHaveProperty('user_id');
@@ -140,7 +140,7 @@ skipIfNoTestSupabase('Database Integration Tests', () => {
 
       expect(error).toBeNull();
       if (data && data.length > 0) {
-        const event = data[0];
+        const event = data[0] as any;
         // Verify all expected columns exist and are the right type
         expect(event).toHaveProperty('id');
         expect(event).toHaveProperty('user_id');
@@ -180,7 +180,7 @@ skipIfNoTestSupabase('Database Integration Tests', () => {
 
       expect(error).toBeNull();
       if (data && data.length > 0) {
-        const event = data[0];
+        const event = data[0] as any;
         // Verify all expected columns exist and are the right type
         expect(event).toHaveProperty('id');
         expect(event).toHaveProperty('user_id');

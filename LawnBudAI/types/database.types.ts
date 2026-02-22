@@ -173,7 +173,8 @@ export type Tables<
     ? PublicTableNameOrOptions
     : never = never
 > = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
+  ? // @ts-expect-error - auto-generated Supabase types with generic constraints
+    (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
       Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
@@ -199,7 +200,8 @@ export type TablesInsert<
     ? PublicTableNameOrOptions
     : never = never
 > = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+  ? // @ts-expect-error - auto-generated Supabase types with generic constraints
+    Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
@@ -222,7 +224,8 @@ export type TablesUpdate<
     ? PublicTableNameOrOptions
     : never = never
 > = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+  ? // @ts-expect-error - auto-generated Supabase types with generic constraints
+    Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
