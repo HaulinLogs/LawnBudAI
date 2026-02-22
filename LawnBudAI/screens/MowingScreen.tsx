@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -7,12 +7,14 @@ import {
   StyleSheet,
 } from 'react-native';
 import { Stack } from 'expo-router';
+// eslint-disable-next-line import/no-unresolved
+import { useFormik } from 'formik';
 import { useMowEvents } from '@/hooks/useMowEvents';
 import { MowEventInput } from '@/models/events';
-import EventForm from '@/components/EventForm';
+import FormikEventForm from '@/components/forms/FormikEventForm';
 import EventHistory from '@/components/EventHistory';
 import Statistics from '@/components/Statistics';
-import { validateRequiredField, validatePositiveNumber, validateForm } from '@/lib/validation';
+import { mowingEventSchema, MowingFormValues } from '@/lib/schemas/mowing.schema';
 
 const localStyles = StyleSheet.create({
   container: {
@@ -35,45 +37,41 @@ const localStyles = StyleSheet.create({
 
 export default function MowingScreen() {
   const { events, loading, error, addEvent, deleteEvent, getStats } = useMowEvents();
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-  const [height, setHeight] = useState('');
-  const [notes, setNotes] = useState('');
-  const [submitting, setSubmitting] = useState(false);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const stats = useMemo(() => getStats(), [events]);
 
-  const handleSubmit = useCallback(async () => {
-    // Validate form using centralized validation utilities
-    const validation = validateForm([
-      () => validateRequiredField(date, 'Date'),
-      () => validatePositiveNumber(height, 'Height'),
-    ]);
+  const formik = useFormik<MowingFormValues>({
+    initialValues: {
+      date: new Date().toISOString().split('T')[0],
+      height_inches: '',
+      notes: '',
+    },
+    validationSchema: mowingEventSchema,
+    validateOnChange: true,  // Real-time validation
+    validateOnBlur: true,    // Validate on field blur
+    onSubmit: async (values, { resetForm }) => {
+      try {
+        const input: MowEventInput = {
+          date: values.date,
+          height_inches: parseFloat(String(values.height_inches)),
+          notes: String(values.notes).trim() || undefined,
+        };
+        await addEvent(input);
+        // Form resets naturally after successful submission
+        resetForm();
+        // Optional: Show success alert
+        Alert.alert('Success', 'Mowing event recorded!');
+      } catch {
+        Alert.alert('Error', 'Failed to record mowing event');
+      }
+    },
+  });
 
-    if (!validation.valid) {
-      Alert.alert('Error', validation.error || 'Please fill in all required fields');
-      return;
-    }
-
-    setSubmitting(true);
-    try {
-      const input: MowEventInput = {
-        date,
-        height_inches: parseFloat(height),
-        notes: notes.trim() || undefined,
-      };
-      await addEvent(input);
-      Alert.alert('Success', 'Mowing event recorded!');
-      setHeight('');
-      setNotes('');
-      setDate(new Date().toISOString().split('T')[0]);
-    } catch {
-      Alert.alert('Error', 'Failed to record mowing event');
-    } finally {
-      setSubmitting(false);
-    }
+  const handleSubmit = useCallback(() => {
+    formik.handleSubmit();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [addEvent]);
+  }, [formik]);
 
   const handleDelete = useCallback((eventId: string) => {
     Alert.alert('Delete Event', 'Are you sure?', [
@@ -113,19 +111,17 @@ export default function MowingScreen() {
         {/* Form Section */}
         <View style={localStyles.section}>
           <Text style={localStyles.sectionTitle}>Log Mowing Event</Text>
-          <EventForm
-            date={date}
-            onDateChange={setDate}
-            amount={height}
-            onAmountChange={setHeight}
+          <FormikEventForm
+            formik={formik}
+            fieldNames={{
+              date: 'date',
+              amount: 'height_inches',
+              notes: 'notes',
+            }}
             amountLabel="Height (inches)"
             amountPlaceholder="e.g., 2.5"
             amountKeyboardType="decimal-pad"
-            notes={notes}
-            onNotesChange={setNotes}
             submitLabel="Record Mowing"
-            onSubmit={handleSubmit}
-            submitting={submitting}
           />
         </View>
 

@@ -13,13 +13,16 @@ import { colors, spacing, borderRadius, typography } from '@/styles/theme';
 interface EventFormProps {
   date: string;
   onDateChange: (date: string) => void;
+  onDateBlur?: () => void;
   amount: string;
   onAmountChange: (amount: string) => void;
+  onAmountBlur?: () => void;
   amountLabel: string;
   amountPlaceholder: string;
   amountKeyboardType?: 'decimal-pad' | 'numeric';
   notes: string;
   onNotesChange: (notes: string) => void;
+  onNotesBlur?: () => void;
   optionalField?: ReactNode;
   submitLabel: string;
   onSubmit: () => void;
@@ -71,13 +74,16 @@ const styles = StyleSheet.create({
 export default function EventForm({
   date,
   onDateChange,
+  onDateBlur,
   amount,
   onAmountChange,
+  onAmountBlur,
   amountLabel,
   amountPlaceholder,
   amountKeyboardType = 'decimal-pad',
   notes,
   onNotesChange,
+  onNotesBlur,
   optionalField,
   submitLabel,
   onSubmit,
@@ -94,6 +100,7 @@ export default function EventForm({
         placeholder="YYYY-MM-DD"
         value={date}
         onChangeText={onDateChange}
+        onBlur={onDateBlur}
         editable={!isDisabled}
       />
 
@@ -103,6 +110,7 @@ export default function EventForm({
         placeholder={amountPlaceholder}
         value={amount}
         onChangeText={onAmountChange}
+        onBlur={onAmountBlur}
         keyboardType={amountKeyboardType}
         editable={!isDisabled}
       />
@@ -115,6 +123,7 @@ export default function EventForm({
         placeholder="Any notes..."
         value={notes}
         onChangeText={onNotesChange}
+        onBlur={onNotesBlur}
         multiline
         numberOfLines={4}
         editable={!isDisabled}

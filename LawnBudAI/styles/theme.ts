@@ -78,6 +78,16 @@ export const typography = {
     fontSize: 12,
     color: colors.textTertiary,
   },
+  errorText: {
+    fontSize: 12,
+    color: colors.error,
+    marginTop: spacing.xs,
+  },
+  warningText: {
+    fontSize: 12,
+    color: colors.warning,
+    marginTop: spacing.xs,
+  },
 };
 
 /**
