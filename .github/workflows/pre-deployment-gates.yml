@@ -32,7 +32,24 @@ jobs:
         working-directory: ./LawnBudAI
 
       # ========================================================================
-      # GATE 2: Type Generation & Type Safety Check
+      # GATE 2: Splinter - Database Schema Linting (Performance & Security)
+      # Runs the full Splinter lint suite via `supabase db lint --linked`.
+      # Checks 24 advisors including: unindexed FKs, RLS misconfigurations,
+      # exposed auth.users, missing PKs, duplicate indexes, insecure functions,
+      # and more. See: https://supabase.github.io/splinter
+      # ========================================================================
+      - name: Lint database schema (Splinter)
+        run: |
+          npx supabase link --project-ref $SUPABASE_PROJECT_ID
+          npx supabase db lint --linked --level warning --fail-on warning --schema public
+        working-directory: ./LawnBudAI
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+        continue-on-error: true  # Requires secrets; set to false once baseline is clean
+
+      # ========================================================================
+      # GATE 3: Type Generation & Type Safety Check
       # ========================================================================
       - name: Generate types from database
         run: yarn types:generate
@@ -47,28 +64,28 @@ jobs:
         working-directory: ./LawnBudAI
 
       # ========================================================================
-      # GATE 3: Linting (Code Quality)
+      # GATE 4: Linting (Code Quality)
       # ========================================================================
       - name: Lint code
         run: yarn lint:ci
         working-directory: ./LawnBudAI
 
       # ========================================================================
-      # GATE 4: Unit Tests
+      # GATE 5: Unit Tests
       # ========================================================================
       - name: Run unit tests
         run: yarn testFinal
         working-directory: ./LawnBudAI
 
       # ========================================================================
-      # GATE 5: Schema Validation Tests (Contract Testing)
+      # GATE 6: Schema Validation Tests (Contract Testing)
       # ========================================================================
       - name: Run schema validation tests
         run: yarn testFinal --testPathPattern=schema.validation
         working-directory: ./LawnBudAI
 
       # ========================================================================
-      # GATE 6: Integration Tests (Against Test Supabase)
+      # GATE 7: Integration Tests (Against Test Supabase)
       # ========================================================================
       - name: Run integration tests
         run: yarn test:integration
@@ -79,7 +96,7 @@ jobs:
         continue-on-error: true  # Integration tests require test Supabase; skip in PR if unavailable
 
       # ========================================================================
-      # GATE 7: Test Coverage Threshold
+      # GATE 8: Test Coverage Threshold
       # ========================================================================
       - name: Check test coverage
         run: yarn test:coverage --coverage-reporters=text-summary
@@ -87,7 +104,7 @@ jobs:
         continue-on-error: true  # Coverage is informational, doesn't block
 
       # ========================================================================
-      # GATE 8: Security Audit
+      # GATE 9: Security Audit
       # ========================================================================
       - name: Security audit
         run: yarn audit --mode dev --level moderate
@@ -95,7 +112,7 @@ jobs:
         continue-on-error: true  # Audit is informational for main, blocking for PRs
 
       # ========================================================================
-      # GATE 9: E2E Tests (Only on main branch, not PRs)
+      # GATE 10: E2E Tests (Only on main branch, not PRs)
       # ========================================================================
       - name: Install Playwright
         if: github.ref == 'refs/heads/main'
@@ -130,15 +147,17 @@ jobs:
   # ============================================================================
   # SUMMARY: What These Gates Protect Against
   # ============================================================================
-  # 1. Schema Mismatch (Gate 1, 5): Code uses non-existent columns
-  # 2. Type Drift (Gate 2): TypeScript types don't match database
-  # 3. Code Quality (Gate 3): Linting violations introduced
-  # 4. Unit Test Failures (Gate 4): Regressions in existing features
-  # 5. Contract Violations (Gate 5): New code breaks existing contracts
-  # 6. Integration Issues (Gate 6): Code fails against real database
-  # 7. Coverage Regression (Gate 7): Test coverage below threshold
-  # 8. Security Vulnerabilities (Gate 8): Known vulnerabilities in dependencies
-  # 9. E2E Failures (Gate 9): User workflows broken
+  # 1.  Schema Mismatch (Gate 1, 6): Code uses non-existent columns
+  # 2.  DB Performance & Security (Gate 2): Splinter advisors (unindexed FKs,
+  #     RLS misconfigurations, exposed auth.users, missing PKs, etc.)
+  # 3.  Type Drift (Gate 3): TypeScript types don't match database
+  # 4.  Code Quality (Gate 4): Linting violations introduced
+  # 5.  Unit Test Failures (Gate 5): Regressions in existing features
+  # 6.  Contract Violations (Gate 6): New code breaks existing contracts
+  # 7.  Integration Issues (Gate 7): Code fails against real database
+  # 8.  Coverage Regression (Gate 8): Test coverage below threshold
+  # 9.  Security Vulnerabilities (Gate 9): Known vulnerabilities in dependencies
+  # 10. E2E Failures (Gate 10): User workflows broken
   #
   # These gates follow industry best practices:
   # - Test Pyramid (Martin Fowler)
