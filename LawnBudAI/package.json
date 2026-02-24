@@ -22,6 +22,8 @@
     "test:playwright:ui": "playwright test --ui",
     "test:maestro": "maestro test .maestro/",
     "validate:schema": "node scripts/validate-schema.js",
+    "db:lint": "supabase db lint --level warning --fail-on warning --schema public",
+    "db:lint:linked": "supabase link --project-ref $SUPABASE_PROJECT_ID && supabase db lint --linked --level warning --fail-on warning --schema public",
     "types:generate": "supabase gen types typescript --project-id $SUPABASE_PROJECT_ID > types/database.types.ts",
     "types:check": "tsc --noEmit",
     "quality-gates": "npm run validate:schema && npm run lint:ci && npm run testFinal && npm run test:coverage && npm audit",
