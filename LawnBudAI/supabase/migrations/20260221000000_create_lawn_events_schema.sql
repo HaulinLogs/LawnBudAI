@@ -22,20 +22,20 @@ alter table public.mow_events enable row level security;
 
 create policy "Users read own mow events"
   on public.mow_events for select
-  using (auth.uid() = user_id);
+  using ((select auth.uid()) = user_id);
 
 create policy "Users create own mow events"
   on public.mow_events for insert
-  with check (auth.uid() = user_id);
+  with check ((select auth.uid()) = user_id);
 
 create policy "Users update own mow events"
   on public.mow_events for update
-  using (auth.uid() = user_id)
-  with check (auth.uid() = user_id);
+  using ((select auth.uid()) = user_id)
+  with check ((select auth.uid()) = user_id);
 
 create policy "Users delete own mow events"
   on public.mow_events for delete
-  using (auth.uid() = user_id);
+  using ((select auth.uid()) = user_id);
 
 create index idx_mow_events_user_id on public.mow_events(user_id);
 create index idx_mow_events_date on public.mow_events(date);
@@ -63,20 +63,20 @@ alter table public.water_events enable row level security;
 
 create policy "Users read own water events"
   on public.water_events for select
-  using (auth.uid() = user_id);
+  using ((select auth.uid()) = user_id);
 
 create policy "Users create own water events"
   on public.water_events for insert
-  with check (auth.uid() = user_id);
+  with check ((select auth.uid()) = user_id);
 
 create policy "Users update own water events"
   on public.water_events for update
-  using (auth.uid() = user_id)
-  with check (auth.uid() = user_id);
+  using ((select auth.uid()) = user_id)
+  with check ((select auth.uid()) = user_id);
 
 create policy "Users delete own water events"
   on public.water_events for delete
-  using (auth.uid() = user_id);
+  using ((select auth.uid()) = user_id);
 
 create index idx_water_events_user_id on public.water_events(user_id);
 create index idx_water_events_date on public.water_events(date);
@@ -106,20 +106,20 @@ alter table public.fertilizer_events enable row level security;
 
 create policy "Users read own fertilizer events"
   on public.fertilizer_events for select
-  using (auth.uid() = user_id);
+  using ((select auth.uid()) = user_id);
 
 create policy "Users create own fertilizer events"
   on public.fertilizer_events for insert
-  with check (auth.uid() = user_id);
+  with check ((select auth.uid()) = user_id);
 
 create policy "Users update own fertilizer events"
   on public.fertilizer_events for update
-  using (auth.uid() = user_id)
-  with check (auth.uid() = user_id);
+  using ((select auth.uid()) = user_id)
+  with check ((select auth.uid()) = user_id);
 
 create policy "Users delete own fertilizer events"
   on public.fertilizer_events for delete
-  using (auth.uid() = user_id);
+  using ((select auth.uid()) = user_id);
 
 create index idx_fertilizer_events_user_id on public.fertilizer_events(user_id);
 create index idx_fertilizer_events_date on public.fertilizer_events(date);
@@ -206,28 +206,28 @@ group by user_id, month;
 -- ============================================================================
 
 create or replace function public.get_days_since_mow(p_user_id uuid)
-returns integer language sql stable security definer as $$
+returns integer language sql stable security definer set search_path = '' as $$
   select coalesce((current_date - max(date))::integer, null)
   from public.mow_events
   where user_id = p_user_id;
 $$;
 
 create or replace function public.get_days_since_water(p_user_id uuid)
-returns integer language sql stable security definer as $$
+returns integer language sql stable security definer set search_path = '' as $$
   select coalesce((current_date - max(date))::integer, null)
   from public.water_events
   where user_id = p_user_id;
 $$;
 
 create or replace function public.get_avg_mowing_height(p_user_id uuid)
-returns decimal language sql stable security definer as $$
+returns decimal language sql stable security definer set search_path = '' as $$
   select round(avg(height_inches)::numeric, 2)
   from public.mow_events
   where user_id = p_user_id;
 $$;
 
 create or replace function public.get_monthly_water_total(p_user_id uuid)
-returns decimal language sql stable security definer as $$
+returns decimal language sql stable security definer set search_path = '' as $$
   select round(sum(amount_inches)::numeric, 2)
   from public.water_events
   where user_id = p_user_id
@@ -239,7 +239,7 @@ returns table (
   source text,
   amount_inches decimal,
   count integer
-) language sql stable security definer as $$
+) language sql stable security definer set search_path = '' as $$
   select
     source,
     round(sum(amount_inches)::numeric, 2) as total_amount,

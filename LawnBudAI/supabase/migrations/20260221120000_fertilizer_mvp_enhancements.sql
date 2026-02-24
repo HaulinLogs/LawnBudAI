@@ -135,7 +135,7 @@ RETURNS TABLE (
   avg_nitrogen_pct decimal,
   avg_phosphorus_pct decimal,
   avg_potassium_pct decimal
-) LANGUAGE sql STABLE SECURITY DEFINER AS $$
+) LANGUAGE sql STABLE SECURITY DEFINER SET search_path = '' AS $$
   SELECT
     application_form,
     application_method,
@@ -154,7 +154,7 @@ RETURNS TABLE (
   avg_nitrogen_pct decimal,
   avg_phosphorus_pct decimal,
   avg_potassium_pct decimal
-) LANGUAGE sql STABLE SECURITY DEFINER AS $$
+) LANGUAGE sql STABLE SECURITY DEFINER SET search_path = '' AS $$
   SELECT
     ROUND(AVG(nitrogen_pct)::numeric, 2) as avg_nitrogen,
     ROUND(AVG(phosphorus_pct)::numeric, 2) as avg_phosphorus,

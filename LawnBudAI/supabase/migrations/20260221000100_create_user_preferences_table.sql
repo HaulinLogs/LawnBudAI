@@ -19,25 +19,25 @@ alter table public.user_preferences enable row level security;
 -- Policy: Users can only read their own preferences
 create policy "Users read own preferences"
   on public.user_preferences for select
-  using (auth.uid() = user_id);
+  using ((select auth.uid()) = user_id);
 
 -- Policy: Users can update their own preferences
 create policy "Users update own preferences"
   on public.user_preferences for update
-  using (auth.uid() = user_id)
-  with check (auth.uid() = user_id);
+  using ((select auth.uid()) = user_id)
+  with check ((select auth.uid()) = user_id);
 
 -- Policy: Users can insert their own preferences
 create policy "Users insert own preferences"
   on public.user_preferences for insert
-  with check (auth.uid() = user_id);
+  with check ((select auth.uid()) = user_id);
 
 -- Indexes for performance
 create index idx_user_preferences_user_id on public.user_preferences(user_id);
 
 -- Trigger to auto-create preferences for new users
 create or replace function public.create_user_preferences()
-returns trigger language plpgsql security definer as $$
+returns trigger language plpgsql security definer set search_path = '' as $$
 begin
   insert into public.user_preferences (user_id, city, state)
   values (new.id, 'Madison', 'WI')
