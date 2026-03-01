@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react-native';
 import * as Navigation from '@react-navigation/native';
 import MowingScreen from '@/screens/MowingScreen';
+import { useMowEvents } from '@/hooks/useMowEvents';
 
 // Mock expo-router
 jest.mock('expo-router', () => ({
@@ -88,8 +89,7 @@ describe('MowingScreen', () => {
   });
 
   it('should not show statistics section when no events exist', () => {
-    const { useMowEvents } = require('@/hooks/useMowEvents');
-    useMowEvents.mockReturnValueOnce({
+    (useMowEvents as jest.Mock).mockReturnValueOnce({
       events: [],
       loading: false,
       error: null,

@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react-native';
 import * as Navigation from '@react-navigation/native';
 import WateringScreen from '@/screens/WateringScreen';
+import { useWaterEvents } from '@/hooks/useWaterEvents';
 
 // Mock expo-router
 jest.mock('expo-router', () => ({
@@ -108,8 +109,7 @@ describe('WateringScreen', () => {
   });
 
   it('should not show statistics or source breakdown when no events exist', () => {
-    const { useWaterEvents } = require('@/hooks/useWaterEvents');
-    useWaterEvents.mockReturnValueOnce({
+    (useWaterEvents as jest.Mock).mockReturnValueOnce({
       events: [],
       loading: false,
       error: null,

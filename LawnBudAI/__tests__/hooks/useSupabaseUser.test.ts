@@ -51,6 +51,7 @@ describe('useSupabaseUser', () => {
       error: null,
     } as any);
 
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { useSupabaseUser } = require('@/hooks/useSupabaseUser');
 
     // Act
@@ -74,6 +75,7 @@ describe('useSupabaseUser', () => {
       error: authError,
     } as any);
 
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { useSupabaseUser } = require('@/hooks/useSupabaseUser');
 
     // Act
@@ -100,6 +102,7 @@ describe('useSupabaseUser', () => {
       return { data: { subscription: { unsubscribe: jest.fn() } } } as any;
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { useSupabaseUser } = require('@/hooks/useSupabaseUser');
     const { result } = renderHook(() => useSupabaseUser());
 
@@ -131,6 +134,7 @@ describe('useSupabaseUser', () => {
       return { data: { subscription: { unsubscribe: jest.fn() } } } as any;
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { useSupabaseUser } = require('@/hooks/useSupabaseUser');
     const { result } = renderHook(() => useSupabaseUser());
 
@@ -159,6 +163,7 @@ describe('useSupabaseUser', () => {
       data: { subscription: { unsubscribe: mockUnsubscribe } },
     } as any);
 
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { useSupabaseUser } = require('@/hooks/useSupabaseUser');
     const { result, unmount } = renderHook(() => useSupabaseUser());
 
