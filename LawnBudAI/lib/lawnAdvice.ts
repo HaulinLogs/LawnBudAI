@@ -328,6 +328,237 @@ export function getOverseedingReminder(
 }
 
 // ---------------------------------------------------------------------------
+// Fertilizer schedule advisor
+//
+// Combines last-application date, grass type, and season to produce a
+// concrete "should I fertilize?" recommendation with a dose calculation
+// based on lawn size.
+//
+// Application rates (lbs N per 1000 sq ft) and interval guidance from:
+//   - Penn State Extension "Fertilizing Home Lawns":
+//       https://extension.psu.edu/fertilizing-home-lawns
+//   - UW-Madison Extension "Lawn Fertilization":
+//       https://extension.wisc.edu/
+//   - Texas A&M AgriLife "Lawn Fertilization Guide":
+//       https://aggie-horticulture.tamu.edu/
+//   - UF/IFAS Extension "Florida Lawn Handbook":
+//       https://gardeningsolutions.ifas.ufl.edu/
+// ---------------------------------------------------------------------------
+
+export type FertilizerStatus =
+  | 'dormant'            // Season not appropriate for fertilizing
+  | 'first_application'  // No history — time to get started
+  | 'due'                // Within the target window
+  | 'overdue'            // Past the window by more than 2 weeks
+  | 'too_soon';          // Last application was too recent
+
+export interface FertilizerAdvisory {
+  status: FertilizerStatus;
+  heading: string;
+  detail: string;
+  /** Suggested pounds of product to apply; null when dormant or lawn size unknown. */
+  suggestedAmountLbs: number | null;
+  /**
+   * Positive → days remaining until due.
+   * Zero     → due now.
+   * Negative → days overdue.
+   * null     → dormant (not applicable).
+   */
+  daysUntilDue: number | null;
+  /** Fertilizer type best suited for the current season. */
+  typeRecommendation: string;
+}
+
+interface FertilizerSchedule {
+  /** null = dormant; no applications in this season. */
+  minDaysBetween: number | null;
+  /** lbs of fertilizer product per 1000 sq ft. */
+  ratePerThousandSqFt: number | null;
+  typeRecommendation: string;
+}
+
+// Rates reflect actual product weight (not pure-N), assuming a common
+// slow-release blend (e.g. 32-0-8 for cool-season, balanced for warm-season).
+// Practitioners should always follow the bag directions for their specific product.
+const fertilizerSchedule: Record<GrassType, Record<Season, FertilizerSchedule>> = {
+  cool_season: {
+    spring: {
+      minDaysBetween: 45,
+      ratePerThousandSqFt: 3.5, // ~0.5 lb N/1000 from a 15-0-8
+      typeRecommendation: 'Balanced slow-release (e.g., 15-0-8 or 10-10-10)',
+    },
+    summer: {
+      minDaysBetween: null, // dormant window — skip
+      ratePerThousandSqFt: null,
+      typeRecommendation: 'None — skip summer fertilization to avoid heat stress',
+    },
+    fall: {
+      minDaysBetween: 30,
+      ratePerThousandSqFt: 4.5, // ~1.0–1.5 lb N/1000 from a 32-0-8
+      typeRecommendation: 'High-nitrogen slow-release (e.g., 32-0-8 or similar winterizer)',
+    },
+    winter: {
+      minDaysBetween: null,
+      ratePerThousandSqFt: null,
+      typeRecommendation: 'None — grass is dormant',
+    },
+  },
+  warm_season: {
+    spring: {
+      minDaysBetween: 45,
+      ratePerThousandSqFt: 4.0, // ~1.0 lb N/1000 from a 25-0-12
+      typeRecommendation: 'Balanced NPK with micronutrients and iron (e.g., 25-0-12)',
+    },
+    summer: {
+      minDaysBetween: 42,
+      ratePerThousandSqFt: 4.0,
+      typeRecommendation: 'Nitrogen-rich, low-phosphorus (e.g., 30-0-10)',
+    },
+    fall: {
+      // One application in early fall, 8+ weeks before frost; high interval
+      // prevents over-application late in the season.
+      minDaysBetween: 60,
+      ratePerThousandSqFt: 3.0, // ~0.5 lb N/1000 from a 15-0-15
+      typeRecommendation: 'Low-N, high-K winterizer blend (e.g., 5-0-20 or 15-0-15)',
+    },
+    winter: {
+      minDaysBetween: null,
+      ratePerThousandSqFt: null,
+      typeRecommendation: 'None — grass is dormant',
+    },
+  },
+  mixed: {
+    spring: {
+      minDaysBetween: 45,
+      ratePerThousandSqFt: 3.5,
+      typeRecommendation: 'Balanced slow-release NPK (e.g., 16-4-8)',
+    },
+    summer: {
+      minDaysBetween: null,
+      ratePerThousandSqFt: null,
+      typeRecommendation: 'None — hold off for cool-season areas; warm-season areas may get one application',
+    },
+    fall: {
+      minDaysBetween: 30,
+      ratePerThousandSqFt: 4.5,
+      typeRecommendation: 'High-nitrogen slow-release for cool-season areas; low-N, high-K for warm-season patches',
+    },
+    winter: {
+      minDaysBetween: null,
+      ratePerThousandSqFt: null,
+      typeRecommendation: 'None — both grass types are resting',
+    },
+  },
+};
+
+/**
+ * Computes a full fertilizer advisory from the user's grass type, the current
+ * season, the date of their most recent application, and their lawn size.
+ *
+ * @param grassType       - User's grass type preference.
+ * @param season          - Current season (use getSeason()).
+ * @param lastAppDate     - ISO date string (YYYY-MM-DD) of the last application, or undefined if none.
+ * @param lawnSizeSqFt    - User's lawn size in square feet, or undefined/null if not set.
+ */
+export function getFertilizerAdvisory(
+  grassType: GrassType,
+  season: Season,
+  lastAppDate?: string,
+  lawnSizeSqFt?: number | null,
+): FertilizerAdvisory {
+  const schedule = fertilizerSchedule[grassType]?.[season] ?? fertilizerSchedule.mixed[season];
+
+  // ----- Dormant window -----
+  if (schedule.minDaysBetween === null) {
+    return {
+      status: 'dormant',
+      heading: 'No Fertilizer Needed',
+      detail:
+        `${schedule.typeRecommendation}. Fertilizing now risks stimulating growth at the wrong time, ` +
+        'increasing disease pressure and wasting product. Wait for the next active season.',
+      suggestedAmountLbs: null,
+      daysUntilDue: null,
+      typeRecommendation: schedule.typeRecommendation,
+    };
+  }
+
+  // Compute suggested amount if lawn size is known
+  const suggestedAmountLbs =
+    lawnSizeSqFt && lawnSizeSqFt > 0 && schedule.ratePerThousandSqFt
+      ? Math.round(((lawnSizeSqFt / 1000) * schedule.ratePerThousandSqFt) * 10) / 10
+      : null;
+
+  const amountNote =
+    suggestedAmountLbs !== null
+      ? ` For your ${lawnSizeSqFt!.toLocaleString()} sq ft lawn, that is about ${suggestedAmountLbs} lbs of product.`
+      : ' Set your lawn size in Settings to get a precise amount recommendation.';
+
+  // ----- No application history -----
+  if (!lastAppDate) {
+    return {
+      status: 'first_application',
+      heading: 'Schedule Your First Application',
+      detail:
+        `No fertilizer history found. ${schedule.typeRecommendation} is ideal for this season.` +
+        amountNote,
+      suggestedAmountLbs,
+      daysUntilDue: 0,
+      typeRecommendation: schedule.typeRecommendation,
+    };
+  }
+
+  // ----- Compute days since last application -----
+  const lastDate = new Date(lastAppDate);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  lastDate.setHours(0, 0, 0, 0);
+  const daysSince = Math.floor((today.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24));
+  const daysUntilDue = schedule.minDaysBetween - daysSince;
+
+  // ----- Too soon -----
+  if (daysUntilDue > 0) {
+    return {
+      status: 'too_soon',
+      heading: 'Too Soon to Fertilize',
+      detail:
+        `Your last application was ${daysSince} day${daysSince !== 1 ? 's' : ''} ago. ` +
+        `Wait ${daysUntilDue} more day${daysUntilDue !== 1 ? 's' : ''} before the next application ` +
+        `to avoid burning the lawn and wasting product.`,
+      suggestedAmountLbs: null,
+      daysUntilDue,
+      typeRecommendation: schedule.typeRecommendation,
+    };
+  }
+
+  // ----- Overdue (more than 2 weeks past the window) -----
+  if (daysUntilDue < -14) {
+    return {
+      status: 'overdue',
+      heading: 'Fertilization Overdue',
+      detail:
+        `It has been ${daysSince} days since your last application — about ` +
+        `${Math.abs(daysUntilDue)} day${Math.abs(daysUntilDue) !== 1 ? 's' : ''} past the target window. ` +
+        `Apply ${schedule.typeRecommendation} soon.${amountNote}`,
+      suggestedAmountLbs,
+      daysUntilDue,
+      typeRecommendation: schedule.typeRecommendation,
+    };
+  }
+
+  // ----- Due (within window) -----
+  return {
+    status: 'due',
+    heading: 'Time to Fertilize',
+    detail:
+      `Your last application was ${daysSince} day${daysSince !== 1 ? 's' : ''} ago — right on schedule. ` +
+      `Apply ${schedule.typeRecommendation}.${amountNote}`,
+    suggestedAmountLbs,
+    daysUntilDue: 0,
+    typeRecommendation: schedule.typeRecommendation,
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
 

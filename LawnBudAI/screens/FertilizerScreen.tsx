@@ -17,6 +17,13 @@ import Statistics from '@/components/Statistics';
 import GenericPicker from '@/components/ui/GenericPicker';
 import { fertilizerEventSchema, FertilizerFormValues } from '@/lib/schemas/fertilizer.schema';
 import { spacing, typography } from '@/styles/theme';
+import { useUserPreferences } from '@/hooks/useUserPreferences';
+import {
+  getFertilizerAdvisory,
+  getSeason,
+  type GrassType,
+  type FertilizerStatus,
+} from '@/lib/lawnAdvice';
 
 const localStyles = StyleSheet.create({
   container: {
@@ -59,6 +66,26 @@ const localStyles = StyleSheet.create({
     fontSize: 12,
     color: '#6b7280',
   },
+  advisorCard: {
+    borderRadius: 10,
+    padding: 14,
+    marginBottom: 16,
+    borderLeftWidth: 4,
+  },
+  advisorHeading: {
+    fontSize: 15,
+    fontWeight: '700',
+    marginBottom: 6,
+  },
+  advisorDetail: {
+    fontSize: 13,
+    lineHeight: 19,
+  },
+  advisorAmount: {
+    marginTop: 8,
+    fontSize: 13,
+    fontWeight: '600',
+  },
 });
 
 const FERTILIZER_TYPES = [
@@ -78,11 +105,33 @@ const APPLICATION_METHODS = [
   { label: 'Granular', value: 'granular' as const, icon: 'cube' },
 ];
 
+// Maps advisory status to visual theme
+const ADVISOR_THEME: Record<FertilizerStatus, { bg: string; border: string; heading: string; detail: string }> = {
+  dormant:           { bg: '#f3f4f6', border: '#9ca3af', heading: '#374151', detail: '#6b7280' },
+  too_soon:          { bg: '#dbeafe', border: '#3b82f6', heading: '#1e3a5f', detail: '#1e40af' },
+  first_application: { bg: '#dcfce7', border: '#22c55e', heading: '#065f46', detail: '#166534' },
+  due:               { bg: '#dcfce7', border: '#22c55e', heading: '#065f46', detail: '#166534' },
+  overdue:           { bg: '#fef3c7', border: '#f59e0b', heading: '#92400e', detail: '#78350f' },
+};
+
 export default function FertilizerScreen() {
   const { events, loading, error, addEvent, deleteEvent, getStats, getTypeBreakdown, getMethodBreakdown } = useFertilizerEvents();
+  const { prefs } = useUserPreferences();
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const stats = useMemo(() => getStats(), [events]);
+
+  const advisory = useMemo(
+    () =>
+      getFertilizerAdvisory(
+        prefs.grass_type as GrassType,
+        getSeason(new Date()),
+        events[0]?.date,
+        prefs.lawn_size_sqft,
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [events, prefs.grass_type, prefs.lawn_size_sqft],
+  );
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const typeBreakdown = useMemo(() => getTypeBreakdown(), [events]);
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -198,6 +247,26 @@ export default function FertilizerScreen() {
         {/* Form Section */}
         <View style={localStyles.section}>
           <Text style={localStyles.sectionTitle}>Log Fertilizer Application</Text>
+
+          {/* Fertilizer Advisor */}
+          {(() => {
+            const theme = ADVISOR_THEME[advisory.status];
+            return (
+              <View style={[localStyles.advisorCard, { backgroundColor: theme.bg, borderLeftColor: theme.border }]}>
+                <Text style={[localStyles.advisorHeading, { color: theme.heading }]}>
+                  {advisory.heading}
+                </Text>
+                <Text style={[localStyles.advisorDetail, { color: theme.detail }]}>
+                  {advisory.detail}
+                </Text>
+                {advisory.suggestedAmountLbs !== null && (
+                  <Text style={[localStyles.advisorAmount, { color: theme.heading }]}>
+                    Suggested amount: {advisory.suggestedAmountLbs} lbs
+                  </Text>
+                )}
+              </View>
+            );
+          })()}
 
           {/* Fertilizer Type and Method Pickers - BEFORE submit button for correct form flow */}
           {typePicker}
