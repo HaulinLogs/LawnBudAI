@@ -231,4 +231,55 @@ describe('useRole', () => {
 
     expect(result.current.loading).toBe(true);
   });
+
+  it('should default to user role when no data row found in database', async () => {
+    (useSupabaseUser as jest.Mock).mockReturnValue({
+      user: { id: 'test-user' },
+      loading: false,
+      error: null,
+    });
+
+    // maybeSingle returns null data with no error (user has no role row)
+    mockSupabase.from = jest.fn().mockReturnValueOnce({
+      select: jest.fn().mockReturnValueOnce({
+        eq: jest.fn().mockReturnValueOnce({
+          maybeSingle: jest.fn().mockResolvedValueOnce({
+            data: null,
+            error: null,
+          }),
+        }),
+      }),
+    } as any);
+
+    const { result } = renderHook(() => useRole());
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    expect(result.current.role).toBe('user');
+    expect(result.current.error).toBeNull();
+  });
+
+  it('should handle exception thrown during role fetch', async () => {
+    (useSupabaseUser as jest.Mock).mockReturnValue({
+      user: { id: 'test-user' },
+      loading: false,
+      error: null,
+    });
+
+    // Simulate supabase.from() itself throwing synchronously
+    mockSupabase.from = jest.fn().mockImplementation(() => {
+      throw new Error('Supabase client failure');
+    });
+
+    const { result } = renderHook(() => useRole());
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    expect(result.current.role).toBe('user');
+    expect(result.current.error).toBeTruthy();
+  });
 });
