@@ -9,11 +9,12 @@ import { useTodo } from '@/hooks/useTodo';
 import React, { useEffect } from 'react';
 import { WeatherCard } from '@/components/WeatherCard';
 import { IconSymbol } from '@/components/ui/IconSymbol';
+import { type GrassType } from '@/lib/lawnAdvice';
 
 export default function HomeScreen() {
   const { prefs, loading: prefsLoading } = useUserPreferences();
   const { weather, loading, error } = useWeather(prefs.city, prefs.state);
-  const { mowingTodo, fertilizerTodo, wateringTodo } = useTodo('mowing');
+  const { mowingTodo, fertilizerTodo, wateringTodo } = useTodo(prefs.grass_type as GrassType);
 
   // Log errors for owner notification (send to error tracking service)
   useEffect(() => {
@@ -91,12 +92,8 @@ export default function HomeScreen() {
           <View style={styles.card}>
             <Text style={styles.sectionTitle}>Upcoming Reminders</Text>
             <View style={styles.reminderItem}>
-              <Text style={styles.reminderTitle}>Mow Front Lawn</Text>
-              <Text style={styles.reminderSubtitle}>Tomorrow · 10:00 AM</Text>
-            </View>
-            <View style={styles.reminderItem}>
-              <Text style={styles.reminderTitle}>Water Backyard</Text>
-              <Text style={styles.reminderSubtitle}>In 2 Days</Text>
+              <Text style={styles.reminderTitle}>No reminders scheduled</Text>
+              <Text style={styles.reminderSubtitle}>Log a mowing, watering, or fertilizer event to track your lawn care schedule.</Text>
             </View>
           </View>
         </ScrollView>
