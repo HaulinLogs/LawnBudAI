@@ -14,7 +14,7 @@ import { type GrassType } from '@/lib/lawnAdvice';
 export default function HomeScreen() {
   const { prefs, loading: prefsLoading } = useUserPreferences();
   const { weather, loading, error } = useWeather(prefs.city, prefs.state);
-  const { mowingTodo, fertilizerTodo, wateringTodo } = useTodo(prefs.grass_type as GrassType);
+  const { mowingTodo, fertilizerTodo, wateringTodo, overseedingReminder } = useTodo(prefs.grass_type as GrassType);
 
   // Log errors for owner notification (send to error tracking service)
   useEffect(() => {
@@ -91,10 +91,34 @@ export default function HomeScreen() {
 
           <View style={styles.card}>
             <Text style={styles.sectionTitle}>Upcoming Reminders</Text>
-            <View style={styles.reminderItem}>
-              <Text style={styles.reminderTitle}>No reminders scheduled</Text>
-              <Text style={styles.reminderSubtitle}>Log a mowing, watering, or fertilizer event to track your lawn care schedule.</Text>
-            </View>
+            {overseedingReminder ? (
+              <View style={[
+                styles.reminderItem,
+                overseedingReminder.urgency === 'now'
+                  ? { backgroundColor: '#fef3c7', borderLeftWidth: 4, borderLeftColor: '#f59e0b' }
+                  : { backgroundColor: '#dbeafe', borderLeftWidth: 4, borderLeftColor: '#3b82f6' },
+              ]}>
+                <Text style={[
+                  styles.reminderTitle,
+                  { color: overseedingReminder.urgency === 'now' ? '#92400e' : '#1e3a5f' },
+                ]}>
+                  {overseedingReminder.title}
+                </Text>
+                <Text style={[
+                  styles.reminderSubtitle,
+                  { color: overseedingReminder.urgency === 'now' ? '#78350f' : '#1e40af' },
+                ]}>
+                  {overseedingReminder.subtitle}
+                </Text>
+              </View>
+            ) : (
+              <View style={styles.reminderItem}>
+                <Text style={styles.reminderTitle}>No reminders scheduled</Text>
+                <Text style={styles.reminderSubtitle}>
+                  Log a mowing, watering, or fertilizer event to track your lawn care schedule.
+                </Text>
+              </View>
+            )}
           </View>
         </ScrollView>
       </ParallaxScrollView>

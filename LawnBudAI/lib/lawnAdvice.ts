@@ -225,6 +225,109 @@ const fertilizerAdvice: Record<GrassType, Record<Season, LawnAdvice>> = {
 };
 
 // ---------------------------------------------------------------------------
+// Overseeding reminders
+//
+// Uses month-level windows rather than broad seasons because the overseeding
+// opportunity is narrow (~6–10 weeks). Windows are based on soil-temperature
+// research from:
+//   - University of Minnesota Extension (cool-season):
+//       https://extension.umn.edu/lawn-care/overseeding-lawns
+//   - Penn State Turfgrass Science (cool-season timing):
+//       https://plantscience.psu.edu/research/centers/turf
+//   - Clemson Extension (warm-season ryegrass overseeding):
+//       https://hgic.clemson.edu/factsheet/lawn-overseeding/
+//   - Texas A&M AgriLife (warm-season ryegrass overseeding):
+//       https://aggie-horticulture.tamu.edu/
+// ---------------------------------------------------------------------------
+
+export type OverseedingUrgency = 'now' | 'soon';
+
+export interface OverseedingReminder {
+  title: string;
+  subtitle: string;
+  urgency: OverseedingUrgency;
+}
+
+interface OverseedingWindow {
+  /** Months (1-based) when overseeding should happen right now. */
+  nowMonths: number[];
+  /** Months when overseeding is 4–6 weeks out — give a heads-up. */
+  soonMonths: number[];
+  nowText: string;
+  soonText: string;
+}
+
+const overseedingWindows: Record<GrassType, OverseedingWindow> = {
+  // Cool-season grasses (Kentucky bluegrass, tall fescue, perennial ryegrass)
+  // Ideal soil temp for germination: 50–65 °F → typically Aug–Oct in northern US
+  cool_season: {
+    nowMonths: [8, 9, 10],
+    soonMonths: [7],
+    nowText:
+      'Prime overseeding window is open. Soil temps are ideal (50–65°F) for cool-season germination. ' +
+      'Mow existing grass to 2", dethatch or rake thin areas to expose soil, broadcast seed at the ' +
+      'recommended rate, then keep the seedbed moist (light watering 2–3× daily) for 2–3 weeks. ' +
+      'Avoid heavy foot traffic until the new grass reaches mowing height.',
+    soonText:
+      'Overseeding season is 4–6 weeks away (mid-August through October). Now is the time to prepare: ' +
+      'soil-test your lawn (target pH 6.0–7.0), identify thin or bare areas, and select seed that ' +
+      'matches your existing grass. Purchasing seed early ensures the best variety selection.',
+  },
+
+  // Warm-season grasses (Bermuda, Zoysia, St. Augustine, Centipede)
+  // Overseeding is done with annual or perennial ryegrass for winter color,
+  // when daytime highs consistently drop below ~70 °F → typically Oct–Nov
+  warm_season: {
+    nowMonths: [10, 11],
+    soonMonths: [9],
+    nowText:
+      'Time to overseed with perennial or annual ryegrass for winter color. Scalp existing grass to 1", ' +
+      'then broadcast ryegrass at 10–15 lbs/1000 sq ft. Keep soil moist until ryegrass is established. ' +
+      'The ryegrass will naturally die off in late spring as your warm-season turf resumes growth — ' +
+      'withhold water and fertilizer from the ryegrass to ease that transition.',
+    soonText:
+      'Winter ryegrass overseeding opens in October once daytime highs drop below 70°F. Start preparing ' +
+      'now: scalp your lawn and collect the clippings, and source perennial or annual ryegrass seed. ' +
+      'Overseeding too early (while it is still hot) leads to poor germination and summer-weed competition.',
+  },
+
+  // Transition-zone / mixed lawns — advice covers both cool and warm areas
+  mixed: {
+    nowMonths: [8, 9, 10],
+    soonMonths: [7],
+    nowText:
+      'Now is the right time to overseed thin cool-season areas while soil temperatures are in the ' +
+      'ideal 50–65°F range. Later in October, consider ryegrass overseeding for any warm-season patches ' +
+      'if you want to maintain winter color throughout the lawn. Keep newly seeded areas consistently ' +
+      'moist and off-limits to heavy traffic until established.',
+    soonText:
+      'Overseeding season for cool-season areas of your lawn is 4–6 weeks away (mid-August through October). ' +
+      'Soil-test now, choose seed that matches your cool-season grass, and mark thin spots. ' +
+      'Warm-season areas of your lawn can be overseeded with ryegrass in October for winter green.',
+  },
+};
+
+/**
+ * Returns an overseeding reminder when the current month falls inside the
+ * defined "now" or "soon" window for the given grass type, or null otherwise.
+ */
+export function getOverseedingReminder(
+  grassType: GrassType,
+  date: Date = new Date(),
+): OverseedingReminder | null {
+  const month = date.getMonth() + 1; // 1-based
+  const window = overseedingWindows[grassType] ?? overseedingWindows.mixed;
+
+  if (window.nowMonths.includes(month)) {
+    return { title: 'Overseed Now', subtitle: window.nowText, urgency: 'now' };
+  }
+  if (window.soonMonths.includes(month)) {
+    return { title: 'Overseeding Season Approaching', subtitle: window.soonText, urgency: 'soon' };
+  }
+  return null;
+}
+
+// ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
 
