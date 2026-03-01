@@ -83,6 +83,18 @@ describe('Validation Utilities', () => {
     it('should work with decimal ranges', () => {
       expect(validateNumberInRange('0.5', 'Value', 0.1, 99.9)).toEqual({ valid: true });
     });
+
+    it('should reject empty string as required', () => {
+      const result = validateNumberInRange('', 'NPK', 0, 100);
+      expect(result.valid).toBe(false);
+      expect(result.error).toContain('required');
+    });
+
+    it('should reject whitespace-only string as required', () => {
+      const result = validateNumberInRange('   ', 'NPK', 0, 100);
+      expect(result.valid).toBe(false);
+      expect(result.error).toContain('required');
+    });
   });
 
   describe('validateRequiredField', () => {

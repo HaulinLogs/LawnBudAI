@@ -1,6 +1,6 @@
 import { renderHook, act, waitFor } from '@testing-library/react-native';
-import { useFertilizerEvents } from '@/hooks/useFertilizerEvents';
-import { FertilizerEventInput } from '@/models/events';
+import { useWaterEvents } from '@/hooks/useWaterEvents';
+import { WaterEventInput } from '@/models/events';
 import { supabase } from '@/lib/supabase';
 import { useSupabaseUser } from '@/hooks/useSupabaseUser';
 
@@ -14,20 +14,19 @@ jest.mock('@/lib/supabase', () => ({
   },
 }));
 
-// Mock useSupabaseUser
+// Mock useSupabaseUser (also mocked globally in setup.ts — override per test)
 jest.mock('@/hooks/useSupabaseUser');
 
-describe('useFertilizerEvents', () => {
+describe('useWaterEvents', () => {
   const mockUser = { id: 'user-123', email: 'test@example.com' };
   const mockEvents = [
     {
       id: '1',
       user_id: 'user-123',
       date: '2026-02-15',
-      amount_lbs: 3.5,
-      type: 'npk' as const,
-      application_method: 'spreader' as const,
-      notes: 'Spring fertilizer application',
+      amount_inches: 0.5,
+      source: 'sprinkler' as const,
+      notes: 'Morning run',
       created_at: '2026-02-15T10:00:00Z',
       updated_at: '2026-02-15T10:00:00Z',
     },
@@ -35,12 +34,21 @@ describe('useFertilizerEvents', () => {
       id: '2',
       user_id: 'user-123',
       date: '2026-02-01',
-      amount_lbs: 2.5,
-      type: 'nitrogen' as const,
-      application_method: 'spray' as const,
-      notes: 'General maintenance',
+      amount_inches: 1.0,
+      source: 'rain' as const,
+      notes: null,
       created_at: '2026-02-01T10:00:00Z',
       updated_at: '2026-02-01T10:00:00Z',
+    },
+    {
+      id: '3',
+      user_id: 'user-123',
+      date: '2026-01-20',
+      amount_inches: 0.25,
+      source: 'manual' as const,
+      notes: 'Hand watering',
+      created_at: '2026-01-20T10:00:00Z',
+      updated_at: '2026-01-20T10:00:00Z',
     },
   ];
 
@@ -49,7 +57,7 @@ describe('useFertilizerEvents', () => {
   });
 
   describe('fetchEvents', () => {
-    it('should fetch fertilizer events from Supabase', async () => {
+    it('should fetch watering events for authenticated user', async () => {
       // Arrange
       (useSupabaseUser as jest.Mock).mockReturnValue({
         user: mockUser,
@@ -73,23 +81,21 @@ describe('useFertilizerEvents', () => {
       });
 
       // Act
-      const { result } = renderHook(() => useFertilizerEvents());
+      const { result } = renderHook(() => useWaterEvents());
 
-      // Assert - initial state
       expect(result.current.loading).toBe(true);
 
-      // Wait for fetch to complete
       await waitFor(() => {
         expect(result.current.loading).toBe(false);
       });
 
+      // Assert
       expect(result.current.events).toEqual(mockEvents);
       expect(result.current.error).toBeNull();
     });
 
     it('should handle fetch errors gracefully', async () => {
       // Arrange
-      const errorMessage = 'Failed to fetch events';
       (useSupabaseUser as jest.Mock).mockReturnValue({
         user: mockUser,
         loading: false,
@@ -101,7 +107,7 @@ describe('useFertilizerEvents', () => {
           order: jest.fn().mockReturnValue({
             limit: jest.fn().mockResolvedValue({
               data: null,
-              error: new Error(errorMessage),
+              error: new Error('DB connection failed'),
             }),
           }),
         }),
@@ -112,18 +118,18 @@ describe('useFertilizerEvents', () => {
       });
 
       // Act
-      const { result } = renderHook(() => useFertilizerEvents());
+      const { result } = renderHook(() => useWaterEvents());
 
-      // Assert
       await waitFor(() => {
         expect(result.current.loading).toBe(false);
       });
 
+      // Assert
       expect(result.current.error).toBeTruthy();
       expect(result.current.events).toEqual([]);
     });
 
-    it('should handle unauthenticated user', async () => {
+    it('should set error when user is not authenticated', async () => {
       // Arrange
       (useSupabaseUser as jest.Mock).mockReturnValue({
         user: null,
@@ -132,20 +138,35 @@ describe('useFertilizerEvents', () => {
       });
 
       // Act
-      const { result } = renderHook(() => useFertilizerEvents());
+      const { result } = renderHook(() => useWaterEvents());
 
-      // Assert
       await waitFor(() => {
         expect(result.current.loading).toBe(false);
       });
 
+      // Assert
       expect(result.current.error).toBeTruthy();
       expect(result.current.events).toEqual([]);
+    });
+
+    it('should not fetch when userLoading is true', () => {
+      // Arrange
+      (useSupabaseUser as jest.Mock).mockReturnValue({
+        user: null,
+        loading: true,
+        error: null,
+      });
+
+      // Act
+      renderHook(() => useWaterEvents());
+
+      // Assert
+      expect(supabase.from).not.toHaveBeenCalled();
     });
   });
 
   describe('addEvent', () => {
-    it('should add a new fertilizer event', async () => {
+    it('should add a new watering event and prepend to events list', async () => {
       // Arrange
       (useSupabaseUser as jest.Mock).mockReturnValue({
         user: mockUser,
@@ -153,7 +174,17 @@ describe('useFertilizerEvents', () => {
         error: null,
       });
 
-      const newEvent = mockEvents[0];
+      const newEvent = {
+        id: '4',
+        user_id: 'user-123',
+        date: '2026-03-01',
+        amount_inches: 0.75,
+        source: 'sprinkler' as const,
+        notes: null,
+        created_at: '2026-03-01T10:00:00Z',
+        updated_at: '2026-03-01T10:00:00Z',
+      };
+
       const mockInsert = jest.fn().mockReturnValue({
         select: jest.fn().mockReturnValue({
           single: jest.fn().mockResolvedValue({
@@ -177,19 +208,17 @@ describe('useFertilizerEvents', () => {
         insert: mockInsert,
       });
 
-      const { result } = renderHook(() => useFertilizerEvents());
+      const { result } = renderHook(() => useWaterEvents());
 
       await waitFor(() => {
         expect(result.current.loading).toBe(false);
       });
 
       // Act
-      const input: FertilizerEventInput = {
-        date: '2026-02-15',
-        amount_lbs: 3.5,
-        type: 'npk',
-        application_method: 'spreader',
-        notes: 'Spring fertilizer application',
+      const input: WaterEventInput = {
+        date: '2026-03-01',
+        amount_inches: 0.75,
+        source: 'sprinkler',
       };
 
       await act(async () => {
@@ -200,7 +229,7 @@ describe('useFertilizerEvents', () => {
       expect(result.current.events).toContainEqual(newEvent);
     });
 
-    it('should handle add event errors', async () => {
+    it('should throw and set error on insert failure', async () => {
       // Arrange
       (useSupabaseUser as jest.Mock).mockReturnValue({
         user: mockUser,
@@ -208,12 +237,11 @@ describe('useFertilizerEvents', () => {
         error: null,
       });
 
-      const errorMessage = 'Insert failed';
       const mockInsert = jest.fn().mockReturnValue({
         select: jest.fn().mockReturnValue({
           single: jest.fn().mockResolvedValue({
             data: null,
-            error: new Error(errorMessage),
+            error: new Error('Insert failed'),
           }),
         }),
       });
@@ -232,18 +260,17 @@ describe('useFertilizerEvents', () => {
         insert: mockInsert,
       });
 
-      const { result } = renderHook(() => useFertilizerEvents());
+      const { result } = renderHook(() => useWaterEvents());
 
       await waitFor(() => {
         expect(result.current.loading).toBe(false);
       });
 
       // Act & Assert
-      const input: FertilizerEventInput = {
-        date: '2026-02-15',
-        amount_lbs: 3.5,
-        type: 'npk',
-        application_method: 'spreader',
+      const input: WaterEventInput = {
+        date: '2026-03-01',
+        amount_inches: 0.75,
+        source: 'sprinkler',
       };
 
       await expect(result.current.addEvent(input)).rejects.toThrow();
@@ -251,7 +278,7 @@ describe('useFertilizerEvents', () => {
   });
 
   describe('deleteEvent', () => {
-    it('should delete a fertilizer event', async () => {
+    it('should remove event from local state after successful delete', async () => {
       // Arrange
       (useSupabaseUser as jest.Mock).mockReturnValue({
         user: mockUser,
@@ -279,7 +306,7 @@ describe('useFertilizerEvents', () => {
         delete: mockDelete,
       });
 
-      const { result } = renderHook(() => useFertilizerEvents());
+      const { result } = renderHook(() => useWaterEvents());
 
       await waitFor(() => {
         expect(result.current.loading).toBe(false);
@@ -297,7 +324,7 @@ describe('useFertilizerEvents', () => {
       expect(result.current.events.find(e => e.id === '1')).toBeUndefined();
     });
 
-    it('should handle delete errors', async () => {
+    it('should throw on delete failure', async () => {
       // Arrange
       (useSupabaseUser as jest.Mock).mockReturnValue({
         user: mockUser,
@@ -305,10 +332,9 @@ describe('useFertilizerEvents', () => {
         error: null,
       });
 
-      const errorMessage = 'Delete failed';
       const mockDelete = jest.fn().mockReturnValue({
         eq: jest.fn().mockResolvedValue({
-          error: new Error(errorMessage),
+          error: new Error('Delete failed'),
         }),
       });
 
@@ -326,7 +352,7 @@ describe('useFertilizerEvents', () => {
         delete: mockDelete,
       });
 
-      const { result } = renderHook(() => useFertilizerEvents());
+      const { result } = renderHook(() => useWaterEvents());
 
       await waitFor(() => {
         expect(result.current.loading).toBe(false);
@@ -338,7 +364,7 @@ describe('useFertilizerEvents', () => {
   });
 
   describe('getStats', () => {
-    it('should calculate statistics correctly', async () => {
+    it('should return null/zero values when no events exist', async () => {
       // Arrange
       (useSupabaseUser as jest.Mock).mockReturnValue({
         user: mockUser,
@@ -346,118 +372,109 @@ describe('useFertilizerEvents', () => {
         error: null,
       });
 
-      const mockSelect = jest.fn().mockReturnValue({
-        eq: jest.fn().mockReturnValue({
-          order: jest.fn().mockReturnValue({
-            limit: jest.fn().mockResolvedValue({
-              data: mockEvents,
-              error: null,
+      (supabase.from as jest.Mock).mockReturnValue({
+        select: jest.fn().mockReturnValue({
+          eq: jest.fn().mockReturnValue({
+            order: jest.fn().mockReturnValue({
+              limit: jest.fn().mockResolvedValue({
+                data: [],
+                error: null,
+              }),
             }),
           }),
         }),
       });
 
-      (supabase.from as jest.Mock).mockReturnValue({
-        select: mockSelect,
-      });
-
-      // Act
-      const { result } = renderHook(() => useFertilizerEvents());
+      const { result } = renderHook(() => useWaterEvents());
 
       await waitFor(() => {
         expect(result.current.loading).toBe(false);
       });
 
+      // Act
+      const stats = result.current.getStats();
+
+      // Assert — empty state returns null/zero values
+      expect(stats.lastWateredDaysAgo).toBeNull();
+      expect(stats.averageInchesPerWatering).toBeUndefined();
+    });
+
+    it('should calculate stats with events', async () => {
+      // Arrange
+      (useSupabaseUser as jest.Mock).mockReturnValue({
+        user: mockUser,
+        loading: false,
+        error: null,
+      });
+
+      (supabase.from as jest.Mock).mockReturnValue({
+        select: jest.fn().mockReturnValue({
+          eq: jest.fn().mockReturnValue({
+            order: jest.fn().mockReturnValue({
+              limit: jest.fn().mockResolvedValue({
+                data: mockEvents,
+                error: null,
+              }),
+            }),
+          }),
+        }),
+      });
+
+      const { result } = renderHook(() => useWaterEvents());
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      // Act
       const stats = result.current.getStats();
 
       // Assert
-      expect(stats.lastApplicationDaysAgo).toBeDefined();
-      expect(stats.totalAmountLbs).toBeDefined();
-      expect(stats.averageAmountLbs).toBeDefined();
-      expect(stats.mostUsedType).toBeDefined();
-    });
-
-    it('should return null values when no events exist', async () => {
-      // Arrange
-      (useSupabaseUser as jest.Mock).mockReturnValue({
-        user: mockUser,
-        loading: false,
-        error: null,
-      });
-
-      const mockSelect = jest.fn().mockReturnValue({
-        eq: jest.fn().mockReturnValue({
-          order: jest.fn().mockReturnValue({
-            limit: jest.fn().mockResolvedValue({
-              data: [],
-              error: null,
-            }),
-          }),
-        }),
-      });
-
-      (supabase.from as jest.Mock).mockReturnValue({
-        select: mockSelect,
-      });
-
-      // Act
-      const { result } = renderHook(() => useFertilizerEvents());
-
-      await waitFor(() => {
-        expect(result.current.loading).toBe(false);
-      });
-
-      const stats = result.current.getStats();
-
-      // Assert
-      expect(stats.lastApplicationDaysAgo).toBeNull();
-      expect(stats.totalAmountLbs).toBe('0');
-      expect(stats.averageAmountLbs).toBeNull();
-      expect(stats.mostUsedType).toBeNull();
+      expect(stats.lastWateredDaysAgo).toBeDefined();
+      expect(typeof stats.lastWateredDaysAgo).toBe('number');
+      expect(stats.lastWateredDaysAgo).toBeGreaterThanOrEqual(0);
+      expect(stats.averageInchesPerWatering).toBeDefined();
     });
   });
 
-  describe('getTypeBreakdown', () => {
-    it('should calculate type breakdown correctly', async () => {
-      // Arrange
+  describe('getSourceBreakdown', () => {
+    it('should count events by source type', async () => {
+      // Arrange — mockEvents has 1 sprinkler, 1 rain, 1 manual
       (useSupabaseUser as jest.Mock).mockReturnValue({
         user: mockUser,
         loading: false,
         error: null,
       });
 
-      const mockSelect = jest.fn().mockReturnValue({
-        eq: jest.fn().mockReturnValue({
-          order: jest.fn().mockReturnValue({
-            limit: jest.fn().mockResolvedValue({
-              data: mockEvents,
-              error: null,
+      (supabase.from as jest.Mock).mockReturnValue({
+        select: jest.fn().mockReturnValue({
+          eq: jest.fn().mockReturnValue({
+            order: jest.fn().mockReturnValue({
+              limit: jest.fn().mockResolvedValue({
+                data: mockEvents,
+                error: null,
+              }),
             }),
           }),
         }),
       });
 
-      (supabase.from as jest.Mock).mockReturnValue({
-        select: mockSelect,
-      });
-
-      // Act
-      const { result } = renderHook(() => useFertilizerEvents());
+      const { result } = renderHook(() => useWaterEvents());
 
       await waitFor(() => {
         expect(result.current.loading).toBe(false);
       });
 
-      const breakdown = result.current.getTypeBreakdown();
+      // Act
+      const breakdown = result.current.getSourceBreakdown();
 
       // Assert
-      expect(breakdown.npk).toBe(1);
-      expect(breakdown.nitrogen).toBe(1);
+      expect(breakdown.sprinkler).toBe(1);
+      expect(breakdown.rain).toBe(1);
+      expect(breakdown.manual).toBe(1);
     });
-  });
 
-  describe('getMethodBreakdown', () => {
-    it('should calculate method breakdown correctly', async () => {
+    it('should return zeros when no events exist', async () => {
       // Arrange
       (useSupabaseUser as jest.Mock).mockReturnValue({
         user: mockUser,
@@ -465,80 +482,32 @@ describe('useFertilizerEvents', () => {
         error: null,
       });
 
-      const mockSelect = jest.fn().mockReturnValue({
-        eq: jest.fn().mockReturnValue({
-          order: jest.fn().mockReturnValue({
-            limit: jest.fn().mockResolvedValue({
-              data: mockEvents,
-              error: null,
+      (supabase.from as jest.Mock).mockReturnValue({
+        select: jest.fn().mockReturnValue({
+          eq: jest.fn().mockReturnValue({
+            order: jest.fn().mockReturnValue({
+              limit: jest.fn().mockResolvedValue({
+                data: [],
+                error: null,
+              }),
             }),
           }),
         }),
       });
 
-      (supabase.from as jest.Mock).mockReturnValue({
-        select: mockSelect,
-      });
-
-      // Act
-      const { result } = renderHook(() => useFertilizerEvents());
+      const { result } = renderHook(() => useWaterEvents());
 
       await waitFor(() => {
         expect(result.current.loading).toBe(false);
       });
 
-      const breakdown = result.current.getMethodBreakdown();
+      // Act
+      const breakdown = result.current.getSourceBreakdown();
 
       // Assert
-      expect(breakdown.spreader).toBe(1);
-      expect(breakdown.spray).toBe(1);
-    });
-
-    it('should skip events with null application_method', async () => {
-      // Arrange
-      (useSupabaseUser as jest.Mock).mockReturnValue({
-        user: mockUser,
-        loading: false,
-        error: null,
-      });
-
-      const eventsWithNullMethod = [
-        {
-          id: '3',
-          user_id: 'user-123',
-          date: '2026-02-10',
-          amount_lbs: 2.0,
-          type: 'nitrogen' as const,
-          application_method: null,
-          notes: null,
-          created_at: '2026-02-10T10:00:00Z',
-          updated_at: '2026-02-10T10:00:00Z',
-        },
-      ];
-
-      const mockSelect = jest.fn().mockReturnValue({
-        eq: jest.fn().mockReturnValue({
-          order: jest.fn().mockReturnValue({
-            limit: jest.fn().mockResolvedValue({
-              data: eventsWithNullMethod,
-              error: null,
-            }),
-          }),
-        }),
-      });
-
-      (supabase.from as jest.Mock).mockReturnValue({
-        select: mockSelect,
-      });
-
-      const { result } = renderHook(() => useFertilizerEvents());
-
-      await waitFor(() => expect(result.current.loading).toBe(false));
-
-      const breakdown = result.current.getMethodBreakdown();
-
-      // Event with null application_method should be skipped
-      expect(Object.keys(breakdown).length).toBe(0);
+      expect(breakdown.sprinkler).toBe(0);
+      expect(breakdown.rain).toBe(0);
+      expect(breakdown.manual).toBe(0);
     });
   });
 });
