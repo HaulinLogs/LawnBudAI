@@ -8,6 +8,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react-native';
 import { PremiumGate } from '@/components/PremiumGate';
 import { useRouter } from 'expo-router';
+import { useColorScheme } from '@/hooks/useColorScheme';
 
 // Mock expo-router
 jest.mock('expo-router', () => ({
@@ -17,8 +18,6 @@ jest.mock('expo-router', () => ({
 jest.mock('@/hooks/useColorScheme', () => ({
   useColorScheme: jest.fn(() => 'light'),
 }));
-
-import { useColorScheme } from '@/hooks/useColorScheme';
 const mockUseColorScheme = useColorScheme as jest.Mock;
 
 const mockRouter = useRouter as jest.MockedFunction<typeof useRouter>;

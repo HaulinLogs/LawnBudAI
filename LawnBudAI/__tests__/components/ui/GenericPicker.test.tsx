@@ -1,12 +1,11 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react-native';
 import GenericPicker from '@/components/ui/GenericPicker';
+import { useColorScheme } from '@/hooks/useColorScheme';
 
 jest.mock('@/hooks/useColorScheme', () => ({
   useColorScheme: jest.fn(() => 'light'),
 }));
-
-import { useColorScheme } from '@/hooks/useColorScheme';
 const mockUseColorScheme = useColorScheme as jest.Mock;
 
 describe('GenericPicker', () => {

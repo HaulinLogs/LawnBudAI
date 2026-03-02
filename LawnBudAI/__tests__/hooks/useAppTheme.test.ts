@@ -9,13 +9,11 @@
 
 import { renderHook } from '@testing-library/react-native';
 import { useAppTheme, lightColors, darkColors } from '@/hooks/useAppTheme';
+import { useColorScheme } from '@/hooks/useColorScheme';
 
 jest.mock('@/hooks/useColorScheme', () => ({
   useColorScheme: jest.fn(),
 }));
-
-// Import after mock so we get the mocked version
-import { useColorScheme } from '@/hooks/useColorScheme';
 
 const mockUseColorScheme = useColorScheme as jest.Mock;
 
@@ -69,11 +67,11 @@ describe('useAppTheme', () => {
   });
 
   it('every palette key maps to a non-empty string value', () => {
-    for (const [key, value] of Object.entries(lightColors)) {
+    for (const [, value] of Object.entries(lightColors)) {
       expect(typeof value).toBe('string');
       expect(value.length).toBeGreaterThan(0);
     }
-    for (const [key, value] of Object.entries(darkColors)) {
+    for (const [, value] of Object.entries(darkColors)) {
       expect(typeof value).toBe('string');
       expect(value.length).toBeGreaterThan(0);
     }
