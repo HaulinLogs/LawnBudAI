@@ -258,6 +258,7 @@ describe('useUserPreferences', () => {
           city: 'Denver',
           state: 'CO',
         }),
+        { onConflict: 'user_id' },
       );
       expect(result.current.prefs.city).toBe('Denver');
       expect(result.current.prefs.state).toBe('CO');

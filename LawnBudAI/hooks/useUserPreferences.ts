@@ -86,11 +86,14 @@ export function useUserPreferences() {
     try {
       if (!user) return;
 
-      const { error } = await supabase.from('user_preferences').upsert({
-        user_id: user.id,
-        ...updates,
-        updated_at: new Date().toISOString(),
-      });
+      const { error } = await supabase.from('user_preferences').upsert(
+        {
+          user_id: user.id,
+          ...updates,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'user_id' },
+      );
 
       if (error) {
         console.error('Error saving preferences:', error);
