@@ -8,13 +8,6 @@ jest.mock('@/hooks/useColorScheme', () => ({
 }));
 const mockUseColorScheme = useColorScheme as jest.Mock;
 
-jest.mock('@/hooks/useColorScheme', () => ({
-  useColorScheme: jest.fn(() => 'light'),
-}));
-
-import { useColorScheme } from '@/hooks/useColorScheme';
-const mockUseColorScheme = useColorScheme as jest.Mock;
-
 describe('GenericPicker', () => {
   beforeEach(() => {
     jest.clearAllMocks();
