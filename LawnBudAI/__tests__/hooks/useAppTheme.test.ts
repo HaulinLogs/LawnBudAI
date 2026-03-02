@@ -15,6 +15,7 @@ jest.mock('@/hooks/useColorScheme', () => ({
   useColorScheme: jest.fn(),
 }));
 
+
 const mockUseColorScheme = useColorScheme as jest.Mock;
 
 describe('useAppTheme', () => {
