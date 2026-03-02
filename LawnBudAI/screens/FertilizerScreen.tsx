@@ -24,69 +24,7 @@ import {
   type GrassType,
   type FertilizerStatus,
 } from '@/lib/lawnAdvice';
-
-const localStyles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f9fafb',
-  },
-  content: {
-    padding: 16,
-  },
-  section: {
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#1f2937',
-    marginBottom: 12,
-  },
-  warningText: {
-    color: '#f97316',
-    fontSize: 12,
-    marginTop: 4,
-    marginBottom: 8,
-  },
-  breakdownRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 12,
-  },
-  breakdownItem: {
-    alignItems: 'center',
-  },
-  breakdownValue: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#22c55e',
-    marginBottom: 4,
-  },
-  breakdownLabel: {
-    fontSize: 12,
-    color: '#6b7280',
-  },
-  advisorCard: {
-    borderRadius: 10,
-    padding: 14,
-    marginBottom: 16,
-    borderLeftWidth: 4,
-  },
-  advisorHeading: {
-    fontSize: 15,
-    fontWeight: '700',
-    marginBottom: 6,
-  },
-  advisorDetail: {
-    fontSize: 13,
-    lineHeight: 19,
-  },
-  advisorAmount: {
-    marginTop: 8,
-    fontSize: 13,
-    fontWeight: '600',
-  },
-});
+import { useAppTheme } from '@/hooks/useAppTheme';
 
 const FERTILIZER_TYPES = [
   { label: 'Nitrogen', value: 'nitrogen' as const, icon: 'leaf' },
@@ -117,6 +55,69 @@ const ADVISOR_THEME: Record<FertilizerStatus, { bg: string; border: string; head
 export default function FertilizerScreen() {
   const { events, loading, error, addEvent, deleteEvent, getStats, getTypeBreakdown, getMethodBreakdown } = useFertilizerEvents();
   const { prefs } = useUserPreferences();
+  const themeColors = useAppTheme();
+  const localStyles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: themeColors.screenBackground,
+    },
+    content: {
+      padding: 16,
+    },
+    section: {
+      marginBottom: 24,
+    },
+    sectionTitle: {
+      fontSize: 18,
+      fontWeight: '700',
+      color: themeColors.textPrimary,
+      marginBottom: 12,
+    },
+    warningText: {
+      color: themeColors.warning,
+      fontSize: 12,
+      marginTop: 4,
+      marginBottom: 8,
+    },
+    breakdownRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      marginBottom: 12,
+    },
+    breakdownItem: {
+      alignItems: 'center',
+    },
+    breakdownValue: {
+      fontSize: 20,
+      fontWeight: '700',
+      color: themeColors.primary,
+      marginBottom: 4,
+    },
+    breakdownLabel: {
+      fontSize: 12,
+      color: themeColors.textTertiary,
+    },
+    advisorCard: {
+      borderRadius: 10,
+      padding: 14,
+      marginBottom: 16,
+      borderLeftWidth: 4,
+    },
+    advisorHeading: {
+      fontSize: 15,
+      fontWeight: '700',
+      marginBottom: 6,
+    },
+    advisorDetail: {
+      fontSize: 13,
+      lineHeight: 19,
+    },
+    advisorAmount: {
+      marginTop: 8,
+      fontSize: 13,
+      fontWeight: '600',
+    },
+  }), [themeColors]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const stats = useMemo(() => getStats(), [events]);
@@ -187,11 +188,11 @@ export default function FertilizerScreen() {
   }, [deleteEvent]);
 
   const renderEventDetail = useCallback((event: any) => (
-    <Text style={{ fontSize: 12, color: '#6b7280', marginTop: 4 }}>
+    <Text style={{ fontSize: 12, color: themeColors.textTertiary, marginTop: 4 }}>
       {event.amount_lbs} lbs • {event.type} • {event.application_method}
       {event.notes && <Text>{'\n'}{event.notes}</Text>}
     </Text>
-  ), []);
+  ), [themeColors]);
 
   const typePicker = useMemo(() => {
     const hasTypeError = formik.touched.type && formik.errors.type;

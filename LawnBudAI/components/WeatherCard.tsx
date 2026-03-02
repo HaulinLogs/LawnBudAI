@@ -5,50 +5,13 @@ import {
   WeatherDay,
   WeatherResponse,
 } from '@/models/weather';
-import { styles } from '@/styles/app.styles';
-import React from 'react';
+import { createAppStyles } from '@/styles/app.styles';
+import React, { useMemo } from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import Icon from '@expo/vector-icons/Ionicons';
+import { useAppTheme } from '@/hooks/useAppTheme';
 
 type Props = { weather: WeatherResponse };
-
-const forecastStyles = StyleSheet.create({
-  forecastContainer: {
-    marginTop: 12,
-  },
-  forecastScroll: {
-    gap: 8,
-  },
-  forecastCard: {
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    padding: 12,
-    minWidth: 100,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  forecastDate: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#065f46',
-  },
-  forecastTemp: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#333',
-  },
-  forecastTempSmall: {
-    fontSize: 12,
-    color: '#666',
-  },
-  forecastIcon: {
-    color: '#22c55e',
-  },
-});
 
 function celsiusToFahrenheit(celsius: string): number {
   return Math.round((parseFloat(celsius) * 9 / 5) + 32);
@@ -60,6 +23,46 @@ function formatDate(dateString: string): string {
 }
 
 function WeatherCardComponent({ weather }: Props) {
+  const themeColors = useAppTheme();
+  const styles = useMemo(() => createAppStyles(themeColors), [themeColors]);
+  const forecastStyles = useMemo(() => StyleSheet.create({
+    forecastContainer: {
+      marginTop: 12,
+    },
+    forecastScroll: {
+      gap: 8,
+    },
+    forecastCard: {
+      backgroundColor: themeColors.cardBackground,
+      borderRadius: 8,
+      padding: 12,
+      minWidth: 100,
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+      shadowColor: '#000',
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+    },
+    forecastDate: {
+      fontSize: 12,
+      fontWeight: '600',
+      color: themeColors.forecastDate,
+    },
+    forecastTemp: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: themeColors.forecastTemp,
+    },
+    forecastTempSmall: {
+      fontSize: 12,
+      color: themeColors.forecastTempSmall,
+    },
+    forecastIcon: {
+      color: '#22c55e',
+    },
+  }), [themeColors]);
+
   return (
     <>
       <Text style={styles.sectionTitle}>Today&apos;s Weather</Text>

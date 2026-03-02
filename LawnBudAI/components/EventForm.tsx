@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useMemo } from 'react';
 import {
   View,
   Text,
@@ -7,8 +7,8 @@ import {
   ActivityIndicator,
   StyleSheet,
 } from 'react-native';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { colors, spacing, borderRadius, typography } from '@/styles/theme';
+import { spacing, borderRadius } from '@/styles/theme';
+import { useAppTheme } from '@/hooks/useAppTheme';
 
 interface EventFormProps {
   date: string;
@@ -30,47 +30,6 @@ interface EventFormProps {
   disabled?: boolean;
 }
 
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.md,
-    padding: spacing.lg,
-    marginBottom: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.borderLight,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600' as const,
-    color: colors.textSecondary,
-    marginBottom: spacing.sm,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: borderRadius.sm,
-    padding: 10,
-    fontSize: 16,
-    marginBottom: spacing.md,
-    color: colors.textPrimary,
-  },
-  button: {
-    backgroundColor: colors.primary,
-    paddingVertical: 12,
-    paddingHorizontal: spacing.lg,
-    borderRadius: borderRadius.sm,
-    alignItems: 'center' as const,
-  },
-  buttonDisabled: {
-    backgroundColor: colors.disabled,
-  },
-  buttonText: {
-    color: colors.white,
-    fontSize: 16,
-    fontWeight: '600' as const,
-  },
-});
-
 export default function EventForm({
   date,
   onDateChange,
@@ -90,7 +49,50 @@ export default function EventForm({
   submitting,
   disabled = false,
 }: EventFormProps) {
+  const themeColors = useAppTheme();
   const isDisabled = disabled || submitting;
+
+  const styles = useMemo(() => StyleSheet.create({
+    card: {
+      backgroundColor: themeColors.cardBackground,
+      borderRadius: borderRadius.md,
+      padding: spacing.lg,
+      marginBottom: spacing.md,
+      borderWidth: 1,
+      borderColor: themeColors.borderLight,
+    },
+    label: {
+      fontSize: 14,
+      fontWeight: '600' as const,
+      color: themeColors.textSecondary,
+      marginBottom: spacing.sm,
+    },
+    input: {
+      borderWidth: 1,
+      borderColor: themeColors.border,
+      borderRadius: borderRadius.sm,
+      padding: 10,
+      fontSize: 16,
+      marginBottom: spacing.md,
+      color: themeColors.textPrimary,
+      backgroundColor: themeColors.inputBackground,
+    },
+    button: {
+      backgroundColor: themeColors.primary,
+      paddingVertical: 12,
+      paddingHorizontal: spacing.lg,
+      borderRadius: borderRadius.sm,
+      alignItems: 'center' as const,
+    },
+    buttonDisabled: {
+      backgroundColor: themeColors.border,
+    },
+    buttonText: {
+      color: '#fff',
+      fontSize: 16,
+      fontWeight: '600' as const,
+    },
+  }), [themeColors]);
 
   return (
     <View style={styles.card}>
@@ -98,6 +100,7 @@ export default function EventForm({
       <TextInput
         style={styles.input}
         placeholder="YYYY-MM-DD"
+        placeholderTextColor={themeColors.placeholderText}
         value={date}
         onChangeText={onDateChange}
         onBlur={onDateBlur}
@@ -108,6 +111,7 @@ export default function EventForm({
       <TextInput
         style={styles.input}
         placeholder={amountPlaceholder}
+        placeholderTextColor={themeColors.placeholderText}
         value={amount}
         onChangeText={onAmountChange}
         onBlur={onAmountBlur}
@@ -121,6 +125,7 @@ export default function EventForm({
       <TextInput
         style={[styles.input, { minHeight: 80 }]}
         placeholder="Any notes..."
+        placeholderTextColor={themeColors.placeholderText}
         value={notes}
         onChangeText={onNotesChange}
         onBlur={onNotesBlur}

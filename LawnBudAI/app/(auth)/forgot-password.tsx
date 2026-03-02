@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -11,7 +11,8 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { supabase } from '@/lib/supabase';
-import { styles } from '@/styles/auth.styles';
+import { createAuthStyles } from '@/styles/auth.styles';
+import { useAppTheme } from '@/hooks/useAppTheme';
 
 export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState('');
@@ -19,6 +20,8 @@ export default function ForgotPasswordScreen() {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const themeColors = useAppTheme();
+  const styles = useMemo(() => createAuthStyles(themeColors), [themeColors]);
 
   const handleResetPassword = async () => {
     if (!email) {
@@ -64,7 +67,7 @@ export default function ForgotPasswordScreen() {
           <TextInput
             style={styles.input}
             placeholder="Email"
-            placeholderTextColor="#999"
+            placeholderTextColor={themeColors.placeholderText}
             value={email}
             onChangeText={setEmail}
             editable={!loading}

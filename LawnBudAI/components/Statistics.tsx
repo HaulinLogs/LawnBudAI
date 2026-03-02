@@ -1,11 +1,11 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useMemo } from 'react';
 import {
   View,
   Text,
   StyleSheet,
 } from 'react-native';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { colors, spacing, borderRadius, typography } from '@/styles/theme';
+import { spacing, borderRadius } from '@/styles/theme';
+import { useAppTheme } from '@/hooks/useAppTheme';
 
 interface StatBox {
   value: string | number;
@@ -19,49 +19,50 @@ interface StatisticsProps {
   title?: string;
 }
 
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: spacing.md,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: '700' as const,
-    color: colors.textPrimary,
-    marginBottom: spacing.md,
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-  },
-  statBox: {
-    flex: 1,
-    backgroundColor: '#f3f4f6',
-    borderRadius: borderRadius.sm,
-    padding: spacing.md,
-    marginHorizontal: 6,
-    alignItems: 'center' as const,
-  },
-  statValue: {
-    fontSize: 20,
-    fontWeight: '700' as const,
-    color: colors.primary,
-    marginBottom: spacing.sm,
-  },
-  statLabel: {
-    fontSize: 12,
-    color: colors.textTertiary,
-    textAlign: 'center' as const,
-  },
-  breakdown: {
-    marginTop: spacing.lg,
-  },
-});
-
 function StatisticsComponent({
   stats,
   showBreakdown,
   title,
 }: StatisticsProps) {
+  const themeColors = useAppTheme();
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      marginBottom: spacing.md,
+    },
+    title: {
+      fontSize: 18,
+      fontWeight: '700' as const,
+      color: themeColors.textPrimary,
+      marginBottom: spacing.md,
+    },
+    statsContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+    },
+    statBox: {
+      flex: 1,
+      backgroundColor: themeColors.statBoxBackground,
+      borderRadius: borderRadius.sm,
+      padding: spacing.md,
+      marginHorizontal: 6,
+      alignItems: 'center' as const,
+    },
+    statValue: {
+      fontSize: 20,
+      fontWeight: '700' as const,
+      color: themeColors.primary,
+      marginBottom: spacing.sm,
+    },
+    statLabel: {
+      fontSize: 12,
+      color: themeColors.textTertiary,
+      textAlign: 'center' as const,
+    },
+    breakdown: {
+      marginTop: spacing.lg,
+    },
+  }), [themeColors]);
+
   return (
     <View style={styles.container}>
       {title && <Text style={styles.title}>{title}</Text>}
