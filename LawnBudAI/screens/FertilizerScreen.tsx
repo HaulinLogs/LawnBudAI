@@ -129,7 +129,6 @@ export default function FertilizerScreen() {
         events[0]?.date,
         prefs.lawn_size_sqft,
       ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [events, prefs.grass_type, prefs.lawn_size_sqft],
   );
   // eslint-disable-next-line react-hooks/exhaustive-deps
