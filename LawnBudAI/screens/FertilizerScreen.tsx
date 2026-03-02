@@ -119,6 +119,7 @@ export default function FertilizerScreen() {
     },
   }), [themeColors]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const stats = useMemo(() => getStats(), [events]);
 
   const advisory = useMemo(
@@ -191,7 +192,6 @@ export default function FertilizerScreen() {
       {event.amount_lbs} lbs • {event.type} • {event.application_method}
       {event.notes && <Text>{'\n'}{event.notes}</Text>}
     </Text>
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   ), [themeColors]);
 
   const typePicker = useMemo(() => {
