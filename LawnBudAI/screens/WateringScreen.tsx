@@ -117,7 +117,6 @@ export default function WateringScreen() {
       {event.amount_inches}&quot; • {event.source}
       {event.notes && <Text>{'\n'}{event.notes}</Text>}
     </Text>
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   ), [themeColors]);
 
   const sourcePicker = useMemo(() => {

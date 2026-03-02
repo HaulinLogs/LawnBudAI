@@ -119,7 +119,6 @@ export default function FertilizerScreen() {
     },
   }), [themeColors]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const stats = useMemo(() => getStats(), [events]);
 
   const advisory = useMemo(
