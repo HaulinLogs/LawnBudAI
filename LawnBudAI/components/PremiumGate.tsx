@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { useAppTheme } from '@/hooks/useAppTheme';
 
 interface PremiumGateProps {
   feature: string;
@@ -16,6 +17,95 @@ interface PremiumGateProps {
  */
 export function PremiumGate({ feature }: PremiumGateProps) {
   const router = useRouter();
+  const themeColors = useAppTheme();
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: 20,
+      backgroundColor: themeColors.premiumBackground,
+    },
+    contentContainer: {
+      alignItems: 'center',
+      maxWidth: 320,
+    },
+    icon: {
+      marginBottom: 24,
+    },
+    title: {
+      fontSize: 28,
+      fontWeight: '700',
+      color: themeColors.premiumTitle,
+      marginBottom: 12,
+      textAlign: 'center',
+    },
+    description: {
+      fontSize: 16,
+      color: themeColors.premiumDescription,
+      textAlign: 'center',
+      marginBottom: 32,
+      lineHeight: 24,
+    },
+    featureName: {
+      fontWeight: '600',
+      color: themeColors.premiumTitle,
+    },
+    benefitsContainer: {
+      width: '100%',
+      backgroundColor: themeColors.premiumCard,
+      borderRadius: 12,
+      padding: 16,
+      marginBottom: 32,
+      borderLeftWidth: 4,
+      borderLeftColor: '#fbbf24',
+    },
+    benefitsTitle: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: themeColors.premiumTitle,
+      marginBottom: 12,
+    },
+    benefitItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 10,
+    },
+    benefitText: {
+      fontSize: 14,
+      color: themeColors.premiumBenefit,
+      marginLeft: 10,
+      fontWeight: '500',
+    },
+    upgradeButton: {
+      width: '100%',
+      backgroundColor: '#22c55e',
+      paddingVertical: 14,
+      borderRadius: 8,
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: 16,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 3,
+    },
+    buttonIcon: {
+      marginRight: 8,
+    },
+    upgradeButtonText: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: '#fff',
+    },
+    dismissText: {
+      fontSize: 12,
+      color: themeColors.premiumDismiss,
+      textAlign: 'center',
+    },
+  }), [themeColors]);
 
   const handleUpgrade = () => {
     // Phase 2.5: This will navigate to the premium paywall screen
@@ -68,92 +158,3 @@ export function PremiumGate({ feature }: PremiumGateProps) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    backgroundColor: '#f9fafb',
-  },
-  contentContainer: {
-    alignItems: 'center',
-    maxWidth: 320,
-  },
-  icon: {
-    marginBottom: 24,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#1f2937',
-    marginBottom: 12,
-    textAlign: 'center',
-  },
-  description: {
-    fontSize: 16,
-    color: '#6b7280',
-    textAlign: 'center',
-    marginBottom: 32,
-    lineHeight: 24,
-  },
-  featureName: {
-    fontWeight: '600',
-    color: '#1f2937',
-  },
-  benefitsContainer: {
-    width: '100%',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 32,
-    borderLeftWidth: 4,
-    borderLeftColor: '#fbbf24',
-  },
-  benefitsTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#1f2937',
-    marginBottom: 12,
-  },
-  benefitItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  benefitText: {
-    fontSize: 14,
-    color: '#4b5563',
-    marginLeft: 10,
-    fontWeight: '500',
-  },
-  upgradeButton: {
-    width: '100%',
-    backgroundColor: '#22c55e',
-    paddingVertical: 14,
-    borderRadius: 8,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  buttonIcon: {
-    marginRight: 8,
-  },
-  upgradeButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#fff',
-  },
-  dismissText: {
-    fontSize: 12,
-    color: '#9ca3af',
-    textAlign: 'center',
-  },
-});

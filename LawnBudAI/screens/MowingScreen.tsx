@@ -14,28 +14,29 @@ import FormikEventForm from '@/components/forms/FormikEventForm';
 import EventHistory from '@/components/EventHistory';
 import Statistics from '@/components/Statistics';
 import { mowingEventSchema, MowingFormValues } from '@/lib/schemas/mowing.schema';
-
-const localStyles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f9fafb',
-  },
-  content: {
-    padding: 16,
-  },
-  section: {
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#1f2937',
-    marginBottom: 12,
-  },
-});
+import { useAppTheme } from '@/hooks/useAppTheme';
 
 export default function MowingScreen() {
   const { events, loading, error, addEvent, deleteEvent, getStats } = useMowEvents();
+  const themeColors = useAppTheme();
+  const localStyles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: themeColors.screenBackground,
+    },
+    content: {
+      padding: 16,
+    },
+    section: {
+      marginBottom: 24,
+    },
+    sectionTitle: {
+      fontSize: 18,
+      fontWeight: '700',
+      color: themeColors.textPrimary,
+      marginBottom: 12,
+    },
+  }), [themeColors]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const stats = useMemo(() => getStats(), [events]);
@@ -88,16 +89,17 @@ export default function MowingScreen() {
 
   const renderEventDetail = useCallback((event: any) => (
     <>
-      <Text style={{ fontSize: 12, color: '#6b7280', marginTop: 4 }}>
+      <Text style={{ fontSize: 12, color: themeColors.textTertiary, marginTop: 4 }}>
         Height: {event.height_inches}&quot;
       </Text>
       {event.notes && (
-        <Text style={{ fontSize: 12, color: '#6b7280', marginTop: 4 }}>
+        <Text style={{ fontSize: 12, color: themeColors.textTertiary, marginTop: 4 }}>
           {event.notes}
         </Text>
       )}
     </>
-  ), []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  ), [themeColors]);
 
   return (
     <View style={localStyles.container}>

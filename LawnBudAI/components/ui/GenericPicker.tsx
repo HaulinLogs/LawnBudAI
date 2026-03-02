@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import Icon from '@expo/vector-icons/Ionicons';
+import { useAppTheme } from '@/hooks/useAppTheme';
 
 /**
  * Represents a single option in the picker
@@ -27,68 +28,6 @@ export interface GenericPickerProps<T> {
   disabled?: boolean;
   testID?: string;
 }
-
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: 12,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#374151',
-    marginBottom: 6,
-  },
-  pickerContainer: {
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 8,
-    marginBottom: 12,
-    backgroundColor: '#fff',
-  },
-  button: {
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  buttonDisabled: {
-    opacity: 0.5,
-  },
-  buttonText: {
-    fontSize: 16,
-    color: '#1f2937',
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  buttonTextWithIcon: {
-    marginLeft: 8,
-  },
-  option: {
-    paddingVertical: 12,
-    paddingHorizontal: 12,
-    borderTopWidth: 1,
-    borderTopColor: '#e5e7eb',
-  },
-  optionSelected: {
-    backgroundColor: '#f0fdf4',
-  },
-  optionText: {
-    fontSize: 16,
-    color: '#1f2937',
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  optionTextSelected: {
-    color: '#22c55e',
-    fontWeight: '600',
-  },
-  optionContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-});
 
 /**
  * GenericPicker - A reusable picker component for selecting from a list of options
@@ -114,7 +53,70 @@ export default function GenericPicker<T extends string | number>({
   testID,
 }: GenericPickerProps<T>) {
   const [showPicker, setShowPicker] = useState(false);
+  const themeColors = useAppTheme();
   const selectedOption = options.find(opt => opt.value === value);
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      marginBottom: 12,
+    },
+    label: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: themeColors.textSecondary,
+      marginBottom: 6,
+    },
+    pickerContainer: {
+      borderWidth: 1,
+      borderColor: themeColors.border,
+      borderRadius: 8,
+      marginBottom: 12,
+      backgroundColor: themeColors.cardBackground,
+    },
+    button: {
+      paddingVertical: 10,
+      paddingHorizontal: 12,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    buttonDisabled: {
+      opacity: 0.5,
+    },
+    buttonText: {
+      fontSize: 16,
+      color: themeColors.textPrimary,
+      flexDirection: 'row',
+      alignItems: 'center',
+      flex: 1,
+    },
+    buttonTextWithIcon: {
+      marginLeft: 8,
+    },
+    option: {
+      paddingVertical: 12,
+      paddingHorizontal: 12,
+      borderTopWidth: 1,
+      borderTopColor: themeColors.borderLight,
+    },
+    optionSelected: {
+      backgroundColor: themeColors.highlight,
+    },
+    optionText: {
+      fontSize: 16,
+      color: themeColors.textPrimary,
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    optionTextSelected: {
+      color: '#22c55e',
+      fontWeight: '600',
+    },
+    optionContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+  }), [themeColors]);
 
   return (
     <View style={styles.container}>
@@ -141,7 +143,7 @@ export default function GenericPicker<T extends string | number>({
           <Icon
             name={showPicker ? 'chevron-up' : 'chevron-down'}
             size={20}
-            color="#6b7280"
+            color={themeColors.textTertiary}
           />
         </TouchableOpacity>
 
@@ -164,7 +166,7 @@ export default function GenericPicker<T extends string | number>({
                     <Icon
                       name={opt.icon as any}
                       size={16}
-                      color={value === opt.value ? '#22c55e' : '#6b7280'}
+                      color={value === opt.value ? '#22c55e' : themeColors.textTertiary}
                     />
                   )}
                   <Text

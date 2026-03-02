@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -14,7 +14,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { useRole } from '@/hooks/useRole';
 import { MaterialIcons } from '@expo/vector-icons';
-import { styles } from '@/styles/settings.styles';
+import { createSettingsStyles } from '@/styles/settings.styles';
+import { useAppTheme } from '@/hooks/useAppTheme';
 
 export default function SettingsScreen() {
   const { signOut } = useAuth();
@@ -26,6 +27,8 @@ export default function SettingsScreen() {
   const [grassType, setGrassType] = useState('cool_season');
   const [saving, setSaving] = useState(false);
   const router = useRouter();
+  const themeColors = useAppTheme();
+  const styles = useMemo(() => createSettingsStyles(themeColors), [themeColors]);
 
   useEffect(() => {
     if (!loading && prefs) {
@@ -78,12 +81,12 @@ export default function SettingsScreen() {
   // Plan section styles
   const planStyles = StyleSheet.create({
     planCard: {
-      backgroundColor: isPremium ? '#f0fdf4' : '#fff',
+      backgroundColor: isPremium ? themeColors.highlight : themeColors.planCardBackground,
       borderRadius: 12,
       padding: 16,
       marginBottom: 24,
       borderWidth: 1,
-      borderColor: isPremium ? '#10b981' : '#e5e7eb',
+      borderColor: isPremium ? '#10b981' : themeColors.planCardBorder,
     },
     planHeader: {
       flexDirection: 'row',
@@ -97,11 +100,11 @@ export default function SettingsScreen() {
     planTitle: {
       fontSize: 16,
       fontWeight: '600',
-      color: '#1f2937',
+      color: themeColors.planTitle,
     },
     planDescription: {
       fontSize: 12,
-      color: '#6b7280',
+      color: themeColors.planDescription,
       marginTop: 4,
     },
     upgradeButton: {
@@ -131,6 +134,7 @@ export default function SettingsScreen() {
           <TextInput
             style={styles.input}
             placeholder="Enter city name (e.g., Madison)"
+            placeholderTextColor={themeColors.placeholderText}
             value={city}
             onChangeText={setCity}
             editable={!saving}
@@ -142,6 +146,7 @@ export default function SettingsScreen() {
           <TextInput
             style={styles.input}
             placeholder="Enter state code (e.g., WI, CA)"
+            placeholderTextColor={themeColors.placeholderText}
             value={state}
             onChangeText={(text) => setState(text.toUpperCase())}
             editable={!saving}
@@ -154,6 +159,7 @@ export default function SettingsScreen() {
           <TextInput
             style={styles.input}
             placeholder="Enter lawn size"
+            placeholderTextColor={themeColors.placeholderText}
             value={lawnSize}
             onChangeText={setLawnSize}
             keyboardType="numeric"

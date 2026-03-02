@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -11,7 +11,8 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/hooks/useAuth';
-import { styles } from '@/styles/auth.styles';
+import { createAuthStyles } from '@/styles/auth.styles';
+import { useAppTheme } from '@/hooks/useAppTheme';
 
 export default function SignInScreen() {
   const [email, setEmail] = useState('');
@@ -20,6 +21,8 @@ export default function SignInScreen() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { signIn } = useAuth();
+  const themeColors = useAppTheme();
+  const styles = useMemo(() => createAuthStyles(themeColors), [themeColors]);
 
   const handleSignIn = async () => {
     if (!email || !password) {
@@ -58,7 +61,7 @@ export default function SignInScreen() {
           <TextInput
             style={styles.input}
             placeholder="Email"
-            placeholderTextColor="#999"
+            placeholderTextColor={themeColors.placeholderText}
             value={email}
             onChangeText={setEmail}
             editable={!loading}
@@ -69,7 +72,7 @@ export default function SignInScreen() {
           <TextInput
             style={[styles.input, { marginTop: 12 }]}
             placeholder="Password"
-            placeholderTextColor="#999"
+            placeholderTextColor={themeColors.placeholderText}
             value={password}
             onChangeText={setPassword}
             secureTextEntry

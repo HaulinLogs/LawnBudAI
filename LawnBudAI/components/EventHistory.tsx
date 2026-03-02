@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -7,7 +7,8 @@ import {
   StyleSheet,
 } from 'react-native';
 import Icon from '@expo/vector-icons/Ionicons';
-import { colors, spacing, borderRadius } from '@/styles/theme';
+import { spacing, borderRadius } from '@/styles/theme';
+import { useAppTheme } from '@/hooks/useAppTheme';
 
 interface Event {
   id: string;
@@ -26,50 +27,6 @@ interface EventHistoryProps {
   maxDisplay?: number;
 }
 
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: spacing.md,
-  },
-  eventItem: {
-    backgroundColor: '#f3f4f6',
-    borderRadius: borderRadius.sm,
-    padding: spacing.md,
-    marginBottom: spacing.sm,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  eventContent: {
-    flex: 1,
-  },
-  eventDate: {
-    fontSize: 14,
-    fontWeight: '600' as const,
-    color: colors.textPrimary,
-  },
-  eventDetail: {
-    fontSize: 12,
-    color: colors.textTertiary,
-    marginTop: spacing.sm,
-  },
-  deleteButton: {
-    padding: spacing.sm,
-  },
-  emptyState: {
-    alignItems: 'center' as const,
-    paddingVertical: spacing.xl,
-  },
-  emptyStateText: {
-    fontSize: 16,
-    color: '#9ca3af',
-    marginTop: spacing.md,
-  },
-  errorText: {
-    color: colors.error,
-    fontSize: 14,
-  },
-});
-
 function EventHistoryComponent({
   events,
   loading,
@@ -80,10 +37,50 @@ function EventHistoryComponent({
   emptyStateText = 'No events yet',
   maxDisplay = 10,
 }: EventHistoryProps) {
+  const themeColors = useAppTheme();
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      marginBottom: spacing.md,
+    },
+    eventItem: {
+      backgroundColor: themeColors.eventItemBackground,
+      borderRadius: borderRadius.sm,
+      padding: spacing.md,
+      marginBottom: spacing.sm,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    eventContent: {
+      flex: 1,
+    },
+    eventDate: {
+      fontSize: 14,
+      fontWeight: '600' as const,
+      color: themeColors.textPrimary,
+    },
+    deleteButton: {
+      padding: spacing.sm,
+    },
+    emptyState: {
+      alignItems: 'center' as const,
+      paddingVertical: spacing.xl,
+    },
+    emptyStateText: {
+      fontSize: 16,
+      color: themeColors.textTertiary,
+      marginTop: spacing.md,
+    },
+    errorText: {
+      color: themeColors.error,
+      fontSize: 14,
+    },
+  }), [themeColors]);
+
   if (loading) {
     return (
       <View style={styles.container}>
-        <ActivityIndicator size="large" color={colors.primary} />
+        <ActivityIndicator size="large" color={themeColors.primary} />
       </View>
     );
   }
@@ -100,7 +97,7 @@ function EventHistoryComponent({
     return (
       <View style={styles.container}>
         <View style={styles.emptyState}>
-          <Icon name={emptyStateIcon as any} size={48} color={colors.border} />
+          <Icon name={emptyStateIcon as any} size={48} color={themeColors.border} />
           <Text style={styles.emptyStateText}>{emptyStateText}</Text>
         </View>
       </View>
@@ -125,7 +122,7 @@ function EventHistoryComponent({
             style={styles.deleteButton}
             onPress={() => onDelete(event.id)}
           >
-            <Icon name="trash" size={20} color={colors.error} />
+            <Icon name="trash" size={20} color={themeColors.error} />
           </TouchableOpacity>
         </View>
       ))}

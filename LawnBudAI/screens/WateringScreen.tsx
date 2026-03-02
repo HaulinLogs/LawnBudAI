@@ -17,40 +17,41 @@ import Statistics from '@/components/Statistics';
 import GenericPicker from '@/components/ui/GenericPicker';
 import { wateringEventSchema, WateringFormValues } from '@/lib/schemas/watering.schema';
 import { spacing, typography } from '@/styles/theme';
-
-const localStyles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f9fafb',
-  },
-  content: {
-    padding: 16,
-  },
-  section: {
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#1f2937',
-    marginBottom: 12,
-  },
-  sourceBreakdown: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-  },
-  breakdownItem: {
-    alignItems: 'center',
-  },
-  breakdownLabel: {
-    fontSize: 12,
-    color: '#6b7280',
-    marginTop: 4,
-  },
-});
+import { useAppTheme } from '@/hooks/useAppTheme';
 
 export default function WateringScreen() {
   const { events, loading, error, addEvent, deleteEvent, getStats, getSourceBreakdown } = useWaterEvents();
+  const themeColors = useAppTheme();
+  const localStyles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: themeColors.screenBackground,
+    },
+    content: {
+      padding: 16,
+    },
+    section: {
+      marginBottom: 24,
+    },
+    sectionTitle: {
+      fontSize: 18,
+      fontWeight: '700',
+      color: themeColors.textPrimary,
+      marginBottom: 12,
+    },
+    sourceBreakdown: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+    },
+    breakdownItem: {
+      alignItems: 'center',
+    },
+    breakdownLabel: {
+      fontSize: 12,
+      color: themeColors.textTertiary,
+      marginTop: 4,
+    },
+  }), [themeColors]);
 
   const sourceOptions = useMemo(() => [
     { label: 'Sprinkler', value: 'sprinkler' as const, icon: 'water' },
@@ -112,11 +113,12 @@ export default function WateringScreen() {
   }, [deleteEvent]);
 
   const renderEventDetail = useCallback((event: any) => (
-    <Text style={{ fontSize: 12, color: '#6b7280', marginTop: 4 }}>
+    <Text style={{ fontSize: 12, color: themeColors.textTertiary, marginTop: 4 }}>
       {event.amount_inches}&quot; • {event.source}
       {event.notes && <Text>{'\n'}{event.notes}</Text>}
     </Text>
-  ), []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  ), [themeColors]);
 
   const sourcePicker = useMemo(() => {
     const hasSourceError = formik.touched.source && formik.errors.source;
