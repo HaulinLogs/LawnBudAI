@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react-native';
 import * as Navigation from '@react-navigation/native';
 import FertilizerScreen from '@/screens/FertilizerScreen';
+import { getFertilizerAdvisory } from '@/lib/lawnAdvice';
 
 // Mock expo-router
 jest.mock('expo-router', () => ({
@@ -23,6 +24,33 @@ jest.mock('@/lib/supabase', () => ({
       getUser: jest.fn(),
     },
   },
+}));
+
+// Mock useUserPreferences
+jest.mock('@/hooks/useUserPreferences', () => ({
+  useUserPreferences: jest.fn(() => ({
+    prefs: {
+      grass_type: 'cool_season',
+      lawn_size_sqft: 5000,
+      city: 'Madison',
+      state: 'WI',
+    },
+    loading: false,
+    save: jest.fn(),
+  })),
+}));
+
+// Mock lawnAdvice — keeps screen tests independent of advisory date logic
+jest.mock('@/lib/lawnAdvice', () => ({
+  getFertilizerAdvisory: jest.fn(() => ({
+    status: 'due',
+    heading: 'Time to Fertilize',
+    detail: 'Your last application was 45 days ago — right on schedule. Apply Balanced slow-release.',
+    suggestedAmountLbs: 22.5,
+    daysUntilDue: 0,
+    typeRecommendation: 'Balanced slow-release (e.g., 15-0-8 or 10-10-10)',
+  })),
+  getSeason: jest.fn(() => 'spring'),
 }));
 
 // Mock the useFertilizerEvents hook
@@ -117,5 +145,69 @@ describe('FertilizerScreen', () => {
 
     // History section should be displayed
     expect(screen.queryByText('Recent Applications')).toBeTruthy();
+  });
+
+  describe('Fertilizer Advisor card', () => {
+    it('should display the advisor heading and detail text', () => {
+      render(<FertilizerScreen />);
+      expect(screen.getByText('Time to Fertilize')).toBeTruthy();
+      expect(screen.getByText(/right on schedule/i)).toBeTruthy();
+    });
+
+    it('should display suggested amount when provided', () => {
+      render(<FertilizerScreen />);
+      expect(screen.getByText('Suggested amount: 22.5 lbs')).toBeTruthy();
+    });
+
+    it('should call getFertilizerAdvisory with grass_type and lawn_size_sqft from prefs', () => {
+      render(<FertilizerScreen />);
+      expect(getFertilizerAdvisory).toHaveBeenCalledWith(
+        'cool_season',
+        'spring',
+        expect.anything(), // lastAppDate from events[0].date
+        5000,
+      );
+    });
+
+    it('should not show suggested amount when advisory returns null', () => {
+      (getFertilizerAdvisory as jest.Mock).mockReturnValueOnce({
+        status: 'dormant',
+        heading: 'No Fertilizer Needed',
+        detail: 'None — grass is dormant.',
+        suggestedAmountLbs: null,
+        daysUntilDue: null,
+        typeRecommendation: 'None — grass is dormant',
+      });
+      render(<FertilizerScreen />);
+      expect(screen.getByText('No Fertilizer Needed')).toBeTruthy();
+      expect(screen.queryByText(/Suggested amount/i)).toBeNull();
+    });
+
+    it('should show the overdue heading when status is overdue', () => {
+      (getFertilizerAdvisory as jest.Mock).mockReturnValueOnce({
+        status: 'overdue',
+        heading: 'Fertilization Overdue',
+        detail: 'It has been 60 days since your last application.',
+        suggestedAmountLbs: 22.5,
+        daysUntilDue: -30,
+        typeRecommendation: 'High-nitrogen slow-release',
+      });
+      render(<FertilizerScreen />);
+      expect(screen.getByText('Fertilization Overdue')).toBeTruthy();
+    });
+
+    it('should show the too_soon heading when status is too_soon', () => {
+      (getFertilizerAdvisory as jest.Mock).mockReturnValueOnce({
+        status: 'too_soon',
+        heading: 'Too Soon to Fertilize',
+        detail: 'Wait 20 more days before the next application.',
+        suggestedAmountLbs: null,
+        daysUntilDue: 20,
+        typeRecommendation: 'Balanced slow-release',
+      });
+      render(<FertilizerScreen />);
+      expect(screen.getByText('Too Soon to Fertilize')).toBeTruthy();
+      expect(screen.queryByText(/Suggested amount/i)).toBeNull();
+    });
   });
 });
