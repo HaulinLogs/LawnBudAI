@@ -6,7 +6,7 @@
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 
-const lightColors = {
+export const lightColors = {
   // Backgrounds
   screenBackground: '#f9fafb',
   screenBackgroundGreen: '#ecfdf5',
@@ -67,7 +67,7 @@ const lightColors = {
   premiumDismiss: '#9ca3af',
 };
 
-const darkColors = {
+export const darkColors = {
   // Backgrounds
   screenBackground: '#151718',
   screenBackgroundGreen: '#0a1a0a',

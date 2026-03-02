@@ -2,7 +2,19 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react-native';
 import GenericPicker from '@/components/ui/GenericPicker';
 
+jest.mock('@/hooks/useColorScheme', () => ({
+  useColorScheme: jest.fn(() => 'light'),
+}));
+
+import { useColorScheme } from '@/hooks/useColorScheme';
+const mockUseColorScheme = useColorScheme as jest.Mock;
+
 describe('GenericPicker', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseColorScheme.mockReturnValue('light');
+  });
+
   const mockOptions = [
     { label: 'Option 1', value: 'opt1', icon: 'water' },
     { label: 'Option 2', value: 'opt2', icon: 'leaf' },
@@ -177,6 +189,72 @@ describe('GenericPicker', () => {
     );
 
     expect(screen.getByText('Option A')).toBeTruthy();
+  });
+
+  describe('dark mode', () => {
+    beforeEach(() => {
+      mockUseColorScheme.mockReturnValue('dark');
+    });
+
+    it('renders label in dark mode', () => {
+      render(
+        <GenericPicker
+          label="Select Source"
+          options={mockOptions}
+          value="opt1"
+          onChange={jest.fn()}
+        />,
+      );
+      expect(screen.getByText('Select Source')).toBeTruthy();
+    });
+
+    it('displays selected value in dark mode', () => {
+      render(
+        <GenericPicker
+          label="Select Source"
+          options={mockOptions}
+          value="opt2"
+          onChange={jest.fn()}
+        />,
+      );
+      expect(screen.getByText('Option 2')).toBeTruthy();
+    });
+
+    it('opens and closes dropdown in dark mode', () => {
+      const { getByTestId, queryByText } = render(
+        <GenericPicker
+          label="Select Source"
+          options={mockOptions}
+          value="opt1"
+          onChange={jest.fn()}
+          testID="picker-button"
+        />,
+      );
+
+      fireEvent.press(getByTestId('picker-button'));
+      expect(screen.getByText('Option 2')).toBeTruthy();
+
+      fireEvent.press(getByTestId('picker-button'));
+      expect(queryByText('Option 2')).toBeNull();
+    });
+
+    it('calls onChange when option selected in dark mode', () => {
+      const mockOnChange = jest.fn();
+      render(
+        <GenericPicker
+          label="Select Source"
+          options={mockOptions}
+          value="opt1"
+          onChange={mockOnChange}
+          testID="picker-button"
+        />,
+      );
+
+      fireEvent.press(screen.getByTestId('picker-button'));
+      fireEvent.press(screen.getByText('Option 3'));
+
+      expect(mockOnChange).toHaveBeenCalledWith('opt3');
+    });
   });
 
   it('updates when value prop changes', () => {

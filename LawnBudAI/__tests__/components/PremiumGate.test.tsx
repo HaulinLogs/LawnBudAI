@@ -14,6 +14,13 @@ jest.mock('expo-router', () => ({
   useRouter: jest.fn(),
 }));
 
+jest.mock('@/hooks/useColorScheme', () => ({
+  useColorScheme: jest.fn(() => 'light'),
+}));
+
+import { useColorScheme } from '@/hooks/useColorScheme';
+const mockUseColorScheme = useColorScheme as jest.Mock;
+
 const mockRouter = useRouter as jest.MockedFunction<typeof useRouter>;
 
 describe('PremiumGate', () => {
@@ -25,6 +32,7 @@ describe('PremiumGate', () => {
     mockRouter.mockReturnValue({
       push: mockPush,
     } as any);
+    mockUseColorScheme.mockReturnValue('light');
   });
 
   it('should render premium gate UI', () => {
@@ -79,5 +87,36 @@ describe('PremiumGate', () => {
 
     rerender(<PremiumGate feature="Feature B" />);
     expect(screen.getByText('Feature B')).toBeTruthy();
+  });
+
+  describe('dark mode', () => {
+    beforeEach(() => {
+      mockUseColorScheme.mockReturnValue('dark');
+    });
+
+    it('renders premium gate UI in dark mode', () => {
+      render(<PremiumGate feature="Smart Recommendations" />);
+      expect(screen.getByText('Premium Feature')).toBeTruthy();
+      expect(screen.getByText(/Smart Recommendations/)).toBeTruthy();
+    });
+
+    it('displays all benefits in dark mode', () => {
+      render(<PremiumGate feature="Test Feature" />);
+      expect(screen.getByText('Smart AI recommendations')).toBeTruthy();
+      expect(screen.getByText('Advanced analytics')).toBeTruthy();
+      expect(screen.getByText('Higher API limits')).toBeTruthy();
+    });
+
+    it('displays pricing information in dark mode', () => {
+      render(<PremiumGate feature="Test Feature" />);
+      expect(screen.getByText(/7 days free/)).toBeTruthy();
+      expect(screen.getByText(/\$2.99\/month/)).toBeTruthy();
+    });
+
+    it('navigates to upgrade screen in dark mode', () => {
+      render(<PremiumGate feature="Test Feature" />);
+      fireEvent.press(screen.getByText('Upgrade to Premium'));
+      expect(mockPush).toHaveBeenCalledWith('/(tabs)/upgrade');
+    });
   });
 });
