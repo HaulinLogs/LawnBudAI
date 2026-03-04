@@ -182,7 +182,7 @@ describe('useUserPreferences', () => {
       expect(mockSupabase.from).not.toHaveBeenCalled();
     });
 
-    it('should continue loading with defaults when supabase returns an error', async () => {
+    it('should use defaults and not attempt insert when supabase returns a fetch error', async () => {
       // Arrange
       (useSupabaseUser as jest.Mock).mockReturnValue({
         user: mockUser,
@@ -190,7 +190,7 @@ describe('useUserPreferences', () => {
         error: null,
       });
 
-      const mockInsert = jest.fn().mockResolvedValue({ error: null });
+      const mockInsert = jest.fn();
 
       (mockSupabase.from as jest.Mock).mockReturnValue({
         select: jest.fn().mockReturnValue({
@@ -211,8 +211,10 @@ describe('useUserPreferences', () => {
         expect(result.current.loading).toBe(false);
       });
 
-      // Assert: prefs stay at defaults, hook does not throw
+      // Assert: prefs stay at defaults, hook does not throw, and no insert is
+      // attempted (we can't know if a row exists when the fetch itself failed)
       expect(result.current.prefs.city).toBe('Madison');
+      expect(mockInsert).not.toHaveBeenCalled();
     });
   });
 
