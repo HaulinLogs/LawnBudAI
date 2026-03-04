@@ -1,15 +1,22 @@
 # LawnBudAI TODO - Current Sprint
 
-**Last Updated**: March 1, 2026
+**Last Updated**: March 4, 2026
 
 ---
 
-## 🎯 Current Focus: Test Coverage Improvement (Target 70%)
+## 🎯 Current Focus: lib/supabase.ts Coverage Gap
 
-Form validation and E2E tests are complete. The final step before production readiness is raising
-unit test coverage from 28.35% to 70%.
+Test coverage target of 70% has been **exceeded**. Current coverage as of March 4, 2026:
 
-**Solution**: Write unit tests for all untested hooks and components.
+| Metric | Target | Actual |
+|--------|--------|--------|
+| Statements | 70% | **90.99%** |
+| Branches | 70% | **75%** |
+| Functions | 70% | **93.9%** |
+| Lines | 70% | **92.04%** |
+| Tests passing | 116+ | **150** |
+
+**Remaining gap**: `lib/supabase.ts` is at 0% coverage (lines 5–42).
 
 ---
 
@@ -20,9 +27,9 @@ unit test coverage from 28.35% to 70%.
   ↓
 #38: E2E Tests ✅ DONE
   ↓
-#37: Test Coverage Improvements (IN PROGRESS)
+#37: Test Coverage Improvements ✅ DONE (90.99% achieved)
   ↓
-Production Ready
+Production Ready ✅ (quality gates passing)
 ```
 
 ---
@@ -85,54 +92,30 @@ Production Ready
 
 ---
 
-## 🔴 CRITICAL - Must Complete Before Production
+## ✅ COMPLETE - Test Coverage (#37)
 
 ### #37: Systematic Test Coverage Improvement - Target 70% Threshold
-**Status**: ⏳ IN PROGRESS
-**Priority**: CRITICAL
-**Effort**: 20-25 hours (phases)
+**Status**: ✅ COMPLETE
+**Completed**: March 4, 2026
 
-**Current Coverage**: 28.35% (need 70%)
-
-Coverage scope: `lib/**`, `hooks/**`, `components/**` (screens are not counted)
-
-#### Phase 1: Quick Wins (3 hours) — patch existing tests
-- [ ] `useFertilizerEvents.test.ts` — add null `application_method` branch test
-- [ ] `lib/validation.test.ts` — add missing edge case for `validateNumberInRange` empty string
-- [ ] `hooks/useRole.test.ts` — add null-data-from-DB test + exception throw test
-- **Expected gain**: +5-8%
-
-#### Phase 2: Core Hook Tests (14-16 hours) — create new files
-- [ ] `__tests__/useMowEvents.test.ts` — fetchEvents, addEvent, deleteEvent, getStats
-- [ ] `__tests__/useWaterEvents.test.ts` — fetchEvents, addEvent, deleteEvent, getStats, getSourceBreakdown
-- [ ] `__tests__/hooks/useSupabaseUser.test.ts` — getUser, onAuthStateChange, cache, cleanup
-- [ ] `__tests__/hooks/useAuth.test.ts` — signIn, signUp, signOut, session init
-- **Expected gain**: +25-35%
-
-#### Phase 3: Remaining Hooks + Components (9-12 hours) — if needed
-- [ ] `__tests__/hooks/useUserPreferences.test.ts`
-- [ ] `__tests__/lib/telemetry.test.ts`
-- [ ] `__tests__/lib/securityMonitoring.test.ts`
-- [ ] `__tests__/components/EventHistory.test.tsx`
-- [ ] `__tests__/components/Statistics.test.tsx`
-- **Expected gain**: +15-20%
+All hook tests created and coverage far exceeds the 70% target. See coverage table above.
 
 **GitHub Issue**: https://github.com/HaulinLogs/LawnBudAI/issues/37
 
 ---
 
-## 🟡 HIGH - Important but Not Blocking
+## 🟡 REMAINING - Low Priority
 
-### Quality Gate: Coverage Threshold
-**Status**: ⏳ BLOCKED (by #37)
-**Current**: 28.35% (threshold 70%)
-**Blocks**: Production deployment
+### Quality Gate: lib/supabase.ts Coverage
+**Status**: ⚠️ MINOR GAP
+**Current**: `lib/supabase.ts` at 0% (lines 5–42 uncovered)
+**Impact**: Does not block production — overall coverage is 90.99%
 
-**When fixed**: `yarn quality-gates` will pass with:
-- ✅ Linting: 0 errors, 0 warnings (ALREADY PASSING)
-- ✅ Schema validation: passing (ALREADY PASSING)
-- ✅ Unit tests: 116+ passing (ALREADY PASSING)
-- ✅ Coverage: 70%+ threshold (BLOCKED by #37)
+**Quality Gates Status**:
+- ✅ Linting: 0 errors, 0 warnings
+- ✅ Schema validation: passing
+- ✅ Unit tests: 150 passing
+- ✅ Coverage: 90.99% (well above 70% threshold)
 
 ---
 
@@ -148,10 +131,11 @@ Coverage scope: `lib/**`, `hooks/**`, `components/**` (screens are not counted)
 - `lib/schemas/watering.schema.ts` - Watering validation schema ✅
 - `lib/schemas/fertilizer.schema.ts` - Fertilizer validation schema ✅
 - `components/forms/FormikEventForm.tsx` - Reusable Formik form ✅
-- `hooks/useMowEvents.ts` - needs unit tests
-- `hooks/useWaterEvents.ts` - needs unit tests
-- `hooks/useSupabaseUser.ts` - needs unit tests
-- `hooks/useAuth.ts` - needs unit tests
+- `hooks/useMowEvents.ts` - unit tests ✅
+- `hooks/useWaterEvents.ts` - unit tests ✅
+- `hooks/useSupabaseUser.ts` - unit tests ✅
+- `hooks/useAuth.ts` - unit tests ✅
+- `lib/supabase.ts` - 0% coverage (minor gap, non-blocking)
 
 ---
 
@@ -163,21 +147,17 @@ Coverage scope: `lib/**`, `hooks/**`, `components/**` (screens are not counted)
 | Linting Cleanup | ✅ DONE | #36 | None |
 | Form Validation | ✅ DONE | #39 | None |
 | E2E Tests | ✅ DONE | #38 | None |
-| **Test Coverage** | ⏳ IN PROGRESS | #37 | None - START HERE |
-| Production Ready | 🔴 BLOCKED | - | Need 70% coverage |
+| **Test Coverage** | ✅ DONE | #37 | None (90.99% achieved) |
+| Production Ready | ✅ READY | - | None |
 
 ---
 
 ## 🚀 Next Steps (In Order)
 
-1. **Patch existing tests** (Phase 1 quick wins)
-2. **Create `useMowEvents.test.ts`** — follow useFertilizerEvents.test.ts pattern
-3. **Create `useWaterEvents.test.ts`** — follow same pattern
-4. **Create `useSupabaseUser.test.ts`** — mock getUser + onAuthStateChange
-5. **Create `useAuth.test.ts`** — mock signIn/signUp/signOut
-6. **Run `yarn test --coverage`** and check if ≥70%
-7. **Add Phase 3 tests** if still below 70%
-8. **Run `yarn quality-gates`** to confirm passing
+1. ✅ ~~Patch existing tests~~ — done
+2. ✅ ~~Create hook test files~~ — all hooks have tests
+3. ✅ ~~Run `yarn test --coverage`~~ — 90.99% achieved
+4. **Optional**: Add tests for `lib/supabase.ts` (0% coverage, non-blocking)
 
 ---
 
