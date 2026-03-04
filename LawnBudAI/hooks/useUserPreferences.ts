@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase';
 import { useSupabaseUser } from '@/hooks/useSupabaseUser';
 
 interface UserPreferences {
+  id?: string;
   city: string;
   state: string;
   timezone?: string;
@@ -45,6 +46,7 @@ export function useUserPreferences() {
         if (data) {
           console.log('User preferences found:', data);
           setPrefs({
+            id: data.id,
             city: data.city || 'Madison',
             state: data.state || 'WI',
             timezone: data.timezone || 'America/Chicago',
@@ -89,11 +91,12 @@ export function useUserPreferences() {
 
       const { error } = await supabase.from('user_preferences').upsert(
         {
+          ...(prefs.id ? { id: prefs.id } : {}),
           user_id: user.id,
           ...updates,
           updated_at: new Date().toISOString(),
         },
-        { onConflict: 'user_id' },
+        { onConflict: 'id' },
       );
 
       if (error) {

@@ -233,12 +233,18 @@ describe('useUserPreferences', () => {
         select: jest.fn().mockReturnValue({
           eq: jest.fn().mockReturnValue({
             maybeSingle: jest.fn().mockResolvedValue({
-              data: null,
+              data: {
+                id: 'pref-row-123',
+                city: 'Madison',
+                state: 'WI',
+                timezone: 'America/Chicago',
+                grass_type: 'cool_season',
+                lawn_size_sqft: null,
+              },
               error: null,
             }),
           }),
         }),
-        insert: jest.fn().mockResolvedValue({ error: null }),
         upsert: mockUpsert,
       });
 
@@ -256,11 +262,12 @@ describe('useUserPreferences', () => {
       // Assert
       expect(mockUpsert).toHaveBeenCalledWith(
         expect.objectContaining({
+          id: 'pref-row-123',
           user_id: mockUser.id,
           city: 'Denver',
           state: 'CO',
         }),
-        { onConflict: 'user_id' },
+        { onConflict: 'id' },
       );
       expect(result.current.prefs.city).toBe('Denver');
       expect(result.current.prefs.state).toBe('CO');
