@@ -6,8 +6,8 @@ import 'react-native-reanimated';
 import { useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-import { useColorScheme } from '@/hooks/useColorScheme';
 import { useAuth } from '@/hooks/useAuth';
+import { ThemeContextProvider, useThemeMode } from '@/contexts/ThemeContext';
 
 const styles = StyleSheet.create({
   errorContainer: {
@@ -31,11 +31,8 @@ const styles = StyleSheet.create({
   },
 });
 
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
+function AppShell() {
+  const { effectiveScheme } = useThemeMode();
   const { session, loading, error } = useAuth();
   const router = useRouter();
 
@@ -47,7 +44,6 @@ export default function RootLayout() {
     }
   }, [session, loading, error, router]);
 
-  // Show error if initialization failed
   if (error) {
     return (
       <View style={styles.errorContainer}>
@@ -58,12 +54,12 @@ export default function RootLayout() {
     );
   }
 
-  if (!loaded || loading) {
+  if (loading) {
     return null;
   }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={effectiveScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -71,5 +67,21 @@ export default function RootLayout() {
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>
+  );
+}
+
+export default function RootLayout() {
+  const [loaded] = useFonts({
+    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+  });
+
+  if (!loaded) {
+    return null;
+  }
+
+  return (
+    <ThemeContextProvider>
+      <AppShell />
+    </ThemeContextProvider>
   );
 }
