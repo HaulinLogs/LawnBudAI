@@ -60,8 +60,11 @@ export default function HomeScreen() {
           {/* Weather Section */}
           <View style={styles.card}>
             {isWeatherLoading ? (
-              <View style={styles.skeletonRow} testID="weather-loading">
+              <View style={[styles.skeletonRow, { flexDirection: 'row', gap: 8 }]} testID="weather-loading">
                 <ActivityIndicator size="small" color="#22c55e" />
+                <Text style={{ color: themeColors.textSecondary, fontSize: 14 }}>
+                  Loading weather for {prefs.city}...
+                </Text>
               </View>
             ) : error ? (
               <View testID="weather-error">

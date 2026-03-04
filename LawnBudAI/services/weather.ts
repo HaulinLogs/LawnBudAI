@@ -1,6 +1,14 @@
 import { WeatherResponse } from '@/models/weather';
 import { trackWeatherError } from '@/lib/errorTracking';
 
+const WEATHER_TIMEOUT_MS = 8000;
+
+function fetchWithTimeout(url: string): Promise<Response> {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), WEATHER_TIMEOUT_MS);
+  return fetch(url, { signal: controller.signal }).finally(() => clearTimeout(id));
+}
+
 /**
  * Fetch weather data from wttr.in API
  * @param city - City name (e.g., "Madison")
@@ -16,7 +24,7 @@ export async function fetchWeather(city: string, state?: string): Promise<Weathe
 
   try {
     console.log(`Fetching weather for ${city} from: ${directUrl}`);
-    const res = await fetch(directUrl);
+    const res = await fetchWithTimeout(directUrl);
 
     if (!res.ok) {
       const errorText = await res.text();
@@ -29,42 +37,34 @@ export async function fetchWeather(city: string, state?: string): Promise<Weathe
     return data;
   } catch (error: any) {
     const errorMessage = error?.message || 'Unknown error';
-    const isCORSError = errorMessage.includes('Failed to fetch') ||
-                       errorMessage.includes('CORS') ||
-                       errorMessage.includes('NetworkError');
 
     console.warn('Direct weather fetch failed, trying CORS proxy...', {
       message: errorMessage,
-      isCORSError,
       location,
     });
 
     // Track the error for monitoring
     trackWeatherError(errorMessage, location);
 
-    // Fallback: Use CORS proxy
-    if (isCORSError) {
-      try {
-        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(directUrl)}`;
-        console.log(`Trying CORS proxy: ${proxyUrl}`);
-        const proxyRes = await fetch(proxyUrl);
+    // Fallback: Use CORS proxy for any failure (CORS block, server error, timeout, etc.)
+    // corsproxy.io returns the raw response body, unlike allorigins.win which wraps in JSON
+    try {
+      const proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(directUrl)}`;
+      console.log(`Trying CORS proxy: ${proxyUrl}`);
+      const proxyRes = await fetchWithTimeout(proxyUrl);
 
-        if (!proxyRes.ok) {
-          throw new Error(`CORS proxy returned ${proxyRes.status}`);
-        }
-
-        const proxyData = await proxyRes.json();
-        const data = JSON.parse(proxyData.contents);
-        console.log('Weather data from proxy:', data);
-        console.log('Successfully retrieved weather via fallback proxy');
-        return data;
-      } catch (proxyError: any) {
-        console.error('CORS proxy also failed:', proxyError);
-        trackWeatherError(`Fallback CORS proxy failed: ${proxyError.message}`, location);
-        throw new Error('Unable to reach weather service. Please check your internet connection.');
+      if (!proxyRes.ok) {
+        throw new Error(`CORS proxy returned ${proxyRes.status}`);
       }
-    }
 
-    throw new Error(`Weather service error: ${errorMessage}`);
+      const data = await proxyRes.json();
+      console.log('Weather data from proxy:', data);
+      console.log('Successfully retrieved weather via fallback proxy');
+      return data;
+    } catch (proxyError: any) {
+      console.error('CORS proxy also failed:', proxyError);
+      trackWeatherError(`Fallback CORS proxy failed: ${proxyError.message}`, location);
+      throw new Error('Unable to reach weather service. Please check your internet connection.');
+    }
   }
 }
