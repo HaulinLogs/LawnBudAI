@@ -70,4 +70,9 @@ export const createHomeStyles = (colors: AppThemeColors) =>
       color: colors.textTertiary,
       marginTop: 4,
     },
+    skeletonRow: {
+      height: 48,
+      justifyContent: 'center' as const,
+      alignItems: 'center' as const,
+    },
   });
