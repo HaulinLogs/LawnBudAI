@@ -4,7 +4,7 @@
  * ensuring WCAG-compliant contrast in both light and dark modes.
  */
 
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { useThemeMode } from '@/contexts/ThemeContext';
 
 export const lightColors = {
   // Backgrounds
@@ -131,6 +131,6 @@ export const darkColors = {
 export type AppThemeColors = typeof lightColors;
 
 export function useAppTheme(): AppThemeColors {
-  const scheme = useColorScheme() ?? 'light';
-  return scheme === 'dark' ? darkColors : lightColors;
+  const { effectiveScheme } = useThemeMode();
+  return effectiveScheme === 'dark' ? darkColors : lightColors;
 }
