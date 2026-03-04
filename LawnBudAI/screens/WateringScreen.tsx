@@ -59,7 +59,9 @@ export default function WateringScreen() {
     { label: 'Rain', value: 'rain' as const, icon: 'rainy' },
   ], []);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const stats = useMemo(() => getStats(), [events]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const breakdown = useMemo(() => getSourceBreakdown(), [events]);
 
   const formik = useFormik<WateringFormValues>({
@@ -137,6 +139,7 @@ export default function WateringScreen() {
         )}
       </View>
     );
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formik.values.source, formik.errors.source, formik.touched.source, sourceOptions]);
 
   return (

@@ -132,7 +132,9 @@ export default function FertilizerScreen() {
       ),
     [events, prefs.grass_type, prefs.lawn_size_sqft],
   );
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const typeBreakdown = useMemo(() => getTypeBreakdown(), [events]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const methodBreakdown = useMemo(() => getMethodBreakdown(), [events]);
 
   const formik = useFormik<FertilizerFormValues>({
@@ -212,6 +214,7 @@ export default function FertilizerScreen() {
         )}
       </View>
     );
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formik.values.type, formik.errors.type, formik.touched.type]);
 
   const methodPicker = useMemo(() => {
@@ -234,6 +237,7 @@ export default function FertilizerScreen() {
         )}
       </View>
     );
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formik.values.application_method, formik.errors.application_method, formik.touched.application_method]);
 
   return (

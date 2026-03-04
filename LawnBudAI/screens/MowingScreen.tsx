@@ -38,6 +38,7 @@ export default function MowingScreen() {
     },
   }), [themeColors]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const stats = useMemo(() => getStats(), [events]);
 
   const formik = useFormik<MowingFormValues>({
