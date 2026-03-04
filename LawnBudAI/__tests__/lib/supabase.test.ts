@@ -39,6 +39,7 @@ describe('lib/supabase', () => {
   describe('createClient call', () => {
     it('passes env vars to createClient', () => {
       jest.doMock('react-native', () => ({ Platform: { OS: 'ios' } }));
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       require('@/lib/supabase');
 
       expect(mockCreateClient).toHaveBeenCalledWith(
@@ -56,6 +57,7 @@ describe('lib/supabase', () => {
 
     it('exports a supabase client object', () => {
       jest.doMock('react-native', () => ({ Platform: { OS: 'ios' } }));
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const { supabase } = require('@/lib/supabase');
       expect(supabase).toBeDefined();
     });
@@ -68,6 +70,7 @@ describe('lib/supabase', () => {
       jest.doMock('react-native', () => ({ Platform: { OS: 'ios' } }));
 
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       require('@/lib/supabase');
       expect(consoleSpy).toHaveBeenCalled();
     });
@@ -78,6 +81,7 @@ describe('lib/supabase', () => {
       jest.doMock('react-native', () => ({ Platform: { OS: 'ios' } }));
       jest.spyOn(console, 'error').mockImplementation(() => {});
 
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       require('@/lib/supabase');
       expect(mockCreateClient).toHaveBeenCalledWith('', '', expect.any(Object));
     });
@@ -89,6 +93,7 @@ describe('lib/supabase', () => {
     });
 
     function getWebStorage() {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       require('@/lib/supabase');
       return mockCreateClient.mock.calls[0][2].auth.storage;
     }
@@ -170,7 +175,9 @@ describe('lib/supabase', () => {
   describe('Platform.OS !== "web" — authStorage', () => {
     it('uses AsyncStorage on native platforms', () => {
       jest.doMock('react-native', () => ({ Platform: { OS: 'ios' } }));
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const AsyncStorage = require('@react-native-async-storage/async-storage');
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       require('@/lib/supabase');
 
       const authStorage = mockCreateClient.mock.calls[0][2].auth.storage;
