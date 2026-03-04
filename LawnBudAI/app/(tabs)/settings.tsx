@@ -16,6 +16,7 @@ import { useRole } from '@/hooks/useRole';
 import { MaterialIcons } from '@expo/vector-icons';
 import { createSettingsStyles } from '@/styles/settings.styles';
 import { useAppTheme } from '@/hooks/useAppTheme';
+import { useThemeMode, ThemeMode } from '@/contexts/ThemeContext';
 
 export default function SettingsScreen() {
   const { signOut } = useAuth();
@@ -29,6 +30,7 @@ export default function SettingsScreen() {
   const router = useRouter();
   const themeColors = useAppTheme();
   const styles = useMemo(() => createSettingsStyles(themeColors), [themeColors]);
+  const { themeMode, setThemeMode } = useThemeMode();
 
   useEffect(() => {
     if (!loading && prefs) {
@@ -191,6 +193,31 @@ export default function SettingsScreen() {
                     : type === 'warm_season'
                     ? 'Warm Season'
                     : 'Mixed'}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        <View style={styles.card}>
+          <Text style={styles.label}>Appearance</Text>
+          <View style={styles.grassTypeContainer}>
+            {(['system', 'light', 'dark'] as ThemeMode[]).map((mode) => (
+              <TouchableOpacity
+                key={mode}
+                style={[
+                  styles.grassTypeButton,
+                  themeMode === mode && styles.grassTypeButtonActive,
+                ]}
+                onPress={() => setThemeMode(mode)}
+              >
+                <Text
+                  style={[
+                    styles.grassTypeText,
+                    themeMode === mode && styles.grassTypeTextActive,
+                  ]}
+                >
+                  {mode === 'system' ? 'System' : mode === 'light' ? 'Light' : 'Dark'}
                 </Text>
               </TouchableOpacity>
             ))}

@@ -2,20 +2,20 @@
  * Tests for useAppTheme hook
  *
  * Verifies that the hook returns the correct semantic colour palette for each
- * system colour scheme, and that the light / dark palettes are structurally
+ * effective colour scheme, and that the light / dark palettes are structurally
  * consistent (identical keys) while having distinct values where contrast
  * matters most.
  */
 
 import { renderHook } from '@testing-library/react-native';
 import { useAppTheme, lightColors, darkColors } from '@/hooks/useAppTheme';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { useThemeMode } from '@/contexts/ThemeContext';
 
-jest.mock('@/hooks/useColorScheme', () => ({
-  useColorScheme: jest.fn(),
+jest.mock('@/contexts/ThemeContext', () => ({
+  useThemeMode: jest.fn(),
 }));
 
-const mockUseColorScheme = useColorScheme as jest.Mock;
+const mockUseThemeMode = useThemeMode as jest.Mock;
 
 describe('useAppTheme', () => {
   beforeEach(() => {
@@ -24,36 +24,30 @@ describe('useAppTheme', () => {
 
   // ─── Palette selection ────────────────────────────────────────────────────
 
-  it('returns light palette when color scheme is "light"', () => {
-    mockUseColorScheme.mockReturnValue('light');
+  it('returns light palette when effective scheme is "light"', () => {
+    mockUseThemeMode.mockReturnValue({ effectiveScheme: 'light', themeMode: 'light', setThemeMode: jest.fn() });
     const { result } = renderHook(() => useAppTheme());
     expect(result.current).toEqual(lightColors);
   });
 
-  it('returns dark palette when color scheme is "dark"', () => {
-    mockUseColorScheme.mockReturnValue('dark');
+  it('returns dark palette when effective scheme is "dark"', () => {
+    mockUseThemeMode.mockReturnValue({ effectiveScheme: 'dark', themeMode: 'dark', setThemeMode: jest.fn() });
     const { result } = renderHook(() => useAppTheme());
     expect(result.current).toEqual(darkColors);
   });
 
-  it('defaults to light palette when color scheme is null', () => {
-    mockUseColorScheme.mockReturnValue(null);
+  it('defaults to light palette when effective scheme is not "dark"', () => {
+    mockUseThemeMode.mockReturnValue({ effectiveScheme: 'light', themeMode: 'system', setThemeMode: jest.fn() });
     const { result } = renderHook(() => useAppTheme());
     expect(result.current).toEqual(lightColors);
   });
 
-  it('defaults to light palette when color scheme is undefined', () => {
-    mockUseColorScheme.mockReturnValue(undefined);
-    const { result } = renderHook(() => useAppTheme());
-    expect(result.current).toEqual(lightColors);
-  });
-
-  it('updates palette when color scheme changes', () => {
-    mockUseColorScheme.mockReturnValue('light');
+  it('updates palette when effective scheme changes', () => {
+    mockUseThemeMode.mockReturnValue({ effectiveScheme: 'light', themeMode: 'light', setThemeMode: jest.fn() });
     const { result, rerender } = renderHook(() => useAppTheme());
     expect(result.current).toEqual(lightColors);
 
-    mockUseColorScheme.mockReturnValue('dark');
+    mockUseThemeMode.mockReturnValue({ effectiveScheme: 'dark', themeMode: 'dark', setThemeMode: jest.fn() });
     rerender({});
     expect(result.current).toEqual(darkColors);
   });
@@ -93,13 +87,11 @@ describe('useAppTheme', () => {
   });
 
   it('light mode uses dark text on light backgrounds', () => {
-    // textPrimary should be a dark hex (low luminance) on a light background
     expect(lightColors.textPrimary).toBe('#1f2937');
     expect(lightColors.cardBackground).toBe('#ffffff');
   });
 
   it('dark mode uses light text on dark backgrounds', () => {
-    // textPrimary should be a light hex (high luminance) on a dark background
     expect(darkColors.textPrimary).toBe('#e5e7eb');
     expect(darkColors.cardBackground).toBe('#1c1f21');
   });
