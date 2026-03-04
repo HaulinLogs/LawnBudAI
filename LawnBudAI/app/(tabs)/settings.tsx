@@ -20,7 +20,7 @@ import { useThemeMode, ThemeMode } from '@/contexts/ThemeContext';
 
 export default function SettingsScreen() {
   const { signOut } = useAuth();
-  const { prefs, loading, save } = useUserPreferences();
+  const { prefs, loading, loadError, save } = useUserPreferences();
   const { role, isPremium } = useRole();
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
@@ -131,6 +131,12 @@ export default function SettingsScreen() {
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
       >
+        {loadError && (
+          <View style={styles.errorBanner}>
+            <Text style={styles.errorText}>Could not load preferences: {loadError}</Text>
+          </View>
+        )}
+
         <View style={styles.card}>
           <Text style={styles.label}>City</Text>
           <TextInput
