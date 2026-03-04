@@ -82,6 +82,18 @@ export const createSettingsStyles = (colors: AppThemeColors) =>
       fontWeight: 'bold',
       fontSize: 16,
     },
+    errorBanner: {
+      backgroundColor: '#fef2f2',
+      borderWidth: 1,
+      borderColor: '#fca5a5',
+      borderRadius: 8,
+      padding: 12,
+      marginBottom: 16,
+    },
+    errorText: {
+      color: '#dc2626',
+      fontSize: 14,
+    },
     signOutButton: {
       backgroundColor: colors.signOutBackground,
       borderRadius: 8,

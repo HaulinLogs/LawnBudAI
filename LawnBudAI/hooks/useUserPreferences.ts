@@ -20,6 +20,7 @@ export function useUserPreferences() {
     lawn_size_sqft: null
   });
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const { user, loading: userLoading } = useSupabaseUser();
 
   useEffect(() => {
@@ -40,6 +41,7 @@ export function useUserPreferences() {
 
         if (error) {
           console.error('Error fetching preferences:', error);
+          setLoadError(error.message || 'Failed to load preferences');
           return;
         }
 
@@ -65,6 +67,7 @@ export function useUserPreferences() {
           });
           if (insertError) {
             console.error('Error creating default preferences:', insertError);
+            setLoadError(insertError.message || 'Failed to create default preferences');
           }
         }
       } catch (err) {
@@ -112,5 +115,5 @@ export function useUserPreferences() {
     }
   };
 
-  return { prefs, loading, save };
+  return { prefs, loading, loadError, save };
 }

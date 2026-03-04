@@ -215,6 +215,42 @@ describe('useUserPreferences', () => {
       // attempted (we can't know if a row exists when the fetch itself failed)
       expect(result.current.prefs.city).toBe('Madison');
       expect(mockInsert).not.toHaveBeenCalled();
+      expect(result.current.loadError).toBe('DB error');
+    });
+
+    it('should set loadError when inserting default preferences fails', async () => {
+      // Arrange
+      (useSupabaseUser as jest.Mock).mockReturnValue({
+        user: mockUser,
+        loading: false,
+        error: null,
+      });
+
+      const insertError = new Error('Insert failed');
+      const mockInsert = jest.fn().mockResolvedValue({ error: insertError });
+
+      (mockSupabase.from as jest.Mock).mockReturnValue({
+        select: jest.fn().mockReturnValue({
+          eq: jest.fn().mockReturnValue({
+            maybeSingle: jest.fn().mockResolvedValue({
+              data: null, // no row found
+              error: null,
+            }),
+          }),
+        }),
+        insert: mockInsert,
+      });
+
+      // Act
+      const { result } = renderHook(() => useUserPreferences());
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      // Assert: insert was attempted, loadError is set
+      expect(mockInsert).toHaveBeenCalled();
+      expect(result.current.loadError).toBe('Insert failed');
     });
   });
 
