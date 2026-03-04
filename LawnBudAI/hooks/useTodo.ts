@@ -15,6 +15,7 @@ export function useTodo(grassType: GrassType = 'cool_season') {
   const [wateringTodo, setWateringTodo] = useState<Todo | null>(null);
   const [fertilizerTodo, setFertilizerTodo] = useState<Todo | null>(null);
   const [overseedingReminder, setOverseedingReminder] = useState<OverseedingReminder | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const now = new Date();
@@ -23,7 +24,8 @@ export function useTodo(grassType: GrassType = 'cool_season') {
     setWateringTodo(getWateringAdvice(grassType, season));
     setFertilizerTodo(getFertilizerAdvice(grassType, season));
     setOverseedingReminder(getOverseedingReminder(grassType, now));
+    setLoading(false);
   }, [grassType]);
 
-  return { mowingTodo, wateringTodo, fertilizerTodo, overseedingReminder };
+  return { mowingTodo, wateringTodo, fertilizerTodo, overseedingReminder, loading };
 }

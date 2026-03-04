@@ -32,8 +32,11 @@ jobs:
           node-version: '22'
           cache: 'yarn'
 
+      - name: Enable Corepack
+        run: corepack enable
+
       - name: Install dependencies
-        run: cd LawnBudAI && yarn install --frozen-lockfile
+        run: cd LawnBudAI && yarn install --immutable
 
       - name: Setup Supabase CLI
         uses: supabase/setup-cli@v1
