@@ -39,6 +39,7 @@ export function useUserPreferences() {
 
         if (error) {
           console.error('Error fetching preferences:', error);
+          return;
         }
 
         if (data) {
