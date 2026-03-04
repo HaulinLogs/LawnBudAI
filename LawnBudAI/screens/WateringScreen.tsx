@@ -139,7 +139,7 @@ export default function WateringScreen() {
         )}
       </View>
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formik.values.source, formik.errors.source, formik.touched.source, sourceOptions]);
 
   return (

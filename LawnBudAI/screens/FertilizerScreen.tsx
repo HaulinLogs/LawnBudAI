@@ -214,7 +214,7 @@ export default function FertilizerScreen() {
         )}
       </View>
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formik.values.type, formik.errors.type, formik.touched.type]);
 
   const methodPicker = useMemo(() => {
@@ -237,7 +237,7 @@ export default function FertilizerScreen() {
         )}
       </View>
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formik.values.application_method, formik.errors.application_method, formik.touched.application_method]);
 
   return (
