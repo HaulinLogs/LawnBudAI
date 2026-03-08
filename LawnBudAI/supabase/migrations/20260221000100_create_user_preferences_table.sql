@@ -13,39 +13,53 @@ create table if not exists public.user_preferences (
   updated_at timestamptz default now()
 );
 
--- Enable RLS on user_preferences
+-- Enable RLS (Safe to run multiple times)
 alter table public.user_preferences enable row level security;
 
--- Policy: Users can only read their own preferences
-create policy "Users read own preferences"
-  on public.user_preferences for select
-  using (auth.uid() = user_id);
+-- Idempotent block for Policies and Indexes
+DO $$ 
+BEGIN
+    -- Policy: Read
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users read own preferences') THEN
+        create policy "Users read own preferences"
+          on public.user_preferences for select
+          using (auth.uid() = user_id);
+    END IF;
 
--- Policy: Users can update their own preferences
-create policy "Users update own preferences"
-  on public.user_preferences for update
-  using (auth.uid() = user_id)
-  with check (auth.uid() = user_id);
+    -- Policy: Update
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users update own preferences') THEN
+        create policy "Users update own preferences"
+          on public.user_preferences for update
+          using (auth.uid() = user_id)
+          with check (auth.uid() = user_id);
+    END IF;
 
--- Policy: Users can insert their own preferences
-create policy "Users insert own preferences"
-  on public.user_preferences for insert
-  with check (auth.uid() = user_id);
+    -- Policy: Insert
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users insert own preferences') THEN
+        create policy "Users insert own preferences"
+          on public.user_preferences for insert
+          with check (auth.uid() = user_id);
+    END IF;
 
--- Indexes for performance
-create index idx_user_preferences_user_id on public.user_preferences(user_id);
+    -- Index
+    IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_user_preferences_user_id') THEN
+        create index idx_user_preferences_user_id on public.user_preferences(user_id);
+    END IF;
 
--- Trigger to auto-create preferences for new users
+END $$;
+
+-- Trigger Function (Always use OR REPLACE)
 create or replace function public.create_user_preferences()
 returns trigger language plpgsql security definer as $$
 begin
   insert into public.user_preferences (user_id, city, state)
   values (new.id, 'Madison', 'WI')
-  on conflict do nothing;
+  on conflict (user_id) do nothing;
   return new;
 end;
 $$;
 
+-- Trigger (Safe because we drop it first)
 drop trigger if exists on_auth_user_created_preferences on auth.users;
 create trigger on_auth_user_created_preferences
   after insert on auth.users
