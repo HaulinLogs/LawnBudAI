@@ -8,9 +8,12 @@ import { TodoStatusCard } from '@/components/TodoStatusCard';
 import { useTodo } from '@/hooks/useTodo';
 import React, { useEffect, useMemo } from 'react';
 import { WeatherCard } from '@/components/WeatherCard';
+import { UsdaZoneCard } from '@/components/UsdaZoneCard';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { type GrassType } from '@/lib/lawnAdvice';
 import { useAppTheme } from '@/hooks/useAppTheme';
+import { useUsdaZone } from '@/hooks/useUsdaZone';
+import { useFertilizerEvents } from '@/hooks/useFertilizerEvents';
 
 export default function HomeScreen() {
   const { prefs, loading: prefsLoading } = useUserPreferences();
@@ -24,6 +27,18 @@ export default function HomeScreen() {
   } = useTodo(prefs.grass_type as GrassType);
   const themeColors = useAppTheme();
   const styles = useMemo(() => createHomeStyles(themeColors), [themeColors]);
+
+  // Fertilizer history for zone-aware NPK recommendation
+  const { events: fertilizerEvents } = useFertilizerEvents();
+  const lastFertilizerDate = fertilizerEvents.length > 0 ? fertilizerEvents[0].date : undefined;
+
+  // USDA zone + zone-calibrated fertilizer recommendation
+  const { zoneInfo, fertilizerRecommendation } = useUsdaZone(
+    prefs.city,
+    prefs.state,
+    lastFertilizerDate,
+    prefs.lawn_size_sqft,
+  );
 
   // Log errors for owner notification (send to error tracking service)
   useEffect(() => {
@@ -106,6 +121,18 @@ export default function HomeScreen() {
               </>
             )}
           </View>
+
+          {/* USDA Zone + Fertilizer Recommendation Section */}
+          {!prefsLoading && (
+            <UsdaZoneCard
+              city={prefs.city}
+              state={prefs.state}
+              zoneInfo={zoneInfo}
+              fertilizerRecommendation={fertilizerRecommendation}
+              lawnSizeSqFt={prefs.lawn_size_sqft}
+              colors={themeColors}
+            />
+          )}
 
           {/* Upcoming Reminders Section */}
           <View style={styles.card}>
