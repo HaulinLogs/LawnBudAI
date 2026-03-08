@@ -25,8 +25,11 @@ describe('useFertilizerEvents', () => {
       user_id: 'user-123',
       date: '2026-02-15',
       amount_lbs: 3.5,
-      type: 'npk' as const,
-      application_method: 'spreader' as const,
+      nitrogen_pct: 15,
+      phosphorus_pct: 0,
+      potassium_pct: 8,
+      application_form: 'granular' as const,
+      application_method: 'broadcast' as const,
       notes: 'Spring fertilizer application',
       created_at: '2026-02-15T10:00:00Z',
       updated_at: '2026-02-15T10:00:00Z',
@@ -36,7 +39,10 @@ describe('useFertilizerEvents', () => {
       user_id: 'user-123',
       date: '2026-02-01',
       amount_lbs: 2.5,
-      type: 'nitrogen' as const,
+      nitrogen_pct: 30,
+      phosphorus_pct: 0,
+      potassium_pct: 10,
+      application_form: 'liquid' as const,
       application_method: 'spray' as const,
       notes: 'General maintenance',
       created_at: '2026-02-01T10:00:00Z',
@@ -187,8 +193,11 @@ describe('useFertilizerEvents', () => {
       const input: FertilizerEventInput = {
         date: '2026-02-15',
         amount_lbs: 3.5,
-        type: 'npk',
-        application_method: 'spreader',
+        nitrogen_pct: 15,
+        phosphorus_pct: 0,
+        potassium_pct: 8,
+        application_form: 'granular',
+        application_method: 'broadcast',
         notes: 'Spring fertilizer application',
       };
 
@@ -242,8 +251,11 @@ describe('useFertilizerEvents', () => {
       const input: FertilizerEventInput = {
         date: '2026-02-15',
         amount_lbs: 3.5,
-        type: 'npk',
-        application_method: 'spreader',
+        nitrogen_pct: 15,
+        phosphorus_pct: 0,
+        potassium_pct: 8,
+        application_form: 'granular',
+        application_method: 'broadcast',
       };
 
       await expect(result.current.addEvent(input)).rejects.toThrow();
@@ -374,7 +386,6 @@ describe('useFertilizerEvents', () => {
       expect(stats.lastApplicationDaysAgo).toBeDefined();
       expect(stats.totalAmountLbs).toBeDefined();
       expect(stats.averageAmountLbs).toBeDefined();
-      expect(stats.mostUsedType).toBeDefined();
     });
 
     it('should return null values when no events exist', async () => {
@@ -413,12 +424,11 @@ describe('useFertilizerEvents', () => {
       expect(stats.lastApplicationDaysAgo).toBeNull();
       expect(stats.totalAmountLbs).toBe('0');
       expect(stats.averageAmountLbs).toBeNull();
-      expect(stats.mostUsedType).toBeNull();
     });
   });
 
-  describe('getTypeBreakdown', () => {
-    it('should calculate type breakdown correctly', async () => {
+  describe('getFormBreakdown', () => {
+    it('should calculate application form breakdown correctly', async () => {
       // Arrange
       (useSupabaseUser as jest.Mock).mockReturnValue({
         user: mockUser,
@@ -448,11 +458,11 @@ describe('useFertilizerEvents', () => {
         expect(result.current.loading).toBe(false);
       });
 
-      const breakdown = result.current.getTypeBreakdown();
+      const breakdown = result.current.getFormBreakdown();
 
-      // Assert
-      expect(breakdown.npk).toBe(1);
-      expect(breakdown.nitrogen).toBe(1);
+      // Assert — mockEvents has 1 granular, 1 liquid
+      expect(breakdown.granular).toBe(1);
+      expect(breakdown.liquid).toBe(1);
     });
   });
 
@@ -489,8 +499,8 @@ describe('useFertilizerEvents', () => {
 
       const breakdown = result.current.getMethodBreakdown();
 
-      // Assert
-      expect(breakdown.spreader).toBe(1);
+      // Assert — mockEvents has broadcast + spray
+      expect(breakdown.broadcast).toBe(1);
       expect(breakdown.spray).toBe(1);
     });
 
@@ -508,7 +518,10 @@ describe('useFertilizerEvents', () => {
           user_id: 'user-123',
           date: '2026-02-10',
           amount_lbs: 2.0,
-          type: 'nitrogen' as const,
+          nitrogen_pct: 0,
+          phosphorus_pct: 0,
+          potassium_pct: 0,
+          application_form: 'granular' as const,
           application_method: null,
           notes: null,
           created_at: '2026-02-10T10:00:00Z',

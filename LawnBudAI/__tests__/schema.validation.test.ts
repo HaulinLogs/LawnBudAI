@@ -43,13 +43,20 @@ const PRODUCTION_SCHEMA: TableSchema = {
     { name: 'updated_at', type: 'timestamptz', nullable: false },
   ],
 
+  // Phase 3.3: Added N-P-K tracking, application_form, amount_lbs_per_1000sqft.
+  // Legacy columns (amount_lbs, type) retained for backward compatibility.
   fertilizer_events: [
     { name: 'id', type: 'uuid', nullable: false },
     { name: 'user_id', type: 'uuid', nullable: false },
     { name: 'date', type: 'date', nullable: false },
-    { name: 'amount_lbs', type: 'decimal(6,2)', nullable: false },
-    { name: 'type', type: 'text', nullable: false },
-    { name: 'application_method', type: 'text', nullable: true },
+    { name: 'amount_lbs', type: 'decimal(6,2)', nullable: true },
+    { name: 'amount_lbs_per_1000sqft', type: 'decimal(6,2)', nullable: true },
+    { name: 'type', type: 'text', nullable: true },
+    { name: 'nitrogen_pct', type: 'decimal(5,2)', nullable: true },
+    { name: 'phosphorus_pct', type: 'decimal(5,2)', nullable: true },
+    { name: 'potassium_pct', type: 'decimal(5,2)', nullable: true },
+    { name: 'application_form', type: 'text', nullable: false },
+    { name: 'application_method', type: 'text', nullable: false },
     { name: 'notes', type: 'text', nullable: true },
     { name: 'created_at', type: 'timestamptz', nullable: false },
     { name: 'updated_at', type: 'timestamptz', nullable: false },
@@ -168,13 +175,16 @@ describe('Schema Validation: Database Columns vs Hook Queries', () => {
   });
 
   describe('useFertilizerEvents hook', () => {
-    it('should select only valid columns from fertilizer_events table', () => {
-      // Valid columns in fertilizer_events
+    it('should recognise Phase 3.3 N-P-K columns as valid in fertilizer_events', () => {
+      // Phase 3.3 added nitrogen_pct, phosphorus_pct, potassium_pct, application_form
       const selectedColumns = [
         'id',
         'date',
         'amount_lbs',
-        'type',
+        'nitrogen_pct',
+        'phosphorus_pct',
+        'potassium_pct',
+        'application_form',
         'application_method',
         'notes',
       ];
@@ -191,29 +201,25 @@ describe('Schema Validation: Database Columns vs Hook Queries', () => {
       }
     });
 
-    it('should NOT have N-P-K percentage columns', () => {
+    it('should have N-P-K percentage columns (added by Phase 3.3 migration)', () => {
       const schema = PRODUCTION_SCHEMA.fertilizer_events;
-      const badColumns = [
-        'nitrogen_pct',
-        'phosphorus_pct',
-        'potassium_pct',
-        'amount_lbs_per_1000sqft',
-      ];
 
-      for (const badColumn of badColumns) {
-        const exists = schema.some(c => c.name === badColumn);
-        expect(exists).toBe(false);
-      }
+      expect(schema.some(c => c.name === 'nitrogen_pct')).toBe(true);
+      expect(schema.some(c => c.name === 'phosphorus_pct')).toBe(true);
+      expect(schema.some(c => c.name === 'potassium_pct')).toBe(true);
+      expect(schema.some(c => c.name === 'application_form')).toBe(true);
     });
 
-    it('should have amount_lbs column, not amount_lbs_per_1000sqft', () => {
+    it('should have both amount_lbs (legacy) and amount_lbs_per_1000sqft (Phase 3.3)', () => {
       const schema = PRODUCTION_SCHEMA.fertilizer_events;
 
-      const amountColumn = schema.find(c => c.name === 'amount_lbs');
-      expect(amountColumn).toBeDefined();
+      expect(schema.some(c => c.name === 'amount_lbs')).toBe(true);
+      expect(schema.some(c => c.name === 'amount_lbs_per_1000sqft')).toBe(true);
+    });
 
-      const badColumn = schema.find(c => c.name === 'amount_lbs_per_1000sqft');
-      expect(badColumn).toBeUndefined();
+    it('should NOT have nonexistent columns like npk_ratio', () => {
+      const schema = PRODUCTION_SCHEMA.fertilizer_events;
+      expect(schema.some(c => c.name === 'npk_ratio')).toBe(false);
     });
   });
 
@@ -242,8 +248,17 @@ describe('Schema Validation: Database Columns vs Hook Queries', () => {
       }
     });
 
-    it('fertilizer_events should have all required columns', () => {
-      const required = ['id', 'user_id', 'date', 'amount_lbs', 'type'];
+    it('fertilizer_events should have all required columns (Phase 3.3 schema)', () => {
+      // Phase 3.3 required columns — legacy 'type' column still present but deprecated in app code
+      const required = [
+        'id', 'user_id', 'date',
+        'amount_lbs',          // legacy
+        'nitrogen_pct',        // Phase 3.3
+        'phosphorus_pct',      // Phase 3.3
+        'potassium_pct',       // Phase 3.3
+        'application_form',    // Phase 3.3
+        'application_method',
+      ];
       const schema = PRODUCTION_SCHEMA.fertilizer_events;
       const actual = schema.map(c => c.name);
 

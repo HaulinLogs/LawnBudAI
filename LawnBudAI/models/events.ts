@@ -23,15 +23,18 @@ export interface WaterEvent {
   updated_at: string;
 }
 
-export type FertilizerType = 'nitrogen' | 'phosphorus' | 'potassium' | 'npk' | 'organic' | 'liquid' | 'granular';
-export type ApplicationMethod = 'spreader' | 'spray' | 'liquid' | 'granular';
+export type ApplicationForm = 'granular' | 'liquid';
+export type ApplicationMethod = 'broadcast' | 'spot' | 'edge' | 'custom' | 'spray';
 
 export interface FertilizerEvent {
   id: string;
   user_id: string;
   date: string; // DATE format: YYYY-MM-DD
   amount_lbs: number;
-  type: FertilizerType;
+  nitrogen_pct: number;
+  phosphorus_pct: number;
+  potassium_pct: number;
+  application_form: ApplicationForm;
   application_method: ApplicationMethod;
   notes?: string;
   created_at: string;
@@ -58,7 +61,10 @@ export interface WaterEventInput {
 export interface FertilizerEventInput {
   date: string;
   amount_lbs: number;
-  type: FertilizerType;
+  nitrogen_pct: number;
+  phosphorus_pct: number;
+  potassium_pct: number;
+  application_form: ApplicationForm;
   application_method: ApplicationMethod;
   notes?: string;
 }

@@ -36,12 +36,19 @@ const PRODUCTION_SCHEMA = {
     'created_at',
     'updated_at',
   ],
+  // Phase 3.3 migration added N-P-K tracking, application_form, and amount_lbs_per_1000sqft.
+  // Legacy columns (amount_lbs, type) are retained for backward compatibility (drops commented out in migration).
   fertilizer_events: [
     'id',
     'user_id',
     'date',
     'amount_lbs',
+    'amount_lbs_per_1000sqft',
     'type',
+    'nitrogen_pct',
+    'phosphorus_pct',
+    'potassium_pct',
+    'application_form',
     'application_method',
     'notes',
     'created_at',
@@ -74,7 +81,13 @@ const ALLOWED_SELECTIONS = {
   useFertilizerEvents: {
     file: 'hooks/useFertilizerEvents.ts',
     table: 'fertilizer_events',
-    allowedColumns: ['id', 'date', 'amount_lbs', 'type', 'application_method', 'notes'],
+    // Phase 3.3: hook now uses SELECT * so specific column list not enforced,
+    // but if specific columns are added they must be from this list
+    allowedColumns: [
+      'id', 'date', 'amount_lbs', 'amount_lbs_per_1000sqft',
+      'nitrogen_pct', 'phosphorus_pct', 'potassium_pct',
+      'application_form', 'application_method', 'notes',
+    ],
     selectPatterns: [/\.select\(['"]([^'"]+)['"]\)/g],
   },
 };
@@ -181,12 +194,11 @@ function validateHook(hookName, config) {
       'watering_frequency',
     ],
     useFertilizerEvents: [
-      'nitrogen_pct',
-      'phosphorus_pct',
-      'potassium_pct',
-      'amount_lbs_per_1000sqft',
+      // These were never valid DB column names - guard against typos
       'npk_ratio',
-      'application_form',
+      'n_pct',
+      'p_pct',
+      'k_pct',
     ],
   };
 
@@ -226,12 +238,12 @@ function validateModels() {
       { field: 'amount_inches', deprecated: ['amount_gallons'] },
       { field: 'source', deprecated: [] },
     ],
+    // Phase 3.3: FertilizerEvent now uses nitrogen_pct/phosphorus_pct/potassium_pct
+    // and application_form instead of the legacy 'type' field.
+    // amount_lbs_per_1000sqft is also valid (Phase 3.3 column).
     FertilizerEvent: [
-      { field: 'amount_lbs', deprecated: ['amount_lbs_per_1000sqft'] },
-      {
-        field: 'type',
-        deprecated: ['nitrogen_pct', 'phosphorus_pct', 'potassium_pct'],
-      },
+      { field: 'amount_lbs', deprecated: [] },
+      { field: 'nitrogen_pct', deprecated: [] },
     ],
   };
 
