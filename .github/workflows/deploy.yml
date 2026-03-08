@@ -44,7 +44,7 @@ jobs:
           version: latest
 
       - name: Deploy database migrations
-        run: supabase db push --db-url "${{ secrets.SUPABASE_DB_URL }}"
+        run: cd LawnBudAI && supabase db push --db-url "${{ secrets.SUPABASE_DB_URL }}"
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
 
