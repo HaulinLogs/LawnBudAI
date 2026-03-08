@@ -62,8 +62,11 @@ jest.mock('@/hooks/useFertilizerEvents', () => ({
         user_id: 'user-123',
         date: '2026-02-15',
         amount_lbs: 3.5,
-        type: 'npk',
-        application_method: 'spreader',
+        nitrogen_pct: 15,
+        phosphorus_pct: 0,
+        potassium_pct: 8,
+        application_form: 'granular',
+        application_method: 'broadcast',
         notes: 'Spring application',
         created_at: '2026-02-15T10:00:00Z',
         updated_at: '2026-02-15T10:00:00Z',
@@ -77,17 +80,12 @@ jest.mock('@/hooks/useFertilizerEvents', () => ({
       lastApplicationDaysAgo: 1,
       totalAmountLbs: '3.5',
       averageAmountLbs: '3.5',
-      mostUsedType: 'npk',
     }),
-    getTypeBreakdown: jest.fn().mockReturnValue({
-      npk: 1,
-      nitrogen: 0,
+    getFormBreakdown: jest.fn().mockReturnValue({
+      granular: 1,
     }),
     getMethodBreakdown: jest.fn().mockReturnValue({
-      spreader: 1,
-      spray: 0,
-      liquid: 0,
-      granular: 0,
+      broadcast: 1,
     }),
     refetch: jest.fn(),
   })),
@@ -107,7 +105,7 @@ describe('FertilizerScreen', () => {
     // Check for form section title
     expect(screen.queryByText('Log Fertilizer Application')).toBeTruthy();
 
-    // Check for form labels - using getByText to be specific
+    // Check for form labels
     expect(screen.getByText('Date')).toBeTruthy();
     expect(screen.getByText('Amount (lbs)')).toBeTruthy();
     expect(screen.getByText('Record Application')).toBeTruthy();
@@ -116,15 +114,30 @@ describe('FertilizerScreen', () => {
   it('should display the screen title', () => {
     render(<FertilizerScreen />);
 
-    // Expo Router screen title should be set
     const { UNSAFE_getByType } = render(<FertilizerScreen />);
     expect(UNSAFE_getByType(FertilizerScreen)).toBeTruthy();
+  });
+
+  it('should display NPK ratio inputs', () => {
+    render(<FertilizerScreen />);
+
+    expect(screen.getByText('N-P-K Ratio (%)')).toBeTruthy();
+    expect(screen.getByText('Nitrogen')).toBeTruthy();
+    expect(screen.getByText('Phosphorus')).toBeTruthy();
+    expect(screen.getByText('Potassium')).toBeTruthy();
+  });
+
+  it('should display application form and method pickers', () => {
+    render(<FertilizerScreen />);
+
+    // Both labels appear as picker label and stats section heading
+    expect(screen.getAllByText('Application Form').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Application Method').length).toBeGreaterThan(0);
   });
 
   it('should display form input fields', () => {
     render(<FertilizerScreen />);
 
-    // Form fields should be rendered
     expect(screen.getByText('Date')).toBeTruthy();
     expect(screen.getByText('Amount (lbs)')).toBeTruthy();
     expect(screen.getByText('Record Application')).toBeTruthy();
@@ -133,7 +146,6 @@ describe('FertilizerScreen', () => {
   it('should display statistics when events exist', () => {
     render(<FertilizerScreen />);
 
-    // Statistics section should be displayed
     expect(screen.queryByText('Statistics')).toBeTruthy();
     expect(screen.queryByText('Days since application')).toBeTruthy();
     expect(screen.queryByText('Total lbs applied')).toBeTruthy();
@@ -143,7 +155,6 @@ describe('FertilizerScreen', () => {
   it('should display event history', () => {
     render(<FertilizerScreen />);
 
-    // History section should be displayed
     expect(screen.queryByText('Recent Applications')).toBeTruthy();
   });
 
