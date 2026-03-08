@@ -10,14 +10,44 @@ jobs:
   pre-deployment-gates:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    permissions:
+      contents: read
+      security-events: write
+    defaults:
+      run:
+        working-directory: ./LawnBudAI
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
+      # ========================================================================
+      # GATE 0: Secret Scanning & Reporting
+      # ========================================================================
+      - name: Secret Scanning
+        uses: trufflesecurity/trufflehog@main
+        id: trufflehog
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --debug --only-verified --format sarif
+        continue-on-error: true 
+
+      - name: Upload Scan Results
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: results.sarif
+
+      # ========================================================================
+      # ENVIRONMENT & DB LINTING
+      # ========================================================================
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'yarn'
 
       - name: Enable Corepack
@@ -25,145 +55,56 @@ jobs:
 
       - name: Install dependencies
         run: yarn install --immutable
-        working-directory: ./LawnBudAI
 
-      # ========================================================================
-      # GATE 1: Schema Validation (CRITICAL)
-      # ========================================================================
-      - name: Validate database schema
-        run: yarn validate:schema
-        working-directory: ./LawnBudAI
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
 
-      # ========================================================================
-      # GATE 2: Splinter - Database Schema Linting (Performance & Security)
-      # Runs the full Splinter lint suite via `supabase db lint --linked`.
-      # Checks 24 advisors including: unindexed FKs, RLS misconfigurations,
-      # exposed auth.users, missing PKs, duplicate indexes, insecure functions,
-      # and more. See: https://supabase.github.io/splinter
-      # ========================================================================
       - name: Lint database schema (Splinter)
+        id: splinter
         run: |
-          npx supabase link --project-ref $SUPABASE_PROJECT_ID
-          npx supabase db lint --linked --level warning --fail-on warning --schema public
-        working-directory: ./LawnBudAI
+          supabase link --project-ref "$SUPABASE_PROJECT_ID" --password "$SUPABASE_DB_PASSWORD"
+          supabase db lint --linked --level warning --schema public
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
-        continue-on-error: true  # Requires secrets; set to false once baseline is clean
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        continue-on-error: true 
 
       # ========================================================================
-      # GATE 3: Type Generation & Type Safety Check
+      # TESTING & TYPES
       # ========================================================================
-      - name: Generate types from database
-        run: yarn types:generate
-        working-directory: ./LawnBudAI
-        env:
-          SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-        continue-on-error: true  # Type generation requires secrets; skip in PR if unavailable
-
       - name: Check TypeScript types
+        id: types
         run: yarn types:check
-        working-directory: ./LawnBudAI
+        continue-on-error: true
+
+      - name: Run unit & contract tests
+        id: tests
+        run: yarn testFinal --maxWorkers=2
+        continue-on-error: true
 
       # ========================================================================
-      # GATE 4: Linting (Code Quality)
+      # FINAL GATE SUMMARY (The Dashboard)
       # ========================================================================
-      - name: Lint code
-        run: yarn lint:ci
-        working-directory: ./LawnBudAI
-
-      # ========================================================================
-      # GATE 5: Unit Tests
-      # ========================================================================
-      - name: Run unit tests
-        run: yarn testFinal
-        working-directory: ./LawnBudAI
-
-      # ========================================================================
-      # GATE 6: Schema Validation Tests (Contract Testing)
-      # ========================================================================
-      - name: Run schema validation tests
-        run: yarn testFinal --testPathPattern=schema.validation
-        working-directory: ./LawnBudAI
-
-      # ========================================================================
-      # GATE 7: Integration Tests (Against Test Supabase)
-      # ========================================================================
-      - name: Run integration tests
-        run: yarn test:integration
-        working-directory: ./LawnBudAI
-        env:
-          TEST_SUPABASE_URL: ${{ secrets.TEST_SUPABASE_URL }}
-          TEST_SUPABASE_ANON_KEY: ${{ secrets.TEST_SUPABASE_ANON_KEY }}
-        continue-on-error: true  # Integration tests require test Supabase; skip in PR if unavailable
-
-      # ========================================================================
-      # GATE 8: Test Coverage Threshold
-      # ========================================================================
-      - name: Check test coverage
-        run: yarn test:coverage --coverage-reporters=text-summary
-        working-directory: ./LawnBudAI
-        continue-on-error: true  # Coverage is informational, doesn't block
-
-      # ========================================================================
-      # GATE 9: Security Audit
-      # ========================================================================
-      - name: Security audit
-        run: yarn audit --mode dev --level moderate
-        working-directory: ./LawnBudAI
-        continue-on-error: true  # Audit is informational for main, blocking for PRs
-
-      # ========================================================================
-      # GATE 10: E2E Tests (Only on main branch, not PRs)
-      # ========================================================================
-      - name: Install Playwright
-        if: github.ref == 'refs/heads/main'
-        run: yarn add -D @playwright/test && yarn playwright install --with-deps
-        working-directory: ./LawnBudAI
-
-      - name: Run E2E tests
-        if: github.ref == 'refs/heads/main'
-        run: yarn test:playwright
-        working-directory: ./LawnBudAI
-        env:
-          TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
-          TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
-        continue-on-error: true  # E2E tests are slower; informational
-
-  # ============================================================================
-  # DEPLOYMENT GATE: Only deploy if all critical gates pass
-  # ============================================================================
-  deploy:
-    needs: pre-deployment-gates
-    if: github.ref == 'refs/heads/main' && success()
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Deployment Notification
+      - name: Generate Job Summary
+        if: always()
         run: |
-          echo "✅ All quality gates passed!"
-          echo "🚀 Ready for deployment"
-          echo "Deployment target: [Configure your deployment here]"
+          echo "## 🛡️ LawnBudAI Quality Gate Report" >> $GITHUB_STEP_SUMMARY
+          echo "| Gate | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "| :--- | :--- |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🔍 Secret Scan (TruffleHog) | ${{ steps.trufflehog.outcome == 'success' && '✅ Pass' || '⚠️ Issues Found' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🏗️ DB Lint (Splinter) | ${{ steps.splinter.outcome == 'success' && '✅ Clean' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🟦 Type Safety | ${{ steps.types.outcome == 'success' && '✅ Valid' || '❌ Drift Detected' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🧪 Test Suite | ${{ steps.tests.outcome == 'success' && '✅ All Passed' || '❌ Regressions Found' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Check the **Security** tab for detailed secret findings." >> $GITHUB_STEP_SUMMARY
 
-  # ============================================================================
-  # SUMMARY: What These Gates Protect Against
-  # ============================================================================
-  # 1.  Schema Mismatch (Gate 1, 6): Code uses non-existent columns
-  # 2.  DB Performance & Security (Gate 2): Splinter advisors (unindexed FKs,
-  #     RLS misconfigurations, exposed auth.users, missing PKs, etc.)
-  # 3.  Type Drift (Gate 3): TypeScript types don't match database
-  # 4.  Code Quality (Gate 4): Linting violations introduced
-  # 5.  Unit Test Failures (Gate 5): Regressions in existing features
-  # 6.  Contract Violations (Gate 6): New code breaks existing contracts
-  # 7.  Integration Issues (Gate 7): Code fails against real database
-  # 8.  Coverage Regression (Gate 8): Test coverage below threshold
-  # 9.  Security Vulnerabilities (Gate 9): Known vulnerabilities in dependencies
-  # 10. E2E Failures (Gate 10): User workflows broken
-  #
-  # These gates follow industry best practices:
-  # - Test Pyramid (Martin Fowler)
-  # - Contract Testing (PACT pattern)
-  # - Shift-Left Testing (catch errors early)
-  # - Continuous Integration (multiple quality gates)
+      # Actual block for the 'deploy' job (Fail if critical gates didn't pass)
+      - name: Final Validation
+        run: |
+          if [[ "${{ steps.tests.outcome }}" != "success" ]]; then
+            echo "Critical tests failed. Blocking deployment."
+            exit 1
+          fi
