@@ -30,6 +30,15 @@ jest.mock('@/components/WeatherCard', () => ({
   },
 }));
 
+// Mock UsdaZoneCard — renders a sentinel so the card is detectable in tests
+jest.mock('@/components/UsdaZoneCard', () => ({
+  UsdaZoneCard: () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { Text } = require('react-native');
+    return <Text testID="usda-zone-card">UsdaZoneCard</Text>;
+  },
+}));
+
 // Mock IconSymbol
 jest.mock('@/components/ui/IconSymbol', () => ({
   IconSymbol: () => null,
@@ -48,6 +57,35 @@ jest.mock('@/hooks/useAppTheme', () => {
 jest.mock('@/hooks/useWeather', () => ({ useWeather: jest.fn() }));
 jest.mock('@/hooks/useUserPreferences', () => ({ useUserPreferences: jest.fn() }));
 jest.mock('@/hooks/useTodo', () => ({ useTodo: jest.fn() }));
+jest.mock('@/hooks/useFertilizerEvents', () => ({
+  useFertilizerEvents: jest.fn(() => ({ events: [], loading: false, error: null })),
+}));
+jest.mock('@/hooks/useUsdaZone', () => ({
+  useUsdaZone: jest.fn(() => ({
+    zoneInfo: {
+      zone: 5,
+      subzone: 'b',
+      label: 'Zone 5b',
+      description: 'Northern cool – cold winters, ~160 frost-free days',
+      climateCategory: 'cool',
+      typicalFirstFrost: 'Mid-October',
+      typicalLastFrost: 'Mid-April',
+      minTempRange: '-20 to -10°F',
+      recommendedGrassType: 'cool_season',
+    },
+    season: 'spring',
+    fertilizerRecommendation: {
+      npk: '15-0-8',
+      productType: 'Balanced slow-release',
+      ratePerThousandSqFt: 3.5,
+      suggestedTotalLbs: null,
+      proTip: 'Light spring feeding only.',
+      seasonStatus: 'active',
+      daysUntilDue: 0,
+      timingLabel: 'No history — first application recommended',
+    },
+  })),
+}));
 
 const mockUseWeather = useWeather as jest.Mock;
 const mockUseUserPreferences = useUserPreferences as jest.Mock;
@@ -247,6 +285,13 @@ describe('HomeScreen', () => {
       render(<HomeScreen />);
 
       expect(screen.getByText('Upcoming Overseeding Window')).toBeTruthy();
+    });
+  });
+
+  describe('USDA Zone Card', () => {
+    it('renders the UsdaZoneCard when prefs are loaded', () => {
+      render(<HomeScreen />);
+      expect(screen.getByTestId('usda-zone-card')).toBeTruthy();
     });
   });
 
