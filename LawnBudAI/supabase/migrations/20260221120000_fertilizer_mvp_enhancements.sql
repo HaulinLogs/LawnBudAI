@@ -80,7 +80,7 @@ CREATE INDEX IF NOT EXISTS idx_fertilizer_events_application_method ON public.fe
 -- ============================================================================
 -- VIEWS & FUNCTIONS (Always safe with OR REPLACE)
 -- ============================================================================
-
+DROP VIEW public.fertilizer_stats IF EXISTS;
 
 CREATE OR REPLACE VIEW public.fertilizer_stats AS
 SELECT
@@ -95,6 +95,8 @@ SELECT
   ROUND(AVG(potassium_pct)::numeric, 2) as avg_potassium_pct
 FROM public.fertilizer_events
 GROUP BY user_id;
+
+DROP FUNCTION public.get_fertilizer_breakdown(p_user_id uuid) IF EXISTS;
 
 CREATE OR REPLACE FUNCTION public.get_fertilizer_breakdown(p_user_id uuid)
 RETURNS TABLE (
