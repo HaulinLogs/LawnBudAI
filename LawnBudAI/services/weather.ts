@@ -64,7 +64,9 @@ export async function fetchWeather(city: string, state?: string): Promise<Weathe
     } catch (proxyError: any) {
       console.error('CORS proxy also failed:', proxyError);
       trackWeatherError(`Fallback CORS proxy failed: ${proxyError.message}`, location);
-      throw new Error('Unable to reach weather service. Please check your internet connection.');
+      throw new Error(
+        `Weather fetch failed. Direct: ${errorMessage}. Proxy: ${proxyError.message}`,
+      );
     }
   }
 }
