@@ -5,3 +5,5 @@
 
 alter table public.user_preferences
   add column if not exists state text not null default 'WI';
+
+notify pgrst, 'reload schema';
