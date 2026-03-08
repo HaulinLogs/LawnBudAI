@@ -1,6 +1,7 @@
-import { View, Text, ActivityIndicator, ScrollView, Image } from 'react-native';
+import { View, Text, ActivityIndicator, ScrollView } from 'react-native';
 import { Stack } from 'expo-router';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
+import { LawnStripeBackground } from '@/components/LawnStripeBackground';
 import { useWeather } from '@/hooks/useWeather';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { createHomeStyles } from './HomeScreen.styles';
@@ -60,16 +61,10 @@ export default function HomeScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ title: 'LawnBud AI' }} />
+      <Stack.Screen options={{ title: '' }} />
       <ParallaxScrollView
-        headerBackgroundColor={{ light: '#ecfdf5', dark: '#064e3b' }}
-        headerImage={
-          <Image
-            source={require('@/assets/images/icon.png')}
-            style={{ width: 100, height: 100 }}
-            height={100}
-          />
-        }
+        headerBackgroundColor={{ light: '#4ade80', dark: '#14532d' }}
+        headerImage={<LawnStripeBackground />}
       >
         <ScrollView contentContainerStyle={styles.container}>
           {/* Weather Section */}
