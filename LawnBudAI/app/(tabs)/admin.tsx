@@ -1,7 +1,8 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { useAppTheme } from '@/hooks/useAppTheme';
+import { useRole } from '@/hooks/useRole';
 
 /**
  * Admin Dashboard (Phase 2.0 Placeholder)
@@ -9,7 +10,10 @@ import { useAppTheme } from '@/hooks/useAppTheme';
  * For now, it shows a "Coming Soon" message
  */
 export default function AdminScreen() {
+  const router = useRouter();
+  const { isAdmin, loading } = useRole();
   const themeColors = useAppTheme();
+
   const styles = useMemo(() => StyleSheet.create({
     container: {
       flexGrow: 1,
@@ -75,6 +79,16 @@ export default function AdminScreen() {
       lineHeight: 18,
     },
   }), [themeColors]);
+
+  useEffect(() => {
+    if (!loading && !isAdmin) {
+      router.replace('/(tabs)');
+    }
+  }, [isAdmin, loading, router]);
+
+  if (loading || !isAdmin) {
+    return null;
+  }
 
   return (
     <>
