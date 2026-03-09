@@ -96,7 +96,7 @@ SELECT
 FROM public.fertilizer_events
 GROUP BY user_id;
 
-DROP FUNCTION public.get_fertilizer_breakdown(p_user_id uuid) IF EXISTS;
+DROP FUNCTION public.get_fertilizer_breakdown(uuid) IF EXISTS;
 
 CREATE OR REPLACE FUNCTION public.get_fertilizer_breakdown(p_user_id uuid)
 RETURNS TABLE (
