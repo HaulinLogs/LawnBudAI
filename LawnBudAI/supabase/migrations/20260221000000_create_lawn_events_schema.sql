@@ -96,7 +96,7 @@ END $$;
 -- ============================================================================
 -- VIEWS & FUNCTIONS (Always use OR REPLACE)
 -- ============================================================================
-drop view public.mowing_stats if exists;
+drop view if exists public.mowing_stats;
 
 create or replace view public.mowing_stats as
 select
@@ -108,7 +108,7 @@ select
 from public.mow_events
 group by user_id;
 
-drop function public.get_days_since_mow(uuid);
+drop function if exists public.get_days_since_mow(uuid);
 
 create or replace function public.get_days_since_mow(p_user_id uuid)
 returns integer language sql stable security definer as $$
