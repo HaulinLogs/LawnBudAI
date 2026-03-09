@@ -3,17 +3,20 @@ import { View } from 'react-native';
 
 interface Props {
   rotation?: number; // degrees: 0=facing south(↓), 90=east(→), 180=north(↑), 270=west(←)
+  width?: number;
+  height?: number;
 }
 
 // Top-down push mower icon composed from Views.
 // Base orientation: front (cutting deck) faces DOWN (south).
 // Rotate to point the front in the direction of travel.
-export function MowerIcon({ rotation = 0 }: Props) {
+export function MowerIcon({ rotation = 0, width = 25, height = 33 }: Props) {
+  const s = width / 20; // scale factor relative to original 20px width
   return (
     <View
       style={{
-        width: 20,
-        height: 26,
+        width,
+        height,
         transform: [{ rotate: `${rotation}deg` }],
         alignItems: 'center',
       }}
@@ -21,8 +24,8 @@ export function MowerIcon({ rotation = 0 }: Props) {
       {/* Handle bar – at the BACK of the mower (top when facing down) */}
       <View
         style={{
-          width: 14,
-          height: 3,
+          width: Math.round(14 * s),
+          height: Math.round(3 * s),
           backgroundColor: '#4b5563',
           borderRadius: 1,
         }}
@@ -30,70 +33,70 @@ export function MowerIcon({ rotation = 0 }: Props) {
       {/* Main body */}
       <View
         style={{
-          width: 20,
-          height: 22,
+          width,
+          height: Math.round(22 * s),
           backgroundColor: '#b91c1c',
-          borderRadius: 3,
+          borderRadius: Math.round(3 * s),
         }}
       >
         {/* Rear-left wheel */}
         <View
           style={{
             position: 'absolute',
-            top: 2,
-            left: 1,
-            width: 6,
-            height: 6,
+            top: Math.round(2 * s),
+            left: Math.round(1 * s),
+            width: Math.round(6 * s),
+            height: Math.round(6 * s),
             backgroundColor: '#111827',
-            borderRadius: 3,
+            borderRadius: Math.round(3 * s),
           }}
         />
         {/* Rear-right wheel */}
         <View
           style={{
             position: 'absolute',
-            top: 2,
-            right: 1,
-            width: 6,
-            height: 6,
+            top: Math.round(2 * s),
+            right: Math.round(1 * s),
+            width: Math.round(6 * s),
+            height: Math.round(6 * s),
             backgroundColor: '#111827',
-            borderRadius: 3,
+            borderRadius: Math.round(3 * s),
           }}
         />
         {/* Cutting deck (slightly darker center panel) */}
         <View
           style={{
             position: 'absolute',
-            top: 7,
-            left: 3,
-            right: 3,
-            height: 8,
+            top: Math.round(7 * s),
+            left: Math.round(3 * s),
+            right: Math.round(3 * s),
+            height: Math.round(8 * s),
             backgroundColor: '#7f1d1d',
-            borderRadius: 2,
+            borderRadius: Math.round(2 * s),
           }}
         />
         {/* Front-left wheel */}
         <View
           style={{
             position: 'absolute',
-            bottom: 2,
-            left: 1,
-            width: 6,
-            height: 6,
+            bottom: Math.round(2 * s),
+            left: Math.round(1 * s),
+            width: Math.round(6 * s),
+            height: Math.round(6 * s),
             backgroundColor: '#111827',
-            borderRadius: 3,
+            borderRadius: Math.round(3 * s),
           }}
         />
         {/* Front-right wheel */}
         <View
           style={{
             position: 'absolute',
-            bottom: 2,
-            right: 1,
-            width: 6,
-            height: 6,
+            bottom: Math.round(2 * s),
+            right: Math.round(1 * s),
+            width: Math.round(6 * s),
+            height: Math.round(6 * s),
             backgroundColor: '#111827',
-            borderRadius: 3,
+            borderRadius: Math.round(3 * s),
           }}
         />
       </View>
