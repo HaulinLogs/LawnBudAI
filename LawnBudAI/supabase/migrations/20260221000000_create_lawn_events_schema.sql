@@ -96,6 +96,8 @@ END $$;
 -- ============================================================================
 -- VIEWS & FUNCTIONS (Always use OR REPLACE)
 -- ============================================================================
+drop view public.mowing_stats if exists;
+
 create or replace view public.mowing_stats as
 select
   user_id,
@@ -105,6 +107,8 @@ select
   round(avg(height_inches)::numeric, 2) as avg_height_inches
 from public.mow_events
 group by user_id;
+
+drop function public.get_days_since_mow(uuid);
 
 create or replace function public.get_days_since_mow(p_user_id uuid)
 returns integer language sql stable security definer as $$
