@@ -80,7 +80,7 @@ CREATE INDEX IF NOT EXISTS idx_fertilizer_events_application_method ON public.fe
 -- ============================================================================
 -- VIEWS & FUNCTIONS (Always safe with OR REPLACE)
 -- ============================================================================
-DROP VIEW public.fertilizer_stats IF EXISTS;
+DROP VIEW IF EXISTS public.fertilizer_stats;
 
 CREATE OR REPLACE VIEW public.fertilizer_stats AS
 SELECT
@@ -96,7 +96,7 @@ SELECT
 FROM public.fertilizer_events
 GROUP BY user_id;
 
-DROP FUNCTION public.get_fertilizer_breakdown(uuid) IF EXISTS;
+DROP FUNCTION IF EXISTS public.get_fertilizer_breakdown(uuid);
 
 CREATE OR REPLACE FUNCTION public.get_fertilizer_breakdown(p_user_id uuid)
 RETURNS TABLE (
