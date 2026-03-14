@@ -23,7 +23,6 @@ jest.mock('@/hooks/useRole', () => ({
   useRole: jest.fn(() => ({
     role: 'user',
     isAdmin: false,
-    isPremium: false,
     loading: false,
     error: null,
   })),
@@ -278,7 +277,6 @@ describe('useAuth', () => {
       (useRole as jest.Mock).mockReturnValue({
         role: 'admin',
         isAdmin: true,
-        isPremium: true,
         loading: false,
         error: null,
       });
@@ -289,7 +287,6 @@ describe('useAuth', () => {
       // Assert
       expect(result.current.role).toBe('admin');
       expect(result.current.isAdmin).toBe(true);
-      expect(result.current.isPremium).toBe(true);
     });
   });
 });

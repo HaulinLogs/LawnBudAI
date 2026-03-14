@@ -52,19 +52,6 @@ export const lightColors = {
   signOutBorder: '#fecaca',
   signOutText: '#dc2626',
 
-  // Plan / Settings
-  planCardBackground: '#ffffff',
-  planCardBorder: '#e5e7eb',
-  planTitle: '#1f2937',
-  planDescription: '#6b7280',
-
-  // Premium Gate
-  premiumBackground: '#f9fafb',
-  premiumCard: '#ffffff',
-  premiumTitle: '#1f2937',
-  premiumDescription: '#6b7280',
-  premiumBenefit: '#4b5563',
-  premiumDismiss: '#9ca3af',
 };
 
 export const darkColors = {
@@ -113,19 +100,6 @@ export const darkColors = {
   signOutBorder: '#7f1d1d',
   signOutText: '#fca5a5',
 
-  // Plan / Settings
-  planCardBackground: '#1c1f21',
-  planCardBorder: '#374151',
-  planTitle: '#e5e7eb',
-  planDescription: '#9ca3af',
-
-  // Premium Gate
-  premiumBackground: '#151718',
-  premiumCard: '#1c1f21',
-  premiumTitle: '#e5e7eb',
-  premiumDescription: '#9ca3af',
-  premiumBenefit: '#d1d5db',
-  premiumDismiss: '#6b7280',
 };
 
 export type AppThemeColors = typeof lightColors;

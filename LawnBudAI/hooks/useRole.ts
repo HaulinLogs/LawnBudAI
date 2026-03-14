@@ -60,6 +60,5 @@ export function useRole() {
     loading,
     error,
     isAdmin: role === 'admin',
-    isPremium: role === 'premium' || role === 'admin', // admins always have premium access
   };
 }

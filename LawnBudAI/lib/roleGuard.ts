@@ -28,9 +28,3 @@ export function isAdminUser(role: UserRole): boolean {
   return role === 'admin';
 }
 
-/**
- * Check if user has paid premium
- */
-export function isPremiumUser(role: UserRole): boolean {
-  return role === 'premium' || role === 'admin';
-}
