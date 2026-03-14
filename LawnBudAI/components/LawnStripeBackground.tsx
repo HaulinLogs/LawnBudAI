@@ -20,7 +20,7 @@ const COLOR_CUT1  = { light: '#86efac', dark: '#166534' };
 const COLOR_CUT2  = { light: '#4ade80', dark: '#15803d' };
 const COLOR_UNCUT = { light: '#16a34a', dark: '#052e16' };
 
-type Pattern = 'horizontal' | 'vertical' | 'diag-right' | 'diag-left';
+type Pattern = 'horizontal' | 'vertical';
 
 interface Pass {
   fromX: number;
@@ -36,18 +36,11 @@ function buildPasses(pattern: Pattern, width: number, reversed: boolean): Pass[]
   const mH = MOWER_H + 6;
   const rowDur = 1300; // ms per horizontal pass (2× slower = 50% speed)
 
-  // Natural diagonal angle of the header rectangle
-  const diagDeg = (Math.atan2(HEADER_HEIGHT, width) * 180) / Math.PI;
-
   // Mower rotation constants: 0°=facing south, positive=clockwise
   const R_E = 90;
   const R_W = 270;
   const R_S = 0;
   const R_N = 180;
-  const R_SE = 90 - diagDeg;
-  const R_NW = 270 - diagDeg;
-  const R_SW = 270 + diagDeg;
-  const R_NE = 90 + diagDeg;
 
   if (pattern === 'horizontal') {
     // Stripe height matches mower cutting width so it looks like the mower creates each stripe
@@ -100,27 +93,8 @@ function buildPasses(pattern: Pattern, width: number, reversed: boolean): Pass[]
     }));
   }
 
-  const diagDur = rowDur * 1.3;
-
-  if (pattern === 'diag-right') {
-    // Mower travels the true header diagonal (top-left ↘ bottom-right), matching stripe angle
-    const passes: Pass[] = [
-      { fromX: -mW, fromY: 0, toX: width + mW, toY: HEADER_HEIGHT, rotation: R_SE, duration: diagDur },
-      { fromX: width + mW, fromY: HEADER_HEIGHT, toX: -mW, toY: 0, rotation: R_NW, duration: diagDur },
-      { fromX: -mW, fromY: -mH, toX: width + mW, toY: HEADER_HEIGHT + mH, rotation: R_SE, duration: diagDur * 1.05 },
-      { fromX: width + mW, fromY: HEADER_HEIGHT + mH, toX: -mW, toY: -mH, rotation: R_NW, duration: diagDur * 1.05 },
-    ];
-    return reversed ? [...passes].reverse() : passes;
-  }
-
-  // diag-left: mower travels top-right ↙ bottom-left
-  const passes: Pass[] = [
-    { fromX: width + mW, fromY: 0, toX: -mW, toY: HEADER_HEIGHT, rotation: R_SW, duration: diagDur },
-    { fromX: -mW, fromY: HEADER_HEIGHT, toX: width + mW, toY: 0, rotation: R_NE, duration: diagDur },
-    { fromX: width + mW, fromY: -mH, toX: -mW, toY: HEADER_HEIGHT + mH, rotation: R_SW, duration: diagDur * 1.05 },
-    { fromX: -mW, fromY: HEADER_HEIGHT + mH, toX: width + mW, toY: -mH, rotation: R_NE, duration: diagDur * 1.05 },
-  ];
-  return reversed ? [...passes].reverse() : passes;
+  // fallback (should never reach here with only horizontal/vertical patterns)
+  return [];
 }
 
 export function LawnStripeBackground() {
@@ -134,7 +108,7 @@ export function LawnStripeBackground() {
   const patternRef = useRef<Pattern | null>(null);
   const reversedRef = useRef<boolean | null>(null);
   if (patternRef.current === null) {
-    const opts: Pattern[] = ['horizontal', 'vertical', 'diag-right', 'diag-left'];
+    const opts: Pattern[] = ['horizontal', 'vertical'];
     patternRef.current = opts[Math.floor(Math.random() * opts.length)];
     reversedRef.current = Math.random() < 0.5;
   }
@@ -162,8 +136,6 @@ export function LawnStripeBackground() {
     [passes]
   );
 
-  const isDiag = pattern === 'diag-right' || pattern === 'diag-left';
-
   useEffect(() => {
     mountedRef.current = true;
     // Reset stripe progress (important when width changes and effect re-runs)
@@ -187,7 +159,7 @@ export function LawnStripeBackground() {
       ];
 
       // Animate stripe reveal in sync with mower movement (JS thread — unavoidable for layout props)
-      if (!isDiag && stripeAnims[index]) {
+      if (stripeAnims[index]) {
         animations.push(
           Animated.timing(stripeAnims[index], {
             toValue: 1,
@@ -298,43 +270,7 @@ export function LawnStripeBackground() {
       );
     }
 
-    // Diagonal: rotate stripes at the true header diagonal angle so they align with the mower path
-    const diagDeg = (Math.atan2(HEADER_HEIGHT, width) * 180) / Math.PI;
-    // Container must cover the full header after rotation — use the header diagonal length with padding
-    const containerSize = Math.ceil(Math.sqrt(width * width + HEADER_HEIGHT * HEADER_HEIGHT) * 1.5);
-    // Stripe width matches mower cutting width so it looks like the mower creates each stripe
-    const stripeWidth = MOWER_W;
-    const stripeCount = Math.ceil(containerSize / stripeWidth) + 1;
-    // Stripe container holds vertical bars. Rotating by (90 - diagDeg) makes them parallel
-    // to the mower's diagonal travel path (not perpendicular to it).
-    const rotateDeg = pattern === 'diag-right' ? `${90 - diagDeg}deg` : `-${90 - diagDeg}deg`;
-
-    return (
-      <View style={{ flex: 1, backgroundColor: colorUncut }}>
-        <View
-          style={{
-            position: 'absolute',
-            width: containerSize,
-            height: containerSize,
-            top: (HEADER_HEIGHT - containerSize) / 2,
-            left: (width - containerSize) / 2,
-            transform: [{ rotate: rotateDeg }],
-            flexDirection: 'row',
-          }}
-        >
-          {Array.from({ length: stripeCount }, (_, i) => (
-            <View
-              key={i}
-              style={{
-                width: stripeWidth,
-                height: containerSize,
-                backgroundColor: i % 2 === 0 ? colorCut1 : colorCut2,
-              }}
-            />
-          ))}
-        </View>
-      </View>
-    );
+    return null;
   };
 
   return (
