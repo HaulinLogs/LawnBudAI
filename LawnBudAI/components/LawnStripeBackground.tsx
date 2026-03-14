@@ -12,12 +12,13 @@ import { MowerIcon } from './MowerIcon';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
 const HEADER_HEIGHT = 140;
-const MOWER_W = 25;
-const MOWER_H = 33;
+const MOWER_W = 25; // 125% of 20
+const MOWER_H = 33; // 125% of 26
 
-// Cut stripe is lighter; uncut is darker — classic lawn stripe effect
-const COLOR_CUT = { light: '#86efac', dark: '#166534' };
-const COLOR_UNCUT = { light: '#4ade80', dark: '#14532d' };
+// Three-tone lawn stripe effect: cut1 (lightest) / cut2 (medium) / uncut (darkest)
+const COLOR_CUT1  = { light: '#86efac', dark: '#166534' };
+const COLOR_CUT2  = { light: '#4ade80', dark: '#15803d' };
+const COLOR_UNCUT = { light: '#16a34a', dark: '#052e16' };
 
 type Pattern = 'horizontal' | 'vertical' | 'diag-right' | 'diag-left';
 
@@ -33,7 +34,7 @@ interface Pass {
 function buildPasses(pattern: Pattern, width: number, reversed: boolean): Pass[] {
   const mW = MOWER_W + 6; // buffer so mower is fully off-screen at start/end
   const mH = MOWER_H + 6;
-  const rowDur = 1300; // ms per horizontal pass
+  const rowDur = 1300; // ms per horizontal pass (2× slower = 50% speed)
 
   // Natural diagonal angle of the header rectangle
   const diagDeg = (Math.atan2(HEADER_HEIGHT, width) * 180) / Math.PI;
@@ -49,7 +50,7 @@ function buildPasses(pattern: Pattern, width: number, reversed: boolean): Pass[]
   const R_NE = 90 + diagDeg;
 
   if (pattern === 'horizontal') {
-    // Stripe height = MOWER_W so each pass aligns with one stripe
+    // Stripe height matches mower cutting width so it looks like the mower creates each stripe
     const stripeH = MOWER_W;
     const numStripes = Math.ceil(HEADER_HEIGHT / stripeH);
     const fwd: Pass[] = Array.from({ length: numStripes }, (_, i) => {
@@ -75,11 +76,11 @@ function buildPasses(pattern: Pattern, width: number, reversed: boolean): Pass[]
 
   if (pattern === 'vertical') {
     const colDur = rowDur * 0.4;
-    // Stripe width = MOWER_H so each pass aligns with one stripe
-    const stripeW = MOWER_H;
+    // Stripe width = MOWER_W (cutting swath perpendicular to south/north travel)
+    const stripeW = MOWER_W;
     const numStripes = Math.ceil(width / stripeW);
     const fwd: Pass[] = Array.from({ length: numStripes }, (_, i) => {
-      const x = stripeW * i + stripeW / 2 - MOWER_W / 2;
+      const x = stripeW * i + stripeW / 2;
       const goSouth = i % 2 === 0;
       return {
         fromX: x,
@@ -102,7 +103,7 @@ function buildPasses(pattern: Pattern, width: number, reversed: boolean): Pass[]
   const diagDur = rowDur * 1.3;
 
   if (pattern === 'diag-right') {
-    // Mower travels the true header diagonal (top-left ↘ bottom-right)
+    // Mower travels the true header diagonal (top-left ↘ bottom-right), matching stripe angle
     const passes: Pass[] = [
       { fromX: -mW, fromY: 0, toX: width + mW, toY: HEADER_HEIGHT, rotation: R_SE, duration: diagDur },
       { fromX: width + mW, fromY: HEADER_HEIGHT, toX: -mW, toY: 0, rotation: R_NW, duration: diagDur },
@@ -125,7 +126,8 @@ function buildPasses(pattern: Pattern, width: number, reversed: boolean): Pass[]
 export function LawnStripeBackground() {
   const { width } = useWindowDimensions();
   const scheme = useColorScheme() ?? 'light';
-  const colorCut = COLOR_CUT[scheme];
+  const colorCut1 = COLOR_CUT1[scheme];
+  const colorCut2 = COLOR_CUT2[scheme];
   const colorUncut = COLOR_UNCUT[scheme];
 
   // Pick pattern and direction once on mount (stable refs — never change after init)
@@ -239,8 +241,11 @@ export function LawnStripeBackground() {
       return (
         <View style={{ flex: 1, backgroundColor: colorUncut }}>
           {Array.from({ length: numStripes }, (_, i) => {
-            // Match grow direction to the mower's travel direction for that stripe
-            const goEast = reversed ? i % 2 !== 0 : i % 2 === 0;
+            // Even stripes: mower travels East (or West when reversed) → colorCut1
+            // Odd stripes: mower travels the opposite direction → colorCut2
+            const isEven = i % 2 === 0;
+            const goEast = isEven ? !reversed : reversed;
+            const color = isEven ? colorCut1 : colorCut2;
             const revealWidth = stripeAnims[i]?.interpolate({
               inputRange: [0, 1],
               outputRange: ['0%', '100%'],
@@ -250,7 +255,7 @@ export function LawnStripeBackground() {
                 <Animated.View
                   style={{
                     height: '100%',
-                    backgroundColor: colorCut,
+                    backgroundColor: color,
                     alignSelf: goEast ? 'flex-start' : 'flex-end',
                     width: revealWidth,
                   }}
@@ -263,12 +268,16 @@ export function LawnStripeBackground() {
     }
 
     if (pattern === 'vertical') {
-      const stripeW = MOWER_H;
+      const stripeW = MOWER_W;
       const numStripes = Math.ceil(width / stripeW);
       return (
         <View style={{ flex: 1, flexDirection: 'row', backgroundColor: colorUncut }}>
           {Array.from({ length: numStripes }, (_, i) => {
-            const goSouth = reversed ? i % 2 !== 0 : i % 2 === 0;
+            // Even stripes: mower travels South (or North when reversed) → colorCut1
+            // Odd stripes: mower travels the opposite direction → colorCut2
+            const isEven = i % 2 === 0;
+            const goSouth = isEven ? !reversed : reversed;
+            const color = isEven ? colorCut1 : colorCut2;
             const revealHeight = stripeAnims[i]?.interpolate({
               inputRange: [0, 1],
               outputRange: ['0%', '100%'],
@@ -278,7 +287,7 @@ export function LawnStripeBackground() {
                 <Animated.View
                   style={{
                     width: '100%',
-                    backgroundColor: colorCut,
+                    backgroundColor: color,
                     height: revealHeight,
                   }}
                 />
@@ -293,9 +302,12 @@ export function LawnStripeBackground() {
     const diagDeg = (Math.atan2(HEADER_HEIGHT, width) * 180) / Math.PI;
     // Container must cover the full header after rotation — use the header diagonal length with padding
     const containerSize = Math.ceil(Math.sqrt(width * width + HEADER_HEIGHT * HEADER_HEIGHT) * 1.5);
+    // Stripe width matches mower cutting width so it looks like the mower creates each stripe
     const stripeWidth = MOWER_W;
     const stripeCount = Math.ceil(containerSize / stripeWidth) + 1;
-    const rotateDeg = pattern === 'diag-right' ? `${diagDeg}deg` : `-${diagDeg}deg`;
+    // Stripe container holds vertical bars. Rotating by (90 - diagDeg) makes them parallel
+    // to the mower's diagonal travel path (not perpendicular to it).
+    const rotateDeg = pattern === 'diag-right' ? `${90 - diagDeg}deg` : `-${90 - diagDeg}deg`;
 
     return (
       <View style={{ flex: 1, backgroundColor: colorUncut }}>
@@ -316,7 +328,7 @@ export function LawnStripeBackground() {
               style={{
                 width: stripeWidth,
                 height: containerSize,
-                backgroundColor: i % 2 === 0 ? colorCut : colorUncut,
+                backgroundColor: i % 2 === 0 ? colorCut1 : colorCut2,
               }}
             />
           ))}
