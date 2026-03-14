@@ -35,7 +35,7 @@ describe('AdminScreen', () => {
 
   describe('Admin user', () => {
     it('renders the admin dashboard for admin users', () => {
-      mockUseRole.mockReturnValue({ isAdmin: true, loading: false, role: 'admin', isPremium: true });
+      mockUseRole.mockReturnValue({ isAdmin: true, loading: false, role: 'admin' });
 
       render(<AdminScreen />);
 
@@ -43,7 +43,7 @@ describe('AdminScreen', () => {
     });
 
     it('does not redirect admin users', () => {
-      mockUseRole.mockReturnValue({ isAdmin: true, loading: false, role: 'admin', isPremium: true });
+      mockUseRole.mockReturnValue({ isAdmin: true, loading: false, role: 'admin' });
 
       render(<AdminScreen />);
 
@@ -51,7 +51,7 @@ describe('AdminScreen', () => {
     });
 
     it('renders the Coming in Phase 2.5 message for admin users', () => {
-      mockUseRole.mockReturnValue({ isAdmin: true, loading: false, role: 'admin', isPremium: true });
+      mockUseRole.mockReturnValue({ isAdmin: true, loading: false, role: 'admin' });
 
       render(<AdminScreen />);
 
@@ -61,15 +61,7 @@ describe('AdminScreen', () => {
 
   describe('Non-admin user', () => {
     it('redirects non-admin user (role=user) to home tab', () => {
-      mockUseRole.mockReturnValue({ isAdmin: false, loading: false, role: 'user', isPremium: false });
-
-      render(<AdminScreen />);
-
-      expect(mockReplace).toHaveBeenCalledWith('/(tabs)');
-    });
-
-    it('redirects premium (non-admin) user to home tab', () => {
-      mockUseRole.mockReturnValue({ isAdmin: false, loading: false, role: 'premium', isPremium: true });
+      mockUseRole.mockReturnValue({ isAdmin: false, loading: false, role: 'user' });
 
       render(<AdminScreen />);
 
@@ -77,7 +69,7 @@ describe('AdminScreen', () => {
     });
 
     it('does not render admin content for non-admin users', () => {
-      mockUseRole.mockReturnValue({ isAdmin: false, loading: false, role: 'user', isPremium: false });
+      mockUseRole.mockReturnValue({ isAdmin: false, loading: false, role: 'user' });
 
       render(<AdminScreen />);
 
@@ -87,7 +79,7 @@ describe('AdminScreen', () => {
 
   describe('Loading state', () => {
     it('renders nothing while role is loading', () => {
-      mockUseRole.mockReturnValue({ isAdmin: false, loading: true, role: 'user', isPremium: false });
+      mockUseRole.mockReturnValue({ isAdmin: false, loading: true, role: 'user' });
 
       render(<AdminScreen />);
 
@@ -95,7 +87,7 @@ describe('AdminScreen', () => {
     });
 
     it('does not redirect while role is loading', () => {
-      mockUseRole.mockReturnValue({ isAdmin: false, loading: true, role: 'user', isPremium: false });
+      mockUseRole.mockReturnValue({ isAdmin: false, loading: true, role: 'user' });
 
       render(<AdminScreen />);
 

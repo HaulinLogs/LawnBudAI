@@ -106,62 +106,6 @@ describe('useRole', () => {
     });
 
     expect(result.current.isAdmin).toBe(true);
-    expect(result.current.isPremium).toBe(true); // Admins have premium access
-  });
-
-  it('should set isPremium flag for premium and admin users', async () => {
-    (useSupabaseUser as jest.Mock).mockReturnValue({
-      user: { id: 'test-user' },
-      loading: false,
-      error: null,
-    });
-
-    mockSupabase.from = jest.fn().mockReturnValueOnce({
-      select: jest.fn().mockReturnValueOnce({
-        eq: jest.fn().mockReturnValueOnce({
-          maybeSingle: jest.fn().mockResolvedValueOnce({
-            data: { role: 'premium' },
-            error: null,
-          }),
-        }),
-      }),
-    } as any);
-
-    const { result } = renderHook(() => useRole());
-
-    await waitFor(() => {
-      expect(result.current.loading).toBe(false);
-    });
-
-    expect(result.current.isPremium).toBe(true);
-    expect(result.current.isAdmin).toBe(false);
-  });
-
-  it('should return false for isPremium when user is free', async () => {
-    (useSupabaseUser as jest.Mock).mockReturnValue({
-      user: { id: 'test-user' },
-      loading: false,
-      error: null,
-    });
-
-    mockSupabase.from = jest.fn().mockReturnValueOnce({
-      select: jest.fn().mockReturnValueOnce({
-        eq: jest.fn().mockReturnValueOnce({
-          maybeSingle: jest.fn().mockResolvedValueOnce({
-            data: { role: 'user' },
-            error: null,
-          }),
-        }),
-      }),
-    } as any);
-
-    const { result } = renderHook(() => useRole());
-
-    await waitFor(() => {
-      expect(result.current.loading).toBe(false);
-    });
-
-    expect(result.current.isPremium).toBe(false);
   });
 
   it('should handle database errors gracefully', async () => {

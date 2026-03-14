@@ -7,13 +7,10 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
-  StyleSheet,
 } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
-import { useRole } from '@/hooks/useRole';
-import { MaterialIcons } from '@expo/vector-icons';
 import { createSettingsStyles } from '@/styles/settings.styles';
 import { useAppTheme } from '@/hooks/useAppTheme';
 import { useThemeMode, ThemeMode } from '@/contexts/ThemeContext';
@@ -21,7 +18,6 @@ import { useThemeMode, ThemeMode } from '@/contexts/ThemeContext';
 export default function SettingsScreen() {
   const { signOut } = useAuth();
   const { prefs, loading, loadError, save } = useUserPreferences();
-  const { role, isPremium } = useRole();
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
   const [lawnSize, setLawnSize] = useState('');
@@ -79,50 +75,6 @@ export default function SettingsScreen() {
       </View>
     );
   }
-
-  // Plan section styles
-  const planStyles = StyleSheet.create({
-    planCard: {
-      backgroundColor: isPremium ? themeColors.highlight : themeColors.planCardBackground,
-      borderRadius: 12,
-      padding: 16,
-      marginBottom: 24,
-      borderWidth: 1,
-      borderColor: isPremium ? '#10b981' : themeColors.planCardBorder,
-    },
-    planHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: isPremium ? 0 : 16,
-    },
-    planInfo: {
-      marginLeft: 12,
-      flex: 1,
-    },
-    planTitle: {
-      fontSize: 16,
-      fontWeight: '600',
-      color: themeColors.planTitle,
-    },
-    planDescription: {
-      fontSize: 12,
-      color: themeColors.planDescription,
-      marginTop: 4,
-    },
-    upgradeButton: {
-      backgroundColor: '#22c55e',
-      paddingVertical: 10,
-      paddingHorizontal: 16,
-      borderRadius: 8,
-      alignItems: 'center',
-      marginTop: 12,
-    },
-    upgradeButtonText: {
-      fontSize: 14,
-      fontWeight: '600',
-      color: '#fff',
-    },
-  });
 
   return (
     <>
@@ -241,37 +193,6 @@ export default function SettingsScreen() {
             <Text style={styles.buttonText}>Save Preferences</Text>
           )}
         </TouchableOpacity>
-
-        {/* Plan Section */}
-        <View style={planStyles.planCard}>
-          <View style={planStyles.planHeader}>
-            <MaterialIcons
-              name={isPremium ? 'workspace-premium' : 'card-membership'}
-              size={24}
-              color={isPremium ? '#10b981' : '#9ca3af'}
-            />
-            <View style={planStyles.planInfo}>
-              <Text style={planStyles.planTitle}>
-                {role === 'admin' ? 'Admin' : isPremium ? 'Premium' : 'Free Plan'}
-              </Text>
-              <Text style={planStyles.planDescription}>
-                {role === 'admin'
-                  ? 'Full access to admin features'
-                  : isPremium
-                  ? 'Unlimited API calls & premium features'
-                  : '100 API calls per hour'}
-              </Text>
-            </View>
-          </View>
-          {!isPremium && (
-            <TouchableOpacity
-              style={planStyles.upgradeButton}
-              onPress={() => router.push('/(tabs)/upgrade')}
-            >
-              <Text style={planStyles.upgradeButtonText}>Upgrade to Premium</Text>
-            </TouchableOpacity>
-          )}
-        </View>
 
         <TouchableOpacity
           style={styles.signOutButton}

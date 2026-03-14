@@ -5,7 +5,7 @@
  * No mocking required — pure logic tests
  */
 
-import { hasPermission, isAdminUser, isPremiumUser } from '@/lib/roleGuard';
+import { hasPermission, isAdminUser } from '@/lib/roleGuard';
 import type { UserRole } from '@/hooks/useRole';
 
 describe('roleGuard', () => {
@@ -45,17 +45,6 @@ describe('roleGuard', () => {
     it('should return false for premium and user roles', () => {
       expect(isAdminUser('premium')).toBe(false);
       expect(isAdminUser('user')).toBe(false);
-    });
-  });
-
-  describe('isPremiumUser', () => {
-    it('should return true for premium and admin users', () => {
-      expect(isPremiumUser('premium')).toBe(true);
-      expect(isPremiumUser('admin')).toBe(true);
-    });
-
-    it('should return false for free users', () => {
-      expect(isPremiumUser('user')).toBe(false);
     });
   });
 

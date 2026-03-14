@@ -9,7 +9,7 @@ export function useAuth() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { role, isAdmin, isPremium } = useRole();
+  const { role, isAdmin } = useRole();
 
   useEffect(() => {
     try {
@@ -74,6 +74,5 @@ export function useAuth() {
     // Role convenience methods
     role,
     isAdmin,
-    isPremium,
   };
 }
