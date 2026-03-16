@@ -248,6 +248,249 @@ export interface OverseedingReminder {
   urgency: OverseedingUrgency;
 }
 
+// ---------------------------------------------------------------------------
+// Germination timing
+//
+// Days to first germination emergence under ideal conditions (moist seedbed,
+// optimal soil temp). Sources:
+//   - Penn State Extension "Grass Seed Germination"
+//   - UMN Extension "Lawn Seeding"
+//   - Texas A&M AgriLife "Turfgrass Seeding"
+// ---------------------------------------------------------------------------
+
+export interface GerminationInfo {
+  /** Display name for this seed type */
+  label: string;
+  /** Minimum days to first germination under ideal conditions */
+  minDays: number;
+  /** Maximum days to first germination under ideal conditions */
+  maxDays: number;
+  /** Optimal soil temperature range in °F */
+  optimalSoilTempMin: number;
+  optimalSoilTempMax: number;
+  /** University extension advice URL */
+  referenceUrl: string;
+}
+
+export type GrassSeedType =
+  | 'kentucky_bluegrass'
+  | 'tall_fescue'
+  | 'perennial_ryegrass'
+  | 'fine_fescue'
+  | 'bermudagrass'
+  | 'zoysiagrass'
+  | 'st_augustine'
+  | 'centipede'
+  | 'annual_ryegrass'
+  | 'mixed'
+  | 'unknown';
+
+export const GERMINATION_INFO: Record<GrassSeedType, GerminationInfo> = {
+  kentucky_bluegrass: {
+    label: 'Kentucky Bluegrass',
+    minDays: 14,
+    maxDays: 30,
+    optimalSoilTempMin: 50,
+    optimalSoilTempMax: 65,
+    referenceUrl: 'https://extension.umn.edu/lawn-care/overseeding-lawns',
+  },
+  tall_fescue: {
+    label: 'Tall Fescue',
+    minDays: 7,
+    maxDays: 12,
+    optimalSoilTempMin: 50,
+    optimalSoilTempMax: 65,
+    referenceUrl: 'https://extension.psu.edu/lawn-seeding-and-renovation',
+  },
+  perennial_ryegrass: {
+    label: 'Perennial Ryegrass',
+    minDays: 5,
+    maxDays: 10,
+    optimalSoilTempMin: 50,
+    optimalSoilTempMax: 65,
+    referenceUrl: 'https://extension.psu.edu/lawn-seeding-and-renovation',
+  },
+  fine_fescue: {
+    label: 'Fine Fescue',
+    minDays: 7,
+    maxDays: 14,
+    optimalSoilTempMin: 50,
+    optimalSoilTempMax: 65,
+    referenceUrl: 'https://extension.psu.edu/lawn-seeding-and-renovation',
+  },
+  bermudagrass: {
+    label: 'Bermudagrass',
+    minDays: 10,
+    maxDays: 30,
+    optimalSoilTempMin: 65,
+    optimalSoilTempMax: 85,
+    referenceUrl: 'https://aggie-horticulture.tamu.edu/plantanswers/turf/publications/bermuda.html',
+  },
+  zoysiagrass: {
+    label: 'Zoysiagrass',
+    minDays: 14,
+    maxDays: 21,
+    optimalSoilTempMin: 65,
+    optimalSoilTempMax: 80,
+    referenceUrl: 'https://hgic.clemson.edu/factsheet/zoysiagrass/',
+  },
+  st_augustine: {
+    label: 'St. Augustine',
+    minDays: 7,
+    maxDays: 14,
+    optimalSoilTempMin: 65,
+    optimalSoilTempMax: 85,
+    referenceUrl: 'https://gardeningsolutions.ifas.ufl.edu/lawns/lawn-care/establishing-lawns/',
+  },
+  centipede: {
+    label: 'Centipede Grass',
+    minDays: 14,
+    maxDays: 21,
+    optimalSoilTempMin: 65,
+    optimalSoilTempMax: 80,
+    referenceUrl: 'https://hgic.clemson.edu/factsheet/centipedegrass-lawn-maintenance-calendar/',
+  },
+  annual_ryegrass: {
+    label: 'Annual Ryegrass',
+    minDays: 5,
+    maxDays: 7,
+    optimalSoilTempMin: 50,
+    optimalSoilTempMax: 65,
+    referenceUrl: 'https://aggie-horticulture.tamu.edu/plantanswers/turf/publications/overseed.html',
+  },
+  mixed: {
+    label: 'Mixed Grass Blend',
+    minDays: 7,
+    maxDays: 21,
+    optimalSoilTempMin: 50,
+    optimalSoilTempMax: 65,
+    referenceUrl: 'https://extension.umn.edu/lawn-care/overseeding-lawns',
+  },
+  unknown: {
+    label: 'Grass Seed',
+    minDays: 7,
+    maxDays: 21,
+    optimalSoilTempMin: 50,
+    optimalSoilTempMax: 65,
+    referenceUrl: 'https://extension.umn.edu/lawn-care/overseeding-lawns',
+  },
+};
+
+// ---------------------------------------------------------------------------
+// Soil temperature evaluation
+// ---------------------------------------------------------------------------
+
+export type SoilTempStatus =
+  | 'ideal'       // In the optimal range for overseeding
+  | 'approaching' // Within 5°F of optimal, trending the right direction
+  | 'too_warm'    // Above optimal
+  | 'too_cold'    // Below optimal
+  | 'unknown';    // No soil temp data available
+
+/**
+ * Evaluates whether current soil temperature conditions are suitable for
+ * overseeding the given grass type.
+ *
+ * @param currentTempF  - Current soil temperature at 6cm depth in °F
+ * @param trendDegPerDay - Degrees per day (positive = warming, negative = cooling)
+ * @param grassType     - User's grass type
+ */
+export function evaluateSoilTempForOverseeding(
+  currentTempF: number,
+  trendDegPerDay: number,
+  grassType: GrassType,
+): { status: SoilTempStatus; daysUntilOptimal: number | null } {
+  const optMin = grassType === 'warm_season' ? 65 : 50;
+  const optMax = grassType === 'warm_season' ? 85 : 65;
+
+  if (currentTempF >= optMin && currentTempF <= optMax) {
+    return { status: 'ideal', daysUntilOptimal: 0 };
+  }
+
+  if (currentTempF > optMax) {
+    // Too warm — cooling trend might help
+    if (trendDegPerDay < -0.2) {
+      const degNeeded = currentTempF - optMax;
+      const days = Math.ceil(degNeeded / Math.abs(trendDegPerDay));
+      if (days <= 30) {
+        return { status: 'approaching', daysUntilOptimal: days };
+      }
+    }
+    return { status: 'too_warm', daysUntilOptimal: null };
+  }
+
+  // Too cold — warming trend might help
+  if (trendDegPerDay > 0.2) {
+    const degNeeded = optMin - currentTempF;
+    const days = Math.ceil(degNeeded / trendDegPerDay);
+    if (days <= 30) {
+      return { status: 'approaching', daysUntilOptimal: days };
+    }
+  }
+  return { status: 'too_cold', daysUntilOptimal: null };
+}
+
+// ---------------------------------------------------------------------------
+// Watering reminders after seeding
+//
+// Germination seedbeds must stay consistently moist. Recommendations from:
+//   - Penn State Extension "Lawn Seeding and Renovation"
+//   - UMN Extension "Overseeding Lawns"
+// ---------------------------------------------------------------------------
+
+export interface WateringReminder {
+  message: string;
+  urgency: 'high' | 'medium' | 'low';
+}
+
+/**
+ * Returns a watering reminder appropriate for the number of days since seeding.
+ * Returns null when the seeding event is old enough that reminders are no longer needed.
+ *
+ * @param daysSinceSeed - Days elapsed since the user logged their seeding event
+ * @param seedType      - Type of grass seed seeded (for germination timing)
+ */
+export function getSeedingWateringReminder(
+  daysSinceSeed: number,
+  seedType: GrassSeedType = 'unknown',
+): WateringReminder | null {
+  const info = GERMINATION_INFO[seedType] ?? GERMINATION_INFO.unknown;
+
+  if (daysSinceSeed < 0) return null;
+
+  // Pre-germination: critical moist phase (days 0 – max germination)
+  if (daysSinceSeed <= info.maxDays) {
+    if (daysSinceSeed <= info.minDays) {
+      return {
+        message: `Day ${daysSinceSeed + 1} after seeding — keep seedbed moist. Water lightly 2–3× per day (about ¼" each time). Avoid letting the soil dry out.`,
+        urgency: 'high',
+      };
+    }
+    return {
+      message: `Germination window open (day ${daysSinceSeed + 1}). Watch for first sprouts — continue light watering 1–2× per day until seedlings are established.`,
+      urgency: 'high',
+    };
+  }
+
+  // Post-germination establishment phase (up to 6 weeks after seeding)
+  if (daysSinceSeed <= 42) {
+    return {
+      message: `Seedlings should be emerging. Begin transitioning to deeper, less frequent watering (½–¾" every other day) to encourage root growth.`,
+      urgency: 'medium',
+    };
+  }
+
+  // First mow zone — let user know young grass needs care
+  if (daysSinceSeed <= 60) {
+    return {
+      message: `New grass should be ready for first mowing (at 3–4"). Water deeply 2–3× per week. Avoid heavy foot traffic for another 2–4 weeks.`,
+      urgency: 'low',
+    };
+  }
+
+  return null;
+}
+
 interface OverseedingWindow {
   /** Months (1-based) when overseeding should happen right now. */
   nowMonths: number[];
@@ -326,6 +569,28 @@ export function getOverseedingReminder(
   }
   return null;
 }
+
+/**
+ * Extension advice links for overseeding by grass type.
+ * Links to authoritative university extension pages.
+ */
+export const OVERSEEDING_ADVICE_LINKS: Record<GrassType, { label: string; url: string }[]> = {
+  cool_season: [
+    { label: 'UMN Extension: Overseeding Lawns', url: 'https://extension.umn.edu/lawn-care/overseeding-lawns' },
+    { label: 'Penn State: Lawn Seeding & Renovation', url: 'https://extension.psu.edu/lawn-seeding-and-renovation' },
+    { label: 'UW-Madison: Lawn Care', url: 'https://extension.wisc.edu/lawn-care/' },
+  ],
+  warm_season: [
+    { label: 'Texas A&M: Overseeding Warm-Season Turf', url: 'https://aggie-horticulture.tamu.edu/plantanswers/turf/publications/overseed.html' },
+    { label: 'Clemson Extension: Lawn Overseeding', url: 'https://hgic.clemson.edu/factsheet/lawn-overseeding/' },
+    { label: 'UF/IFAS: Establishing Your Florida Lawn', url: 'https://gardeningsolutions.ifas.ufl.edu/lawns/lawn-care/establishing-lawns/' },
+  ],
+  mixed: [
+    { label: 'NC State: Overseeding Lawns', url: 'https://content.ces.ncsu.edu/overseeding-lawns' },
+    { label: 'Penn State: Lawn Seeding & Renovation', url: 'https://extension.psu.edu/lawn-seeding-and-renovation' },
+    { label: 'Clemson Extension: Lawn Overseeding', url: 'https://hgic.clemson.edu/factsheet/lawn-overseeding/' },
+  ],
+};
 
 // ---------------------------------------------------------------------------
 // Fertilizer schedule advisor

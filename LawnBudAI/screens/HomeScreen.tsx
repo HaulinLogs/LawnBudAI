@@ -1,4 +1,4 @@
-import { View, Text, ActivityIndicator, ScrollView } from 'react-native';
+import { View, Text, ActivityIndicator, ScrollView, Alert } from 'react-native';
 import { Stack } from 'expo-router';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { LawnStripeBackground } from '@/components/LawnStripeBackground';
@@ -7,14 +7,17 @@ import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { createHomeStyles } from './HomeScreen.styles';
 import { TodoStatusCard } from '@/components/TodoStatusCard';
 import { useTodo } from '@/hooks/useTodo';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { WeatherCard } from '@/components/WeatherCard';
 import { UsdaZoneCard } from '@/components/UsdaZoneCard';
+import { OverseedingCard } from '@/components/OverseedingCard';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { type GrassType } from '@/lib/lawnAdvice';
 import { useAppTheme } from '@/hooks/useAppTheme';
 import { useUsdaZone } from '@/hooks/useUsdaZone';
 import { useFertilizerEvents } from '@/hooks/useFertilizerEvents';
+import { useSoilTemp } from '@/hooks/useSoilTemp';
+import { useSeedEvents } from '@/hooks/useSeedEvents';
 
 export default function HomeScreen() {
   const { prefs, loading: prefsLoading } = useUserPreferences();
@@ -41,6 +44,23 @@ export default function HomeScreen() {
     prefs.lawn_size_sqft,
   );
 
+  // Soil temperature (Open-Meteo)
+  const {
+    data: soilTempData,
+    loading: soilTempLoading,
+    error: soilTempError,
+  } = useSoilTemp(prefs.city, prefs.state);
+
+  // Seed events (for watering reminders + germination countdown)
+  const {
+    latestEvent: latestSeedEvent,
+    daysSinceLastSeed,
+    addEvent: addSeedEvent,
+    loading: seedEventsLoading,
+  } = useSeedEvents();
+
+  const [seedEventLogging, setSeedEventLogging] = useState(false);
+
   // Log errors for owner notification (send to error tracking service)
   useEffect(() => {
     if (error) {
@@ -58,6 +78,28 @@ export default function HomeScreen() {
 
   const isWeatherLoading = weatherLoading || prefsLoading;
   const areTodosLoading = prefsLoading || todosLoading;
+
+  async function handleLogSeedEvent() {
+    setSeedEventLogging(true);
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      await addSeedEvent({
+        date: today,
+        grass_seed_type: 'mixed',
+        notes: 'Logged from home screen',
+      });
+      Alert.alert(
+        'Seeding Logged! 🌱',
+        'Great! Water lightly 2–3× per day to keep the seedbed moist. Check back for germination updates.',
+        [{ text: 'Got it' }],
+      );
+    } catch (err) {
+      Alert.alert('Error', 'Could not log seeding event. Please try again.');
+      console.error('[HomeScreen] addSeedEvent error:', err);
+    } finally {
+      setSeedEventLogging(false);
+    }
+  }
 
   return (
     <>
@@ -116,6 +158,22 @@ export default function HomeScreen() {
               </>
             )}
           </View>
+
+          {/* Overseeding Card (soil temp + seed event tracking) */}
+          {!prefsLoading && !seedEventsLoading && (
+            <OverseedingCard
+              grassType={prefs.grass_type as GrassType}
+              soilTempData={soilTempData}
+              soilTempLoading={soilTempLoading}
+              soilTempError={soilTempError}
+              overseedingReminder={overseedingReminder}
+              latestSeedEvent={latestSeedEvent}
+              daysSinceLastSeed={daysSinceLastSeed}
+              onLogSeedEvent={handleLogSeedEvent}
+              seedEventLogging={seedEventLogging}
+              colors={themeColors}
+            />
+          )}
 
           {/* USDA Zone + Fertilizer Recommendation Section */}
           {!prefsLoading && (

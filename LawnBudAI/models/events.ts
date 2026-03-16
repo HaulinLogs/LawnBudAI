@@ -41,6 +41,30 @@ export interface FertilizerEvent {
   updated_at: string;
 }
 
+export type GrassSeedType =
+  | 'kentucky_bluegrass'
+  | 'tall_fescue'
+  | 'perennial_ryegrass'
+  | 'fine_fescue'
+  | 'bermudagrass'
+  | 'zoysiagrass'
+  | 'st_augustine'
+  | 'centipede'
+  | 'annual_ryegrass'
+  | 'mixed'
+  | 'unknown';
+
+export interface SeedEvent {
+  id: string;
+  user_id: string;
+  date: string; // DATE format: YYYY-MM-DD
+  grass_seed_type: GrassSeedType;
+  area_sqft?: number;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 /**
  * Form submission payloads (without id, user_id, timestamps - those are server-generated)
  */
@@ -66,5 +90,12 @@ export interface FertilizerEventInput {
   potassium_pct: number;
   application_form: ApplicationForm;
   application_method: ApplicationMethod;
+  notes?: string;
+}
+
+export interface SeedEventInput {
+  date: string;
+  grass_seed_type: GrassSeedType;
+  area_sqft?: number;
   notes?: string;
 }
