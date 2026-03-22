@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useSupabaseUser } from '@/hooks/useSupabaseUser';
+import { type SunExposure, type SoilType } from '@/lib/grassVarieties';
 
 interface UserPreferences {
   id?: string;
@@ -8,6 +9,9 @@ interface UserPreferences {
   state: string;
   timezone?: string;
   grass_type: string;
+  grass_variety?: string;
+  sun_exposure?: SunExposure;
+  soil_type?: SoilType;
   lawn_size_sqft: number | null;
 }
 
@@ -53,6 +57,9 @@ export function useUserPreferences() {
             state: data.state || 'WI',
             timezone: data.timezone || 'America/Chicago',
             grass_type: data.grass_type || 'cool_season',
+            grass_variety: data.grass_variety ?? undefined,
+            sun_exposure: data.sun_exposure ?? undefined,
+            soil_type: data.soil_type ?? undefined,
             lawn_size_sqft: data.lawn_size_sqft || null,
           });
         } else {
