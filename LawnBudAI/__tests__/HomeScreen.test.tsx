@@ -86,6 +86,30 @@ jest.mock('@/hooks/useUsdaZone', () => ({
     },
   })),
 }));
+jest.mock('@/hooks/useSoilTemp', () => ({
+  useSoilTemp: jest.fn(() => ({ data: null, loading: false, error: null })),
+}));
+jest.mock('@/hooks/useSeedEvents', () => ({
+  useSeedEvents: jest.fn(() => ({
+    events: [],
+    loading: false,
+    error: null,
+    latestEvent: null,
+    daysSinceLastSeed: null,
+    addEvent: jest.fn(),
+    deleteEvent: jest.fn(),
+    refetch: jest.fn(),
+  })),
+}));
+
+// Mock OverseedingCard — renders a sentinel so tests don't render full component
+jest.mock('@/components/OverseedingCard', () => ({
+  OverseedingCard: () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { Text } = require('react-native');
+    return <Text testID="overseeding-card">OverseedingCard</Text>;
+  },
+}));
 
 const mockUseWeather = useWeather as jest.Mock;
 const mockUseUserPreferences = useUserPreferences as jest.Mock;

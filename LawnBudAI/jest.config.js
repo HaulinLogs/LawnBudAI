@@ -12,6 +12,7 @@ module.exports = {
     'lib/**/*.{ts,tsx}',
     'hooks/**/*.{ts,tsx}',
     'components/**/*.{ts,tsx}',
+    '!lib/schemas/**',
     '!**/*.test.{ts,tsx}',
     '!**/node_modules/**',
   ],
