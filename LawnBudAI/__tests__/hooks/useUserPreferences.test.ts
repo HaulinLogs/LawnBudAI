@@ -376,4 +376,190 @@ describe('useUserPreferences', () => {
       ).rejects.toThrow();
     });
   });
+
+  // ---------------------------------------------------------------------------
+  // New fields: grass_variety, sun_exposure, soil_type
+  // ---------------------------------------------------------------------------
+
+  describe('new variety/sun/soil fields', () => {
+    it('should load grass_variety, sun_exposure, and soil_type from database', async () => {
+      (useSupabaseUser as jest.Mock).mockReturnValue({
+        user: mockUser,
+        loading: false,
+        error: null,
+      });
+
+      (mockSupabase.from as jest.Mock).mockReturnValue({
+        select: jest.fn().mockReturnValue({
+          eq: jest.fn().mockReturnValue({
+            maybeSingle: jest.fn().mockResolvedValue({
+              data: {
+                city: 'Austin',
+                state: 'TX',
+                timezone: 'America/Chicago',
+                grass_type: 'warm_season',
+                grass_variety: 'bermudagrass',
+                sun_exposure: 'full_sun',
+                soil_type: 'sandy',
+                lawn_size_sqft: 3000,
+              },
+              error: null,
+            }),
+          }),
+        }),
+      });
+
+      const { result } = renderHook(() => useUserPreferences());
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(result.current.prefs.grass_variety).toBe('bermudagrass');
+      expect(result.current.prefs.sun_exposure).toBe('full_sun');
+      expect(result.current.prefs.soil_type).toBe('sandy');
+    });
+
+    it('should return undefined for grass_variety/sun_exposure/soil_type when columns are null', async () => {
+      (useSupabaseUser as jest.Mock).mockReturnValue({
+        user: mockUser,
+        loading: false,
+        error: null,
+      });
+
+      (mockSupabase.from as jest.Mock).mockReturnValue({
+        select: jest.fn().mockReturnValue({
+          eq: jest.fn().mockReturnValue({
+            maybeSingle: jest.fn().mockResolvedValue({
+              data: {
+                city: 'Madison',
+                state: 'WI',
+                timezone: 'America/Chicago',
+                grass_type: 'cool_season',
+                grass_variety: null,
+                sun_exposure: null,
+                soil_type: null,
+                lawn_size_sqft: null,
+              },
+              error: null,
+            }),
+          }),
+        }),
+      });
+
+      const { result } = renderHook(() => useUserPreferences());
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(result.current.prefs.grass_variety).toBeUndefined();
+      expect(result.current.prefs.sun_exposure).toBeUndefined();
+      expect(result.current.prefs.soil_type).toBeUndefined();
+      // Falls back to grass_type for advice engine
+      expect(result.current.prefs.grass_type).toBe('cool_season');
+    });
+
+    it('should save grass_variety to supabase', async () => {
+      (useSupabaseUser as jest.Mock).mockReturnValue({
+        user: mockUser,
+        loading: false,
+        error: null,
+      });
+
+      const mockUpsert = jest.fn().mockResolvedValue({ error: null });
+
+      (mockSupabase.from as jest.Mock).mockReturnValue({
+        select: jest.fn().mockReturnValue({
+          eq: jest.fn().mockReturnValue({
+            maybeSingle: jest.fn().mockResolvedValue({
+              data: { id: 'pref-1', city: 'Madison', state: 'WI', timezone: 'America/Chicago', grass_type: 'cool_season', lawn_size_sqft: null },
+              error: null,
+            }),
+          }),
+        }),
+        upsert: mockUpsert,
+      });
+
+      const { result } = renderHook(() => useUserPreferences());
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      await act(async () => {
+        await result.current.save({ grass_variety: 'tall_fescue' });
+      });
+
+      expect(mockUpsert).toHaveBeenCalledWith(
+        expect.objectContaining({ grass_variety: 'tall_fescue' }),
+        { onConflict: 'id' },
+      );
+    });
+
+    it('should save sun_exposure to supabase', async () => {
+      (useSupabaseUser as jest.Mock).mockReturnValue({
+        user: mockUser,
+        loading: false,
+        error: null,
+      });
+
+      const mockUpsert = jest.fn().mockResolvedValue({ error: null });
+
+      (mockSupabase.from as jest.Mock).mockReturnValue({
+        select: jest.fn().mockReturnValue({
+          eq: jest.fn().mockReturnValue({
+            maybeSingle: jest.fn().mockResolvedValue({
+              data: { id: 'pref-1', city: 'Madison', state: 'WI', timezone: 'America/Chicago', grass_type: 'cool_season', lawn_size_sqft: null },
+              error: null,
+            }),
+          }),
+        }),
+        upsert: mockUpsert,
+      });
+
+      const { result } = renderHook(() => useUserPreferences());
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      await act(async () => {
+        await result.current.save({ sun_exposure: 'sun_and_shade' });
+      });
+
+      expect(mockUpsert).toHaveBeenCalledWith(
+        expect.objectContaining({ sun_exposure: 'sun_and_shade' }),
+        { onConflict: 'id' },
+      );
+    });
+
+    it('should save soil_type to supabase', async () => {
+      (useSupabaseUser as jest.Mock).mockReturnValue({
+        user: mockUser,
+        loading: false,
+        error: null,
+      });
+
+      const mockUpsert = jest.fn().mockResolvedValue({ error: null });
+
+      (mockSupabase.from as jest.Mock).mockReturnValue({
+        select: jest.fn().mockReturnValue({
+          eq: jest.fn().mockReturnValue({
+            maybeSingle: jest.fn().mockResolvedValue({
+              data: { id: 'pref-1', city: 'Madison', state: 'WI', timezone: 'America/Chicago', grass_type: 'cool_season', lawn_size_sqft: null },
+              error: null,
+            }),
+          }),
+        }),
+        upsert: mockUpsert,
+      });
+
+      const { result } = renderHook(() => useUserPreferences());
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      await act(async () => {
+        await result.current.save({ soil_type: 'clay' });
+      });
+
+      expect(mockUpsert).toHaveBeenCalledWith(
+        expect.objectContaining({ soil_type: 'clay' }),
+        { onConflict: 'id' },
+      );
+    });
+  });
 });

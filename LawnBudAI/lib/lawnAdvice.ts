@@ -838,3 +838,47 @@ export function getWateringAdvice(grassType: GrassType, season: Season): LawnAdv
 export function getFertilizerAdvice(grassType: GrassType, season: Season): LawnAdvice {
   return fertilizerAdvice[grassType]?.[season] ?? fertilizerAdvice.mixed[season];
 }
+
+// ---------------------------------------------------------------------------
+// Soil-type-aware watering advice
+//
+// Wraps getWateringAdvice() and appends a soil-specific modifier note.
+// Existing callers that omit soilType receive identical behaviour to before.
+//
+// Soil modifier guidance derived from:
+//   - UW-Madison Extension "Lawn Watering": https://extension.wisc.edu/lawn-care/
+//   - Penn State Extension "Watering Your Lawn": https://extension.psu.edu/
+//   - Texas A&M AgriLife "Lawn Watering": https://aggie-horticulture.tamu.edu/
+// ---------------------------------------------------------------------------
+
+type SoilTypeParam = 'sandy' | 'loamy' | 'clay' | undefined;
+
+const soilWateringModifiers: Record<NonNullable<SoilTypeParam>, (season: Season) => string> = {
+  sandy:
+    (_season) =>
+      ' Sandy soil drains quickly — split your weekly target into one extra session to prevent dry-out between waterings.',
+  loamy:
+    (_season) => '',
+  clay:
+    (season) =>
+      season === 'fall'
+        ? ' Clay soil holds moisture well — reduce watering frequency by one session per week. Fall is the ideal time to aerate to improve drainage before winter.'
+        : ' Clay soil holds moisture well — reduce watering frequency by one session per week to avoid waterlogging and shallow roots.',
+};
+
+/**
+ * Returns watering advice tailored to both grass type/season and soil texture.
+ * Loamy soil returns the standard advice unchanged.
+ * Sandy soil adds a note to water more frequently.
+ * Clay soil adds a note to water less frequently (and aerate in fall).
+ */
+export function getWateringAdviceWithSoil(
+  grassType: GrassType,
+  season: Season,
+  soilType?: SoilTypeParam,
+): LawnAdvice {
+  const base = getWateringAdvice(grassType, season);
+  if (!soilType || soilType === 'loamy') return base;
+  const modifier = soilWateringModifiers[soilType](season);
+  return { name: base.name, text: base.text + modifier };
+}
