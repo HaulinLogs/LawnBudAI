@@ -5,7 +5,7 @@
  * university cooperative extension programs:
  *
  *  - UW-Madison Division of Extension (cool-season, Midwest):
- *      https://extension.wisc.edu/
+ *      https://hort.extension.wisc.edu/articles/lawn-maintenance/
  *  - Penn State Extension (cool-season, Northeast):
  *      https://extension.psu.edu/
  *  - Texas A&M AgriLife Extension (warm-season, South):
@@ -578,7 +578,7 @@ export const OVERSEEDING_ADVICE_LINKS: Record<GrassType, { label: string; url: s
   cool_season: [
     { label: 'UMN Extension: Overseeding Lawns', url: 'https://extension.umn.edu/lawn-care/overseeding-lawns' },
     { label: 'Penn State: Lawn Seeding & Renovation', url: 'https://extension.psu.edu/lawn-seeding-and-renovation' },
-    { label: 'UW-Madison: Lawn Care', url: 'https://extension.wisc.edu/lawn-care/' },
+    { label: 'UW-Madison: Lawn Care', url: 'https://hort.extension.wisc.edu/articles/lawn-maintenance/' },
   ],
   warm_season: [
     { label: 'Texas A&M: Overseeding Warm-Season Turf', url: 'https://aggie-horticulture.tamu.edu/plantanswers/turf/publications/overseed.html' },
@@ -603,7 +603,7 @@ export const OVERSEEDING_ADVICE_LINKS: Record<GrassType, { label: string; url: s
 //   - Penn State Extension "Fertilizing Home Lawns":
 //       https://extension.psu.edu/fertilizing-home-lawns
 //   - UW-Madison Extension "Lawn Fertilization":
-//       https://extension.wisc.edu/
+//       https://hort.extension.wisc.edu/articles/lawn-maintenance/
 //   - Texas A&M AgriLife "Lawn Fertilization Guide":
 //       https://aggie-horticulture.tamu.edu/
 //   - UF/IFAS Extension "Florida Lawn Handbook":
@@ -846,7 +846,7 @@ export function getFertilizerAdvice(grassType: GrassType, season: Season): LawnA
 // Existing callers that omit soilType receive identical behaviour to before.
 //
 // Soil modifier guidance derived from:
-//   - UW-Madison Extension "Lawn Watering": https://extension.wisc.edu/lawn-care/
+//   - UW-Madison Extension "Lawn Watering": https://hort.extension.wisc.edu/articles/lawn-maintenance/
 //   - Penn State Extension "Watering Your Lawn": https://extension.psu.edu/
 //   - Texas A&M AgriLife "Lawn Watering": https://aggie-horticulture.tamu.edu/
 // ---------------------------------------------------------------------------
