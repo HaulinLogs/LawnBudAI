@@ -9,15 +9,18 @@ import {
 import { Stack } from 'expo-router';
 import { useFormik } from 'formik';
 import { useMowEvents } from '@/hooks/useMowEvents';
+import { useLawnZones } from '@/hooks/useLawnZones';
 import { MowEventInput } from '@/models/events';
 import FormikEventForm from '@/components/forms/FormikEventForm';
 import EventHistory from '@/components/EventHistory';
 import Statistics from '@/components/Statistics';
+import GenericPicker from '@/components/ui/GenericPicker';
 import { mowingEventSchema, MowingFormValues } from '@/lib/schemas/mowing.schema';
 import { useAppTheme } from '@/hooks/useAppTheme';
 
 export default function MowingScreen() {
   const { events, loading, error, addEvent, deleteEvent, getStats } = useMowEvents();
+  const { zones } = useLawnZones();
   const themeColors = useAppTheme();
   const localStyles = useMemo(() => StyleSheet.create({
     container: {
@@ -41,11 +44,17 @@ export default function MowingScreen() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const stats = useMemo(() => getStats(), [events]);
 
-  const formik = useFormik<MowingFormValues>({
+  const zoneOptions = useMemo(() => [
+    { label: 'Whole Lawn', value: '' },
+    ...zones.map(z => ({ label: z.name, value: z.id })),
+  ], [zones]);
+
+  const formik = useFormik<MowingFormValues & { zone_id: string }>({
     initialValues: {
       date: new Date().toISOString().split('T')[0],
       height_inches: '',
       notes: '',
+      zone_id: '',
     },
     validationSchema: mowingEventSchema,
     validateOnChange: true,  // Real-time validation
@@ -56,6 +65,7 @@ export default function MowingScreen() {
           date: values.date,
           height_inches: parseFloat(String(values.height_inches)),
           notes: String(values.notes).trim() || undefined,
+          zone_id: values.zone_id || null,
         };
         await addEvent(input);
         // Form resets naturally after successful submission
@@ -118,6 +128,16 @@ export default function MowingScreen() {
             amountPlaceholder="e.g., 2.5"
             amountKeyboardType="decimal-pad"
             submitLabel="Record Mowing"
+            optionalField={
+              zones.length > 0 ? (
+                <GenericPicker
+                  label="Zone (optional)"
+                  options={zoneOptions}
+                  value={formik.values.zone_id}
+                  onChange={(value) => formik.setFieldValue('zone_id', value)}
+                />
+              ) : undefined
+            }
           />
         </View>
 

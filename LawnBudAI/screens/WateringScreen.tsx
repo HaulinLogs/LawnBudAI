@@ -10,6 +10,7 @@ import { Stack } from 'expo-router';
 import Icon from '@expo/vector-icons/Ionicons';
 import { useFormik } from 'formik';
 import { useWaterEvents } from '@/hooks/useWaterEvents';
+import { useLawnZones } from '@/hooks/useLawnZones';
 import { WaterEventInput } from '@/models/events';
 import FormikEventForm from '@/components/forms/FormikEventForm';
 import EventHistory from '@/components/EventHistory';
@@ -21,6 +22,7 @@ import { useAppTheme } from '@/hooks/useAppTheme';
 
 export default function WateringScreen() {
   const { events, loading, error, addEvent, deleteEvent, getStats, getSourceBreakdown } = useWaterEvents();
+  const { zones } = useLawnZones();
   const themeColors = useAppTheme();
   const localStyles = useMemo(() => StyleSheet.create({
     container: {
@@ -59,17 +61,23 @@ export default function WateringScreen() {
     { label: 'Rain', value: 'rain' as const, icon: 'rainy' },
   ], []);
 
+  const zoneOptions = useMemo(() => [
+    { label: 'Whole Lawn', value: '' },
+    ...zones.map(z => ({ label: z.name, value: z.id })),
+  ], [zones]);
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const stats = useMemo(() => getStats(), [events]);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const breakdown = useMemo(() => getSourceBreakdown(), [events]);
 
-  const formik = useFormik<WateringFormValues>({
+  const formik = useFormik<WateringFormValues & { zone_id: string }>({
     initialValues: {
       date: new Date().toISOString().split('T')[0],
       amount_inches: '',
       source: 'manual',
       notes: '',
+      zone_id: '',
     },
     validationSchema: wateringEventSchema,
     validateOnChange: true,  // Real-time validation
@@ -81,6 +89,7 @@ export default function WateringScreen() {
           amount_inches: parseFloat(String(values.amount_inches)),
           source: values.source as 'sprinkler' | 'manual' | 'rain',
           notes: String(values.notes).trim() || undefined,
+          zone_id: values.zone_id || null,
         };
         await addEvent(input);
         // Form resets naturally after successful submission
@@ -137,10 +146,18 @@ export default function WateringScreen() {
             {formik.errors.source}
           </Text>
         )}
+        {zones.length > 0 && (
+          <GenericPicker
+            label="Zone (optional)"
+            options={zoneOptions}
+            value={String(formik.values.zone_id)}
+            onChange={(value) => formik.setFieldValue('zone_id', value)}
+          />
+        )}
       </View>
     );
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formik.values.source, formik.errors.source, formik.touched.source, sourceOptions]);
+  }, [formik.values.source, formik.errors.source, formik.touched.source, formik.values.zone_id, sourceOptions, zoneOptions, zones.length]);
 
   return (
     <View style={localStyles.container}>
