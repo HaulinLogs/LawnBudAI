@@ -84,6 +84,14 @@ jobs:
         continue-on-error: true 
 
       # ========================================================================
+      # LINK INTEGRITY CHECK
+      # ========================================================================
+      - name: Check external links
+        id: links
+        run: node scripts/check-links.js
+        continue-on-error: true
+
+      # ========================================================================
       # TESTING & TYPES
       # ========================================================================
       - name: Check TypeScript types
@@ -107,6 +115,7 @@ jobs:
           echo "| :--- | :--- |" >> $GITHUB_STEP_SUMMARY
           echo "| 🔍 Secret Scan (TruffleHog) | ${{ steps.trufflehog.outcome == 'success' && '✅ Pass' || '⚠️ Issues Found' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| 🏗️ DB Lint (Splinter) | ${{ steps.splinter.outcome == 'success' && '✅ Clean' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🔗 External Links | ${{ steps.links.outcome == 'success' && '✅ All Valid' || '⚠️ Broken Links Found' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| 🟦 Type Safety | ${{ steps.types.outcome == 'success' && '✅ Valid' || '❌ Drift Detected' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| 🧪 Test Suite | ${{ steps.tests.outcome == 'success' && '✅ All Passed' || '❌ Regressions Found' }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
