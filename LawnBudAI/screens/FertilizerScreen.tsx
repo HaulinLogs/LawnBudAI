@@ -10,6 +10,7 @@ import { Stack } from 'expo-router';
 import Icon from '@expo/vector-icons/Ionicons';
 import { useFormik } from 'formik';
 import { useFertilizerEvents } from '@/hooks/useFertilizerEvents';
+import { useLawnZones } from '@/hooks/useLawnZones';
 import { FertilizerEventInput, ApplicationForm, ApplicationMethod } from '@/models/events';
 import FormikEventForm from '@/components/forms/FormikEventForm';
 import FormikNPKInput from '@/components/forms/FormikNPKInput';
@@ -57,6 +58,7 @@ const ADVISOR_THEME: Record<FertilizerStatus, { bg: string; border: string; head
 
 export default function FertilizerScreen() {
   const { events, loading, error, addEvent, deleteEvent, getStats, getFormBreakdown, getMethodBreakdown } = useFertilizerEvents();
+  const { zones } = useLawnZones();
   const { prefs } = useUserPreferences();
   const themeColors = useAppTheme();
   const localStyles = useMemo(() => StyleSheet.create({
@@ -119,6 +121,11 @@ export default function FertilizerScreen() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const stats = useMemo(() => getStats(), [events]);
 
+  const zoneOptions = useMemo(() => [
+    { label: 'Whole Lawn', value: '' },
+    ...zones.map(z => ({ label: z.name, value: z.id })),
+  ], [zones]);
+
   const advisory = useMemo(
     () =>
       getFertilizerAdvisory(
@@ -134,7 +141,7 @@ export default function FertilizerScreen() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const methodBreakdown = useMemo(() => getMethodBreakdown(), [events]);
 
-  const formik = useFormik<FertilizerFormValues>({
+  const formik = useFormik<FertilizerFormValues & { zone_id: string }>({
     initialValues: {
       date: new Date().toISOString().split('T')[0],
       amount_lbs: '',
@@ -144,6 +151,7 @@ export default function FertilizerScreen() {
       application_form: 'granular',
       application_method: 'broadcast',
       notes: '',
+      zone_id: '',
     },
     validationSchema: fertilizerEventSchema,
     validateOnChange: true,
@@ -159,6 +167,7 @@ export default function FertilizerScreen() {
           application_form: values.application_form as ApplicationForm,
           application_method: values.application_method as ApplicationMethod,
           notes: String(values.notes).trim() || undefined,
+          zone_id: values.zone_id || null,
         };
         await addEvent(input);
         resetForm();
@@ -296,6 +305,16 @@ export default function FertilizerScreen() {
           {/* Application Form and Method pickers */}
           {formPicker}
           {methodPicker}
+
+          {/* Zone picker */}
+          {zones.length > 0 && (
+            <GenericPicker
+              label="Zone (optional)"
+              options={zoneOptions}
+              value={formik.values.zone_id}
+              onChange={(value) => formik.setFieldValue('zone_id', value)}
+            />
+          )}
 
           {/* Date, Amount, Notes, and Submit Button — all together */}
           <FormikEventForm

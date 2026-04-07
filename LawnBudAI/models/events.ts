@@ -8,6 +8,7 @@ export interface MowEvent {
   date: string; // DATE format: YYYY-MM-DD
   height_inches: number;
   notes?: string;
+  zone_id?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -19,6 +20,7 @@ export interface WaterEvent {
   amount_inches: number;
   source: 'sprinkler' | 'manual' | 'rain';
   notes?: string;
+  zone_id?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -37,6 +39,7 @@ export interface FertilizerEvent {
   application_form: ApplicationForm;
   application_method: ApplicationMethod;
   notes?: string;
+  zone_id?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -61,6 +64,7 @@ export interface SeedEvent {
   grass_seed_type: GrassSeedType;
   area_sqft?: number;
   notes?: string;
+  zone_id?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -73,6 +77,7 @@ export interface MowEventInput {
   date: string;
   height_inches: number;
   notes?: string;
+  zone_id?: string | null;
 }
 
 export interface WaterEventInput {
@@ -80,6 +85,7 @@ export interface WaterEventInput {
   amount_inches: number;
   source: 'sprinkler' | 'manual' | 'rain';
   notes?: string;
+  zone_id?: string | null;
 }
 
 export interface FertilizerEventInput {
@@ -91,6 +97,7 @@ export interface FertilizerEventInput {
   application_form: ApplicationForm;
   application_method: ApplicationMethod;
   notes?: string;
+  zone_id?: string | null;
 }
 
 export interface SeedEventInput {
@@ -98,4 +105,5 @@ export interface SeedEventInput {
   grass_seed_type: GrassSeedType;
   area_sqft?: number;
   notes?: string;
+  zone_id?: string | null;
 }

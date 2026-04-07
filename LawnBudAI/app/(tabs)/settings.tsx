@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { Stack, useRouter } from 'expo-router';
+import { Stack, useRouter, Link } from 'expo-router';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { createSettingsStyles } from '@/styles/settings.styles';
@@ -294,6 +294,19 @@ export default function SettingsScreen() {
             ))}
           </View>
         </View>
+
+        {/* Lawn Zones */}
+        <Link href="/zones" asChild>
+          <TouchableOpacity style={styles.card}>
+            <Text style={[styles.label, { marginBottom: 2 }]}>Lawn Zones</Text>
+            <Text style={{ fontSize: 13, color: themeColors.textTertiary }}>
+              Manage your lawn zones (front yard, back yard, etc.) to track care by area
+            </Text>
+            <Text style={{ fontSize: 13, color: themeColors.primary, marginTop: 6, fontWeight: '600' }}>
+              Manage Zones →
+            </Text>
+          </TouchableOpacity>
+        </Link>
 
         <TouchableOpacity
           style={[styles.button, saving && styles.buttonDisabled]}

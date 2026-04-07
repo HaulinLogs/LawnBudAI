@@ -11,6 +11,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { WeatherCard } from '@/components/WeatherCard';
 import { UsdaZoneCard } from '@/components/UsdaZoneCard';
 import { OverseedingCard } from '@/components/OverseedingCard';
+import { ZoneStatusCard } from '@/components/ZoneStatusCard';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { type GrassType } from '@/lib/lawnAdvice';
 import { useAppTheme } from '@/hooks/useAppTheme';
@@ -18,6 +19,9 @@ import { useUsdaZone } from '@/hooks/useUsdaZone';
 import { useFertilizerEvents } from '@/hooks/useFertilizerEvents';
 import { useSoilTemp } from '@/hooks/useSoilTemp';
 import { useSeedEvents } from '@/hooks/useSeedEvents';
+import { useLawnZones } from '@/hooks/useLawnZones';
+import { useMowEvents } from '@/hooks/useMowEvents';
+import { useWaterEvents } from '@/hooks/useWaterEvents';
 
 export default function HomeScreen() {
   const { prefs, loading: prefsLoading } = useUserPreferences();
@@ -58,6 +62,11 @@ export default function HomeScreen() {
     addEvent: addSeedEvent,
     loading: seedEventsLoading,
   } = useSeedEvents();
+
+  // Lawn zones + per-zone activity data
+  const { zones, loading: zonesLoading } = useLawnZones();
+  const { events: mowEvents } = useMowEvents();
+  const { events: waterEvents } = useWaterEvents();
 
   const [seedEventLogging, setSeedEventLogging] = useState(false);
 
@@ -185,6 +194,28 @@ export default function HomeScreen() {
               lawnSizeSqFt={prefs.lawn_size_sqft}
               colors={themeColors}
             />
+          )}
+
+          {/* Lawn Zones Status Section */}
+          {!zonesLoading && zones.length > 0 && (
+            <View style={styles.card}>
+              <Text style={styles.sectionTitle}>Zone Status</Text>
+              {zones.map(zone => {
+                const lastMow = mowEvents.find(e => e.zone_id === zone.id);
+                const lastWater = waterEvents.find(e => e.zone_id === zone.id);
+                const lastFertilizer = fertilizerEvents.find(e => e.zone_id === zone.id);
+                return (
+                  <ZoneStatusCard
+                    key={zone.id}
+                    zone={zone}
+                    lastMowedDate={lastMow?.date ?? null}
+                    lastWateredDate={lastWater?.date ?? null}
+                    lastFertilizedDate={lastFertilizer?.date ?? null}
+                    colors={themeColors}
+                  />
+                );
+              })}
+            </View>
           )}
 
           {/* Upcoming Reminders Section */}

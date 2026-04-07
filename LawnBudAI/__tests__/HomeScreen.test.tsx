@@ -101,6 +101,40 @@ jest.mock('@/hooks/useSeedEvents', () => ({
     refetch: jest.fn(),
   })),
 }));
+jest.mock('@/hooks/useLawnZones', () => ({
+  useLawnZones: jest.fn(() => ({
+    zones: [],
+    loading: false,
+    error: null,
+    addZone: jest.fn(),
+    deleteZone: jest.fn(),
+    totalLawnSize: 0,
+    refetch: jest.fn(),
+  })),
+}));
+jest.mock('@/hooks/useMowEvents', () => ({
+  useMowEvents: jest.fn(() => ({
+    events: [],
+    loading: false,
+    error: null,
+    addEvent: jest.fn(),
+    deleteEvent: jest.fn(),
+    getStats: jest.fn(() => ({ lastMowedDaysAgo: null, averageHeight: null })),
+    refetch: jest.fn(),
+  })),
+}));
+jest.mock('@/hooks/useWaterEvents', () => ({
+  useWaterEvents: jest.fn(() => ({
+    events: [],
+    loading: false,
+    error: null,
+    addEvent: jest.fn(),
+    deleteEvent: jest.fn(),
+    getStats: jest.fn(() => ({ lastWateredDaysAgo: null, totalInchesThisMonth: '0', averageInchesPerWatering: null })),
+    getSourceBreakdown: jest.fn(() => ({ sprinkler: 0, manual: 0, rain: 0 })),
+    refetch: jest.fn(),
+  })),
+}));
 
 // Mock OverseedingCard — renders a sentinel so tests don't render full component
 jest.mock('@/components/OverseedingCard', () => ({
