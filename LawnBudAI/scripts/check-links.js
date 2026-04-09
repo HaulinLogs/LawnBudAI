@@ -50,6 +50,20 @@ const BROKEN_STATUSES = new Set([404, 410]);
 /** HTTP status codes treated as soft warnings (bot-blocking, not truly broken) */
 const WARN_STATUSES = new Set([403, 429]);
 
+/**
+ * Domains that return 403 for ALL requests (bot AND browser UA) regardless of
+ * whether the page exists. The browser-UA retry cannot distinguish a live page
+ * from a deleted one on these hosts, so any 403 from them is escalated to a
+ * hard warning requiring manual verification rather than silently passing.
+ *
+ * Add a domain here when you confirm it returns 403 even to real browsers for
+ * pages that do not exist.
+ */
+const OPAQUE_403_DOMAINS = new Set([
+  'extension.umn.edu',
+  'extension.psu.edu',
+]);
+
 const REQUEST_TIMEOUT_MS = 12000;
 const CONCURRENCY = 4; // parallel fetch limit
 
@@ -150,7 +164,12 @@ async function fetchWithTimeout(url, method, ua) {
   }
 }
 
+function domainOf(url) {
+  try { return new URL(url).hostname; } catch { return ''; }
+}
+
 async function checkUrl(url) {
+  const domain = domainOf(url);
   try {
     // Step 1: HEAD with bot UA (fast path for well-behaved servers)
     let res = await fetchWithTimeout(url, 'HEAD', BOT_UA);
@@ -160,18 +179,21 @@ async function checkUrl(url) {
       res = await fetchWithTimeout(url, 'GET', BOT_UA);
     }
 
-    // Step 3: If still 403, retry with a browser UA.
-    //
-    // Rationale: sites like extension.umn.edu return 403 to bots for BOTH
-    // existing and deleted pages.  With a real browser UA they return 200 for
-    // live pages and redirect/404 for missing ones, letting us tell the
-    // difference.
     if (res.status === 403) {
+      // Step 3a: Domains in OPAQUE_403_DOMAINS return 403 even to real browsers
+      // for missing pages — the browser-UA retry cannot tell live from deleted.
+      // Escalate to a hard warning so the operator must verify manually.
+      if (OPAQUE_403_DOMAINS.has(domain)) {
+        return { status: 403, finalUrl: res.url, opaque403: true };
+      }
+
+      // Step 3b: For other domains, retry with a browser UA.
+      // If the page exists they return 200; if deleted they return 404/410 or
+      // stay 403 (still unresolvable, falls through to soft-warn).
       let retryRes;
       try {
         retryRes = await fetchWithTimeout(url, 'GET', BROWSER_UA);
       } catch {
-        // Network error on retry — keep the original 403 result
         return { status: 403, finalUrl: res.url };
       }
 
@@ -179,7 +201,6 @@ async function checkUrl(url) {
         // Page exists — bot-blocking only, not truly broken
         return { status: retryRes.status, finalUrl: retryRes.url, botBlocked: true };
       }
-      // 404, 410, or another 403 on the browser retry
       return { status: retryRes.status, finalUrl: retryRes.url };
     }
 
@@ -254,14 +275,17 @@ async function main() {
 
   // Categorise results
   const broken = [];
+  const opaque = [];   // 403 from domains that block bots AND browsers equally
   const warnings = [];
   const ok = [];
 
   for (const r of results) {
     if (r.error || BROKEN_STATUSES.has(r.status)) {
       broken.push(r);
+    } else if (r.opaque403) {
+      // Unresolvable 403 from a known opaque domain — must verify manually
+      opaque.push(r);
     } else if (WARN_STATUSES.has(r.status) && !r.botBlocked) {
-      // 403/429 that persisted even with a browser UA = truly unresolvable
       warnings.push(r);
     } else {
       ok.push(r);
@@ -271,6 +295,16 @@ async function main() {
   // Report
   if (ok.length > 0) {
     console.log(`✅ ${ok.length} link(s) OK`);
+  }
+
+  if (opaque.length > 0) {
+    console.log(`\n🔶 ${opaque.length} link(s) need MANUAL verification (domain blocks all bots — cannot auto-detect broken pages):`);
+    for (const r of opaque) {
+      console.log(`   [403/opaque] ${r.url}`);
+      console.log(`         in: ${r.files.join(', ')}`);
+    }
+    console.log(`\n   Add these to OPAQUE_403_DOMAINS in scripts/check-links.js once verified,`);
+    console.log(`   or fix/remove the URL if the page is gone.\n`);
   }
 
   if (warnings.length > 0) {
@@ -289,6 +323,9 @@ async function main() {
       console.log(`         in: ${r.files.join(', ')}`);
     }
     console.log();
+  }
+
+  if (broken.length > 0 || opaque.length > 0) {
     process.exit(1);
   }
 

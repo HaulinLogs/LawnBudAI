@@ -300,7 +300,7 @@ export const GERMINATION_INFO: Record<GrassSeedType, GerminationInfo> = {
     maxDays: 12,
     optimalSoilTempMin: 50,
     optimalSoilTempMax: 65,
-    referenceUrl: 'https://extension.psu.edu/lawn-seeding-and-renovation',
+    referenceUrl: 'https://extension.psu.edu/renovation-of-lawns',
   },
   perennial_ryegrass: {
     label: 'Perennial Ryegrass',
@@ -308,7 +308,7 @@ export const GERMINATION_INFO: Record<GrassSeedType, GerminationInfo> = {
     maxDays: 10,
     optimalSoilTempMin: 50,
     optimalSoilTempMax: 65,
-    referenceUrl: 'https://extension.psu.edu/lawn-seeding-and-renovation',
+    referenceUrl: 'https://extension.psu.edu/renovation-of-lawns',
   },
   fine_fescue: {
     label: 'Fine Fescue',
@@ -316,7 +316,7 @@ export const GERMINATION_INFO: Record<GrassSeedType, GerminationInfo> = {
     maxDays: 14,
     optimalSoilTempMin: 50,
     optimalSoilTempMax: 65,
-    referenceUrl: 'https://extension.psu.edu/lawn-seeding-and-renovation',
+    referenceUrl: 'https://extension.psu.edu/renovation-of-lawns',
   },
   bermudagrass: {
     label: 'Bermudagrass',
@@ -577,7 +577,7 @@ export function getOverseedingReminder(
 export const OVERSEEDING_ADVICE_LINKS: Record<GrassType, { label: string; url: string }[]> = {
   cool_season: [
     { label: 'UMN Extension: Seeding & Sodding Home Lawns', url: 'https://extension.umn.edu/lawn-care/seeding-and-sodding-home-lawns' },
-    { label: 'Penn State: Lawn Seeding & Renovation', url: 'https://extension.psu.edu/lawn-seeding-and-renovation' },
+    { label: 'Penn State Extension: Renovation of Lawns', url: 'https://extension.psu.edu/renovation-of-lawns' },
     { label: 'UW-Madison: Lawn Care', url: 'https://hort.extension.wisc.edu/articles/lawn-maintenance/' },
   ],
   warm_season: [
@@ -587,7 +587,7 @@ export const OVERSEEDING_ADVICE_LINKS: Record<GrassType, { label: string; url: s
   ],
   mixed: [
     { label: 'NC State: Carolina Lawns', url: 'https://content.ces.ncsu.edu/carolina-lawns' },
-    { label: 'Penn State: Lawn Seeding & Renovation', url: 'https://extension.psu.edu/lawn-seeding-and-renovation' },
+    { label: 'Penn State Extension: Renovation of Lawns', url: 'https://extension.psu.edu/renovation-of-lawns' },
     { label: 'Clemson Extension: Overseeding with Ryegrass', url: 'https://hgic.clemson.edu/factsheet/overseeding-with-ryegrass/' },
   ],
 };
