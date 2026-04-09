@@ -115,42 +115,76 @@ function shouldSkip(url) {
 // HTTP checking
 // ---------------------------------------------------------------------------
 
-async function checkUrl(url) {
+/**
+ * Full browser User-Agent used for 403-retry requests.
+ *
+ * Some university extension sites (e.g. extension.umn.edu) return 403 for
+ * ALL bot requests, whether the page exists or not, making it impossible to
+ * distinguish a live-but-blocked page from a deleted one.  Retrying with a
+ * browser UA string resolves this for most of those servers: if the page
+ * exists they return 200; if it doesn't they still return 403 or redirect to
+ * a generic error page (different final URL).
+ */
+const BROWSER_UA =
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 ' +
+  '(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
+
+const BOT_UA =
+  'Mozilla/5.0 (compatible; LawnBudAI-LinkChecker/1.0; +https://github.com/HaulinLogs/lawnbudai)';
+
+async function fetchWithTimeout(url, method, ua) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-
   try {
-    // Try HEAD first (faster, no body)
-    let res = await fetch(url, {
-      method: 'HEAD',
+    const res = await fetch(url, {
+      method,
       signal: controller.signal,
-      headers: {
-        'User-Agent':
-          'Mozilla/5.0 (compatible; LawnBudAI-LinkChecker/1.0; +https://github.com/HaulinLogs/lawnbudai)',
-      },
+      headers: { 'User-Agent': ua },
       redirect: 'follow',
     });
-
-    // Some servers reject HEAD but accept GET — retry with GET on 405
-    if (res.status === 405) {
-      const controller2 = new AbortController();
-      const timer2 = setTimeout(() => controller2.abort(), REQUEST_TIMEOUT_MS);
-      res = await fetch(url, {
-        method: 'GET',
-        signal: controller2.signal,
-        headers: {
-          'User-Agent':
-            'Mozilla/5.0 (compatible; LawnBudAI-LinkChecker/1.0; +https://github.com/HaulinLogs/lawnbudai)',
-        },
-        redirect: 'follow',
-      });
-      clearTimeout(timer2);
-    }
-
     clearTimeout(timer);
-    return { status: res.status, finalUrl: res.url };
+    return res;
   } catch (err) {
     clearTimeout(timer);
+    throw err;
+  }
+}
+
+async function checkUrl(url) {
+  try {
+    // Step 1: HEAD with bot UA (fast path for well-behaved servers)
+    let res = await fetchWithTimeout(url, 'HEAD', BOT_UA);
+
+    // Step 2: Some servers reject HEAD → retry with GET
+    if (res.status === 405) {
+      res = await fetchWithTimeout(url, 'GET', BOT_UA);
+    }
+
+    // Step 3: If still 403, retry with a browser UA.
+    //
+    // Rationale: sites like extension.umn.edu return 403 to bots for BOTH
+    // existing and deleted pages.  With a real browser UA they return 200 for
+    // live pages and redirect/404 for missing ones, letting us tell the
+    // difference.
+    if (res.status === 403) {
+      let retryRes;
+      try {
+        retryRes = await fetchWithTimeout(url, 'GET', BROWSER_UA);
+      } catch {
+        // Network error on retry — keep the original 403 result
+        return { status: 403, finalUrl: res.url };
+      }
+
+      if (retryRes.status === 200 || (retryRes.status >= 300 && retryRes.status < 400)) {
+        // Page exists — bot-blocking only, not truly broken
+        return { status: retryRes.status, finalUrl: retryRes.url, botBlocked: true };
+      }
+      // 404, 410, or another 403 on the browser retry
+      return { status: retryRes.status, finalUrl: retryRes.url };
+    }
+
+    return { status: res.status, finalUrl: res.url };
+  } catch (err) {
     const message = err.name === 'AbortError' ? 'timeout' : err.message;
     return { status: 0, error: message };
   }
@@ -226,7 +260,8 @@ async function main() {
   for (const r of results) {
     if (r.error || BROKEN_STATUSES.has(r.status)) {
       broken.push(r);
-    } else if (WARN_STATUSES.has(r.status)) {
+    } else if (WARN_STATUSES.has(r.status) && !r.botBlocked) {
+      // 403/429 that persisted even with a browser UA = truly unresolvable
       warnings.push(r);
     } else {
       ok.push(r);
