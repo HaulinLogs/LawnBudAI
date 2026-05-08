@@ -231,13 +231,13 @@ const fertilizerAdvice: Record<GrassType, Record<Season, LawnAdvice>> = {
 // opportunity is narrow (~6–10 weeks). Windows are based on soil-temperature
 // research from:
 //   - University of Minnesota Extension (cool-season):
-//       https://extension.umn.edu/lawn-care/overseeding-lawns
+//       https://extension.umn.edu/lawn-care/seeding-and-sodding-home-lawns
 //   - Penn State Turfgrass Science (cool-season timing):
 //       https://plantscience.psu.edu/research/centers/turf
 //   - Clemson Extension (warm-season ryegrass overseeding):
-//       https://hgic.clemson.edu/factsheet/lawn-overseeding/
+//       https://hgic.clemson.edu/factsheet/overseeding-with-ryegrass/
 //   - Texas A&M AgriLife (warm-season ryegrass overseeding):
-//       https://aggie-horticulture.tamu.edu/
+//       https://aggie-hort.tamu.edu/plantanswers/turf/publications/overseed.html
 // ---------------------------------------------------------------------------
 
 export type OverseedingUrgency = 'now' | 'soon';
@@ -292,7 +292,7 @@ export const GERMINATION_INFO: Record<GrassSeedType, GerminationInfo> = {
     maxDays: 30,
     optimalSoilTempMin: 50,
     optimalSoilTempMax: 65,
-    referenceUrl: 'https://extension.umn.edu/lawn-care/overseeding-lawns',
+    referenceUrl: 'https://extension.umn.edu/lawn-care/seeding-and-sodding-home-lawns',
   },
   tall_fescue: {
     label: 'Tall Fescue',
@@ -300,7 +300,7 @@ export const GERMINATION_INFO: Record<GrassSeedType, GerminationInfo> = {
     maxDays: 12,
     optimalSoilTempMin: 50,
     optimalSoilTempMax: 65,
-    referenceUrl: 'https://extension.psu.edu/lawn-seeding-and-renovation',
+    referenceUrl: 'https://extension.psu.edu/renovation-of-lawns',
   },
   perennial_ryegrass: {
     label: 'Perennial Ryegrass',
@@ -308,7 +308,7 @@ export const GERMINATION_INFO: Record<GrassSeedType, GerminationInfo> = {
     maxDays: 10,
     optimalSoilTempMin: 50,
     optimalSoilTempMax: 65,
-    referenceUrl: 'https://extension.psu.edu/lawn-seeding-and-renovation',
+    referenceUrl: 'https://extension.psu.edu/renovation-of-lawns',
   },
   fine_fescue: {
     label: 'Fine Fescue',
@@ -316,7 +316,7 @@ export const GERMINATION_INFO: Record<GrassSeedType, GerminationInfo> = {
     maxDays: 14,
     optimalSoilTempMin: 50,
     optimalSoilTempMax: 65,
-    referenceUrl: 'https://extension.psu.edu/lawn-seeding-and-renovation',
+    referenceUrl: 'https://extension.psu.edu/renovation-of-lawns',
   },
   bermudagrass: {
     label: 'Bermudagrass',
@@ -324,7 +324,7 @@ export const GERMINATION_INFO: Record<GrassSeedType, GerminationInfo> = {
     maxDays: 30,
     optimalSoilTempMin: 65,
     optimalSoilTempMax: 85,
-    referenceUrl: 'https://aggie-horticulture.tamu.edu/plantanswers/turf/publications/bermuda.html',
+    referenceUrl: 'https://aggie-hort.tamu.edu/plantanswers/turf/publications/Bermuda',
   },
   zoysiagrass: {
     label: 'Zoysiagrass',
@@ -340,7 +340,7 @@ export const GERMINATION_INFO: Record<GrassSeedType, GerminationInfo> = {
     maxDays: 14,
     optimalSoilTempMin: 65,
     optimalSoilTempMax: 85,
-    referenceUrl: 'https://gardeningsolutions.ifas.ufl.edu/lawns/lawn-care/establishing-lawns/',
+    referenceUrl: 'https://gardeningsolutions.ifas.ufl.edu/lawns/maintenance-and-care/planting-your-florida-lawn/',
   },
   centipede: {
     label: 'Centipede Grass',
@@ -356,7 +356,7 @@ export const GERMINATION_INFO: Record<GrassSeedType, GerminationInfo> = {
     maxDays: 7,
     optimalSoilTempMin: 50,
     optimalSoilTempMax: 65,
-    referenceUrl: 'https://aggie-horticulture.tamu.edu/plantanswers/turf/publications/overseed.html',
+    referenceUrl: 'https://aggie-hort.tamu.edu/plantanswers/turf/publications/overseed.html',
   },
   mixed: {
     label: 'Mixed Grass Blend',
@@ -364,7 +364,7 @@ export const GERMINATION_INFO: Record<GrassSeedType, GerminationInfo> = {
     maxDays: 21,
     optimalSoilTempMin: 50,
     optimalSoilTempMax: 65,
-    referenceUrl: 'https://extension.umn.edu/lawn-care/overseeding-lawns',
+    referenceUrl: 'https://extension.umn.edu/lawn-care/seeding-and-sodding-home-lawns',
   },
   unknown: {
     label: 'Grass Seed',
@@ -372,7 +372,7 @@ export const GERMINATION_INFO: Record<GrassSeedType, GerminationInfo> = {
     maxDays: 21,
     optimalSoilTempMin: 50,
     optimalSoilTempMax: 65,
-    referenceUrl: 'https://extension.umn.edu/lawn-care/overseeding-lawns',
+    referenceUrl: 'https://extension.umn.edu/lawn-care/seeding-and-sodding-home-lawns',
   },
 };
 
@@ -576,19 +576,19 @@ export function getOverseedingReminder(
  */
 export const OVERSEEDING_ADVICE_LINKS: Record<GrassType, { label: string; url: string }[]> = {
   cool_season: [
-    { label: 'UMN Extension: Overseeding Lawns', url: 'https://extension.umn.edu/lawn-care/overseeding-lawns' },
-    { label: 'Penn State: Lawn Seeding & Renovation', url: 'https://extension.psu.edu/lawn-seeding-and-renovation' },
+    { label: 'UMN Extension: Seeding & Sodding Home Lawns', url: 'https://extension.umn.edu/lawn-care/seeding-and-sodding-home-lawns' },
+    { label: 'Penn State Extension: Renovation of Lawns', url: 'https://extension.psu.edu/renovation-of-lawns' },
     { label: 'UW-Madison: Lawn Care', url: 'https://hort.extension.wisc.edu/articles/lawn-maintenance/' },
   ],
   warm_season: [
-    { label: 'Texas A&M: Overseeding Warm-Season Turf', url: 'https://aggie-horticulture.tamu.edu/plantanswers/turf/publications/overseed.html' },
-    { label: 'Clemson Extension: Lawn Overseeding', url: 'https://hgic.clemson.edu/factsheet/lawn-overseeding/' },
-    { label: 'UF/IFAS: Establishing Your Florida Lawn', url: 'https://gardeningsolutions.ifas.ufl.edu/lawns/lawn-care/establishing-lawns/' },
+    { label: 'Texas A&M: Overseeding Warm-Season Turf', url: 'https://aggie-hort.tamu.edu/plantanswers/turf/publications/overseed.html' },
+    { label: 'Clemson Extension: Overseeding with Ryegrass', url: 'https://hgic.clemson.edu/factsheet/overseeding-with-ryegrass/' },
+    { label: 'UF/IFAS: Planting Your Florida Lawn', url: 'https://gardeningsolutions.ifas.ufl.edu/lawns/maintenance-and-care/planting-your-florida-lawn/' },
   ],
   mixed: [
-    { label: 'NC State: Overseeding Lawns', url: 'https://content.ces.ncsu.edu/overseeding-lawns' },
-    { label: 'Penn State: Lawn Seeding & Renovation', url: 'https://extension.psu.edu/lawn-seeding-and-renovation' },
-    { label: 'Clemson Extension: Lawn Overseeding', url: 'https://hgic.clemson.edu/factsheet/lawn-overseeding/' },
+    { label: 'NC State: Carolina Lawns', url: 'https://content.ces.ncsu.edu/carolina-lawns' },
+    { label: 'Penn State Extension: Renovation of Lawns', url: 'https://extension.psu.edu/renovation-of-lawns' },
+    { label: 'Clemson Extension: Overseeding with Ryegrass', url: 'https://hgic.clemson.edu/factsheet/overseeding-with-ryegrass/' },
   ],
 };
 
