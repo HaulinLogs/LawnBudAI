@@ -53,40 +53,62 @@ CREATE POLICY "Users read own counters"
   ON rate_limit_counters FOR SELECT
   USING (auth.uid() = user_id);
 
--- Policy: Only service_role can write counters
-CREATE POLICY "Service role manages counters"
-  ON rate_limit_counters FOR INSERT
-  USING (auth.role() = 'service_role');
+-- No client write policy: counters are written only by the SECURITY DEFINER
+-- function below, which bypasses RLS. A "FOR INSERT ... USING" policy is also
+-- invalid SQL -- Postgres requires WITH CHECK for INSERT -- and aborts this
+-- script at that point (#80).
 
 -- ============================================================================
 -- RPC FUNCTION: check_and_increment_rate_limit
 -- ============================================================================
 -- Atomically checks and increments rate limit counter
 -- Returns: { allowed: boolean, current_count: int, limit: int, window_start: timestamptz }
+--
+-- The caller passes only the endpoint. Identity comes from auth.uid() and the
+-- limit is resolved from user_roles, because a client-supplied p_limit lets the
+-- caller grant themselves an unlimited budget and a client-supplied p_user_id
+-- lets them exhaust someone else's (#74).
 
 CREATE OR REPLACE FUNCTION check_and_increment_rate_limit(
-  p_user_id UUID,
-  p_endpoint TEXT,
-  p_limit INTEGER
-) RETURNS JSON LANGUAGE plpgsql SECURITY DEFINER AS $$
+  p_endpoint TEXT
+) RETURNS JSON LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = '' AS $$
 DECLARE
+  v_user   UUID := (SELECT auth.uid());
+  v_role   TEXT;
+  v_limit  INTEGER;
   v_window TIMESTAMPTZ := date_trunc('hour', now());
-  v_count INTEGER;
+  v_count  INTEGER;
 BEGIN
-  INSERT INTO rate_limit_counters (user_id, endpoint, window_start, request_count)
-  VALUES (p_user_id, p_endpoint, v_window, 1)
+  IF v_user IS NULL THEN
+    RAISE EXCEPTION 'not authenticated' USING ERRCODE = '28000';
+  END IF;
+
+  SELECT role INTO v_role FROM public.user_roles WHERE user_id = v_user;
+
+  v_limit := CASE coalesce(v_role, 'user')
+               WHEN 'admin'   THEN 999999
+               WHEN 'premium' THEN 1000
+               ELSE 100
+             END;
+
+  INSERT INTO public.rate_limit_counters AS rlc (user_id, endpoint, window_start, request_count)
+  VALUES (v_user, p_endpoint, v_window, 1)
   ON CONFLICT (user_id, endpoint, window_start)
-  DO UPDATE SET request_count = rate_limit_counters.request_count + 1
-  RETURNING request_count INTO v_count;
+  DO UPDATE SET request_count = rlc.request_count + 1
+  RETURNING rlc.request_count INTO v_count;
 
   RETURN json_build_object(
-    'allowed', v_count <= p_limit,
+    'allowed', v_count <= v_limit,
     'current_count', v_count,
-    'limit', p_limit,
+    'limit', v_limit,
     'window_start', v_window
   );
 END;
 $$;
+
+REVOKE ALL ON FUNCTION check_and_increment_rate_limit(TEXT) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION check_and_increment_rate_limit(TEXT) TO authenticated;
 
 -- ============================================================================
 -- RPC FUNCTION: get_user_role
