@@ -12,7 +12,13 @@ jobs:
     timeout-minutes: 30
     permissions:
       contents: read
-      security-events: write
+    # Surfaced at job level because the `secrets` context is not available in a
+    # step-level `if` -- `env` is. This lets the DB lint gate below detect
+    # whether the project is configured.
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
     defaults:
       run:
         working-directory: ./LawnBudAI
@@ -24,33 +30,35 @@ jobs:
           fetch-depth: 0
 
       # ========================================================================
-      # GATE 0: Secret Scanning (The Correct Way for the Action)
+      # GATE 0: Secret Scanning
       # ========================================================================
+      # This gate had been failing on every run, hidden by continue-on-error:
+      #
+      #   1. `base`/`head` were pinned to the default branch and HEAD. That
+      #      overrides the action's own per-event detection, and on a push to
+      #      main it makes base == head, which the action rejects outright
+      #      ("BASE and HEAD commits are the same"). Omitting both lets the
+      #      action derive the right range: before/after for push, and the PR
+      #      base/head SHAs for pull_request.
+      #   2. `--format sarif --output <file>` are not trufflehog flags, so the
+      #      CLI exited with "unknown long flag '--format'". SARIF is produced
+      #      by `--sarif` and goes to stdout; there is no --output. The SARIF
+      #      upload steps that followed could therefore only ever publish the
+      #      empty placeholder, so they have been removed rather than left to
+      #      imply the Security tab is covered.
+      #   3. `--only-verified` is now hidden/deprecated upstream in favour of
+      #      `--results`.
+      #
+      # The action already passes --fail, so a verified finding fails the step.
+      # Pinned to a SHA so an upstream flag change cannot silently break this
+      # gate again (see #78).
       - name: Secret Scanning
-        uses: trufflesecurity/trufflehog@main
+        uses: trufflesecurity/trufflehog@288a8a8643a2c5a36b81d231c550dccfa0beeb64 # main @ 2026-09-19
         id: trufflehog
         continue-on-error: true
         with:
           path: ./
-          base: ${{ github.event.repository.default_branch }}
-          head: HEAD
-          extra_args: --only-verified --format sarif --output ${{ github.workspace }}/trufflehog.sarif
-
-      # Guarantee the SARIF file exists even when the scan finds nothing or errors out
-      - name: Ensure SARIF file exists
-        if: always()
-        run: |
-          SARIF="${GITHUB_WORKSPACE}/trufflehog.sarif"
-          if [ ! -f "$SARIF" ]; then
-            echo '{"version":"2.1.0","$schema":"https://json.schemastore.org/sarif-2.1.0.json","runs":[{"tool":{"driver":{"name":"TruffleHog","version":"3.0.0","informationUri":"https://github.com/trufflesecurity/trufflehog","rules":[]}},"results":[]}]}' > "$SARIF"
-          fi
-
-      - name: Upload Scan Results
-        uses: github/codeql-action/upload-sarif@v3
-        if: always()
-        with:
-          sarif_file: trufflehog.sarif
-
+          extra_args: --results=verified
 
       # ========================================================================
       # ENVIRONMENT & DB LINTING
@@ -72,16 +80,24 @@ jobs:
         with:
           version: latest
 
+      # Runs only when the project is configured. SUPABASE_PROJECT_ID and
+      # SUPABASE_DB_PASSWORD are not currently set as repository secrets, so
+      # `supabase link --project-ref ""` failed instantly on every run with
+      # "required flag(s) \"project-ref\" not set". That was invisible behind
+      # continue-on-error; now that Final Validation enforces outcomes, the step
+      # is skipped rather than failing the build on missing configuration.
+      # Add both secrets to turn this gate on -- until then the schema is not
+      # linted and Final Validation says so.
+      #
+      # The password is passed via the environment rather than --password, per
+      # RULES.md section 3 (no credentials on the command line).
       - name: Lint database schema (Splinter)
         id: splinter
+        if: env.SUPABASE_PROJECT_ID != '' && env.SUPABASE_DB_PASSWORD != ''
         run: |
-          supabase link --project-ref "$SUPABASE_PROJECT_ID" --password "$SUPABASE_DB_PASSWORD"
+          supabase link --project-ref "$SUPABASE_PROJECT_ID"
           supabase db lint --linked --level warning --schema public
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-        continue-on-error: true 
+        continue-on-error: true
 
       # ========================================================================
       # LINK INTEGRITY CHECK
@@ -114,12 +130,12 @@ jobs:
           echo "| Gate | Status |" >> $GITHUB_STEP_SUMMARY
           echo "| :--- | :--- |" >> $GITHUB_STEP_SUMMARY
           echo "| 🔍 Secret Scan (TruffleHog) | ${{ steps.trufflehog.outcome == 'success' && '✅ Pass' || '⚠️ Issues Found' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🏗️ DB Lint (Splinter) | ${{ steps.splinter.outcome == 'success' && '✅ Clean' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🏗️ DB Lint (Splinter) | ${{ steps.splinter.outcome == 'success' && '✅ Clean' || (steps.splinter.outcome == 'skipped' && '⏭️ Not configured') || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| 🔗 External Links | ${{ steps.links.outcome == 'success' && '✅ All Valid' || '⚠️ Broken Links Found' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| 🟦 Type Safety | ${{ steps.types.outcome == 'success' && '✅ Valid' || '❌ Drift Detected' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| 🧪 Test Suite | ${{ steps.tests.outcome == 'success' && '✅ All Passed' || '❌ Regressions Found' }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Check the **Security** tab for detailed secret findings." >> $GITHUB_STEP_SUMMARY
+          echo "Blocking gates: Secret Scan, Type Safety, Test Suite, and DB Lint when configured." >> $GITHUB_STEP_SUMMARY
 
       # ========================================================================
       # FINAL VALIDATION
@@ -140,9 +156,18 @@ jobs:
           }
 
           check "Secret Scan (TruffleHog)" "${{ steps.trufflehog.outcome }}"
-          check "DB Lint (Splinter)"       "${{ steps.splinter.outcome }}"
           check "Type Safety"              "${{ steps.types.outcome }}"
           check "Test Suite"               "${{ steps.tests.outcome }}"
+
+          # The DB lint is skipped when SUPABASE_PROJECT_ID / SUPABASE_DB_PASSWORD
+          # are not set as repository secrets. Skipping is not a pass: warn loudly
+          # rather than fail the build on missing configuration.
+          SPLINTER="${{ steps.splinter.outcome }}"
+          if [[ "$SPLINTER" == "skipped" ]]; then
+            echo "::warning::DB Lint (Splinter) did not run: SUPABASE_PROJECT_ID and/or SUPABASE_DB_PASSWORD are not configured. The database schema is NOT being linted."
+          else
+            check "DB Lint (Splinter)" "$SPLINTER"
+          fi
 
           if [[ -n "$FAILED" ]]; then
             echo ""
