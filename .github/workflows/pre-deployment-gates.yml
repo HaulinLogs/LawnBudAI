@@ -121,10 +121,33 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Check the **Security** tab for detailed secret findings." >> $GITHUB_STEP_SUMMARY
 
-      # Actual block for the 'deploy' job (Fail if critical gates didn't pass)
+      # ========================================================================
+      # FINAL VALIDATION
+      # ========================================================================
+      # Each gate above runs with continue-on-error so that a single failure does
+      # not hide the rest of the dashboard. This step is the actual enforcement
+      # point: it inspects the recorded outcomes and fails the job. deploy.yml
+      # will not run unless this job succeeds (#77).
       - name: Final Validation
         run: |
-          if [[ "${{ steps.tests.outcome }}" != "success" ]]; then
-            echo "Critical tests failed. Blocking deployment."
+          FAILED=""
+
+          check() {
+            if [[ "$2" != "success" ]]; then
+              echo "::error::Gate failed: $1 (outcome: $2)"
+              FAILED="${FAILED} $1"
+            fi
+          }
+
+          check "Secret Scan (TruffleHog)" "${{ steps.trufflehog.outcome }}"
+          check "DB Lint (Splinter)"       "${{ steps.splinter.outcome }}"
+          check "Type Safety"              "${{ steps.types.outcome }}"
+          check "Test Suite"               "${{ steps.tests.outcome }}"
+
+          if [[ -n "$FAILED" ]]; then
+            echo ""
+            echo "Blocking deployment. Failed gates:${FAILED}"
             exit 1
           fi
+
+          echo "All required gates passed."

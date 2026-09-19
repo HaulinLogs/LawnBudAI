@@ -37,14 +37,20 @@ ALTER TABLE telemetry_events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE security_events ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policy: Users can only see their own telemetry (for transparency)
+-- Do NOT add an "OR auth.uid() IS NULL" branch here: auth.uid() is NULL for
+-- every anonymous request, so that makes the policy true for all rows and
+-- publishes the whole table to anyone holding the public anon key (#71).
 CREATE POLICY "Users view own telemetry"
 ON telemetry_events FOR SELECT
-USING (auth.uid() = user_id OR auth.uid() IS NULL); -- Allow anonymous queries
+TO authenticated
+USING ((SELECT auth.uid()) = user_id);
 
--- RLS Policy: Only service role can insert telemetry (from app)
-CREATE POLICY "App inserts telemetry"
+-- RLS Policy: Users may only write telemetry attributed to themselves.
+-- WITH CHECK (true) would let any caller forge rows for any user_id (#72).
+CREATE POLICY "Users insert own telemetry"
 ON telemetry_events FOR INSERT
-WITH CHECK (true); -- App authenticates with anon key
+TO authenticated
+WITH CHECK ((SELECT auth.uid()) = user_id);
 
 -- RLS Policy: Security events readable by service role only (owner dashboards)
 CREATE POLICY "Service role manages security events"
@@ -52,7 +58,7 @@ ON security_events FOR ALL
 USING (auth.role() = 'service_role');
 
 -- Dashboard View: Daily Active Users (no PII)
-CREATE VIEW IF NOT EXISTS daily_active_users AS
+CREATE OR REPLACE VIEW daily_active_users WITH (security_invoker = on) AS
 SELECT
   DATE(created_at) as date,
   COUNT(DISTINCT user_id) as active_users,
@@ -63,7 +69,7 @@ GROUP BY DATE(created_at)
 ORDER BY date DESC;
 
 -- Dashboard View: Feature Usage (anonymized)
-CREATE VIEW IF NOT EXISTS feature_usage_stats AS
+CREATE OR REPLACE VIEW feature_usage_stats WITH (security_invoker = on) AS
 SELECT
   event_name,
   COUNT(*) as usage_count,
@@ -77,7 +83,7 @@ GROUP BY event_name, DATE(created_at)
 ORDER BY date DESC, usage_count DESC;
 
 -- Dashboard View: Auth Security Overview
-CREATE VIEW IF NOT EXISTS auth_security_summary AS
+CREATE OR REPLACE VIEW auth_security_summary WITH (security_invoker = on) AS
 SELECT
   DATE(created_at) as date,
   COUNT(*) FILTER (WHERE event_name = 'login_success') as successful_logins,
@@ -95,7 +101,7 @@ GROUP BY DATE(created_at)
 ORDER BY date DESC;
 
 -- Dashboard View: Security Events Summary
-CREATE VIEW IF NOT EXISTS security_events_summary AS
+CREATE OR REPLACE VIEW security_events_summary WITH (security_invoker = on) AS
 SELECT
   DATE(created_at) as date,
   severity,
@@ -106,7 +112,7 @@ GROUP BY DATE(created_at), severity
 ORDER BY date DESC, severity DESC;
 
 -- Performance Percentiles View (for monitoring)
-CREATE VIEW IF NOT EXISTS performance_percentiles AS
+CREATE OR REPLACE VIEW performance_percentiles WITH (security_invoker = on) AS
 SELECT
   event_name,
   PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY performance_ms) as p50_ms,
@@ -117,3 +123,18 @@ SELECT
 FROM telemetry_events
 WHERE performance_ms IS NOT NULL
 GROUP BY event_name;
+
+-- ============================================================================
+-- DASHBOARD VIEW GRANTS
+-- ============================================================================
+-- These are operator dashboards, not user-facing data. Views are reachable over
+-- PostgREST by default, so revoke them from the client roles and serve them from
+-- an admin-authenticated Edge Function instead (#75).
+REVOKE ALL ON daily_active_users      FROM anon, authenticated;
+REVOKE ALL ON feature_usage_stats     FROM anon, authenticated;
+REVOKE ALL ON auth_security_summary   FROM anon, authenticated;
+REVOKE ALL ON security_events_summary FROM anon, authenticated;
+REVOKE ALL ON performance_percentiles FROM anon, authenticated;
+
+REVOKE ALL ON telemetry_events FROM anon;
+REVOKE ALL ON security_events  FROM anon;

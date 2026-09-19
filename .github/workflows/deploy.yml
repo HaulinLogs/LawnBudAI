@@ -1,9 +1,16 @@
 name: Deploy to GitHub Pages
 
+# Deployment is gated on the quality gates workflow. Previously this workflow
+# also triggered on `push: main`, so it ran in parallel with the gates and
+# shipped regardless of whether secret scanning or the DB lint had failed (#77).
+#
+# Note: workflow_run only fires for the copy of this file on the default branch,
+# so this gating takes effect once merged to main.
 on:
-  push:
-    branches:
-      - main
+  workflow_run:
+    workflows: ["Pre-Deployment Quality Gates"]
+    types:
+      - completed
   workflow_dispatch:
 
 permissions:
@@ -18,6 +25,12 @@ concurrency:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    # Deploy only when the gates passed, and only for main. workflow_dispatch
+    # stays available as a manual override.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'main')
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -25,6 +38,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          # workflow_run does not check out the triggering commit by default.
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
